@@ -17,7 +17,7 @@ const SectionBecomeAnAuthor: FC<SectionBecomeAnAuthorProps> = ({
   className = '',
   rightImg = rightImgDemo,
   heading = 'Become a host with us.',
-  subHeading = 'With Chisfis, booking resorts, villas, hotels, private homes, and apartments becomes quick, convenient, and easy.',
+  subHeading = 'With DoCoolture, booking resorts, villas, hotels, private homes, and apartments becomes quick, convenient, and easy.',
 }) => {
   return (
     <div className={`relative flex flex-col items-center lg:flex-row ${className}`}>

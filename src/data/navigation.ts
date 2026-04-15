@@ -68,8 +68,8 @@ export async function getNavigation(): Promise<TNavigationItem[]> {
               id: '3-5',
               href:
                 process.env.NEXT_PUBLIC_THEME_DIR !== 'rtl'
-                  ? 'https://chisfis-nextjs-rtl.vercel.app/'
-                  : 'https://chisfis-nextjs.vercel.app/',
+                  ? 'https://docoolture-nextjs-rtl.vercel.app/'
+                  : 'https://docoolture-nextjs.vercel.app/',
               name: process.env.NEXT_PUBLIC_THEME_DIR !== 'rtl' ? 'Theme RTL' : 'Theme LTR',
               isNew: true,
             },

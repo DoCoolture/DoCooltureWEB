@@ -34,14 +34,14 @@ const SectionOurFeatures: FC<Props> = ({
     {
       badge: 'Exposure',
       badgeColor: 'green',
-      title: 'Reach millions with Chisfis',
+      title: 'Reach millions with DoCoolture',
       description: 'Millions of people are searching for unique places to stay around the world',
     },
     {
       badge: 'Secure',
       badgeColor: 'red',
       title: 'Secure and simple',
-      description: 'A Chisfis listing gives you a secure and easy way to take bookings and payments online',
+      description: 'A DoCoolture listing gives you a secure and easy way to take bookings and payments online',
     },
   ],
 }) => {

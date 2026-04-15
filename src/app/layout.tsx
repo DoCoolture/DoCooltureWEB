@@ -11,11 +11,11 @@ const poppins = Poppins({ subsets: ['latin'], variable: '--font-sans', weight: [
 
 export const metadata: Metadata = {
   title: {
-    template: '%s - Chisfis',
-    default: 'Chisfis - Booking online React Next.js template',
+    template: '%s - DoCoolture',
+    default: 'DoCoolture - Booking online React Next.js template',
   },
   description: 'Booking online & rental online Next.js Template',
-  keywords: ['Chisfis', 'Booking online', 'Rental online', 'React Next.js template'],
+  keywords: ['DoCoolture', 'Booking online', 'Rental online', 'React Next.js template'],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -35,7 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div>
               {children}
 
-              {/* For Chisfis's demo  -- you can remove it  */}
+              {/* For DoCoolture's demo  -- you can remove it  */}
               <CustomizeControl />
             </div>
           </DirectionProvider>

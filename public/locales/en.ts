@@ -240,7 +240,7 @@ export const en = {
     sectionHero: {
       title: 'Hotel, car & experiences',
       description:
-        'Accompanying us, you have a trip full of experiences. With Chisfis, booking accommodation, resort villas, hotels',
+        'Accompanying us, you have a trip full of experiences. With DoCoolture, booking accommodation, resort villas, hotels',
       'Start your search': 'Start your search',
       button: 'Start your search',
     },

@@ -1,5 +1,5 @@
 {
-  "name": "chisfis-template",
+  "name": "docoolture-template",
   "description": "A template for creating a Next.js application with Tailwind CSS and TypeScript.",
   "version": "2.2.0",
   "private": true,

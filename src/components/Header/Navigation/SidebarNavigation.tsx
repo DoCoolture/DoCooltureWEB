@@ -133,7 +133,7 @@ const SidebarNavigation: React.FC<Props> = ({ data, currencies, languages }) => 
 
       <div className="flex items-center justify-between gap-x-2.5 py-6">
         <ButtonPrimary
-          href="https://themeforest.net/item/chisfis-online-booking-nextjs-template/43399526"
+          href="https://themeforest.net/item/docoolture-online-booking-nextjs-template/43399526"
           target="_blank"
           rel="noopener noreferrer"
         >
