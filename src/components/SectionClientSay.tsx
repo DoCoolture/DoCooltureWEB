@@ -19,23 +19,31 @@ import useEmblaCarousel from 'embla-carousel-react'
 import Image from 'next/image'
 import { FC } from 'react'
 
+// ✅ DOCOOLTURE - Testimonios de viajeros
 const DEMO_DATA = [
   {
     id: 1,
-    clientName: 'Tiana Abie',
-    content: 'Great quality products, affordable prices, fast and friendly delivery. I very recommend.',
+    clientName: 'María González',
+    content: 'Una experiencia increíble. El tour gastronómico superó todas mis expectativas. ¡Lo recomiendo totalmente!',
   },
   {
     id: 2,
-    clientName: 'Lennie Swiffan',
-    content: 'Great quality products, affordable prices, fast and friendly delivery. I very recommend.',
+    clientName: 'Carlos Rodríguez',
+    content: 'Reservar fue super fácil y la experiencia de aventura fue épica. Definitivamente volveré a usar DoCoolture.',
   },
   {
     id: 3,
-    clientName: 'Berta Emili',
-    content: 'Great quality products, affordable prices, fast and friendly delivery. I very recommend.',
+    clientName: 'Ana Martínez',
+    content: 'El taller de cocina local fue una experiencia única. Aprendí muchísimo y me divertí mucho. ¡Gracias DoCoolture!',
   },
 ]
+
+// OCULTO - Testimonios originales de Chisfis
+// const DEMO_DATA = [
+//   { id: 1, clientName: 'Tiana Abie', content: 'Great quality products, affordable prices, fast and friendly delivery. I very recommend.' },
+//   { id: 2, clientName: 'Lennie Swiffan', content: 'Great quality products, affordable prices, fast and friendly delivery. I very recommend.' },
+//   { id: 3, clientName: 'Berta Emili', content: 'Great quality products, affordable prices, fast and friendly delivery. I very recommend.' },
+// ]
 
 interface SectionClientSayProps {
   className?: string
@@ -46,18 +54,15 @@ interface SectionClientSayProps {
 
 const SectionClientSay: FC<SectionClientSayProps> = ({
   className,
-  emblaOptions = {
-    slidesToScroll: 1,
-    loop: true,
-  },
-  heading = 'Good news from far away 🥇',
-  subHeading = "Let's see what people think of DoCoolture",
+  emblaOptions = { slidesToScroll: 1, loop: true },
+  heading = 'Lo que dicen nuestros viajeros 🥇',
+  subHeading = 'Experiencias reales de personas reales',
+  // OCULTO - Textos originales de Chisfis
+  // heading = 'Good news from far away 🥇',
+  // subHeading = "Let's see what people think of Chisfis",
 }) => {
   const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      ...emblaOptions,
-      direction: process.env.NEXT_PUBLIC_THEME_DIR,
-    },
+    { ...emblaOptions, direction: process.env.NEXT_PUBLIC_THEME_DIR },
     [Autoplay({ playOnInit: true, delay: 2000 })]
   )
   const { selectedIndex, scrollSnaps, onDotButtonClick } = useCarouselDotButton(emblaApi)
@@ -68,41 +73,18 @@ const SectionClientSay: FC<SectionClientSayProps> = ({
         {heading}
       </HeadingWithSub>
       <div className="relative mx-auto max-w-2xl md:mb-16">
-        {/* BACKGROUND USER IMAGES */}
         <div className="hidden md:block">
           <Image sizes="100px" className="absolute top-9 -left-20 size-16" src={userImage2} alt="client" />
-          <Image
-            sizes="100px"
-            className="absolute right-full bottom-[100px] mr-40 size-16"
-            src={userImage3}
-            alt="client"
-          />
+          <Image sizes="100px" className="absolute right-full bottom-[100px] mr-40 size-16" src={userImage3} alt="client" />
           <Image sizes="100px" className="absolute top-full left-[140px] size-16" src={userImage4} alt="client" />
           <Image sizes="100px" className="absolute right-[140px] -bottom-10 size-16" src={userImage5} alt="client" />
-          <Image
-            sizes="100px"
-            className="absolute bottom-[80px] left-full ml-32 size-16"
-            src={userImage6}
-            alt="client"
-          />
+          <Image sizes="100px" className="absolute bottom-[80px] left-full ml-32 size-16" src={userImage6} alt="client" />
           <Image sizes="100px" className="absolute top-10 -right-10 size-16" src={userImage7} alt="client" />
         </div>
-
-        {/* MAIN USER IMAGE */}
         <Image className="mx-auto size-32" src={userImage1} alt="main" />
-
-        {/* SLIDER */}
         <div className="relative mt-12 lg:mt-16">
-          <Image
-            className="absolute top-1 right-full -mr-16 size-12 opacity-50 md:opacity-100 lg:mr-3"
-            src={qlImage}
-            alt="ql"
-          />
-          <Image
-            className="absolute top-1 left-full -ml-16 size-12 opacity-50 md:opacity-100 lg:ml-3"
-            src={qrImage}
-            alt="qr"
-          />
+          <Image className="absolute top-1 right-full -mr-16 size-12 opacity-50 md:opacity-100 lg:mr-3" src={qlImage} alt="ql" />
+          <Image className="absolute top-1 left-full -ml-16 size-12 opacity-50 md:opacity-100 lg:ml-3" src={qrImage} alt="qr" />
           <div className="embla" ref={emblaRef}>
             <ul className="embla__container">
               {DEMO_DATA.map((item) => (
@@ -119,7 +101,6 @@ const SectionClientSay: FC<SectionClientSayProps> = ({
                 </li>
               ))}
             </ul>
-
             <div className="embla__dots flex items-center justify-center pt-10">
               {scrollSnaps.map((_, index) => (
                 <button
@@ -130,7 +111,7 @@ const SectionClientSay: FC<SectionClientSayProps> = ({
                     index === selectedIndex ? 'bg-neutral-700' : 'bg-neutral-300',
                     'mx-1 size-2 rounded-full focus:outline-none'
                   )}
-                ></button>
+                />
               ))}
             </div>
           </div>

@@ -9,25 +9,26 @@ import SectionHero from './SectionHero'
 import SectionStatistic from './SectionStatistic'
 
 export const metadata: Metadata = {
-  title: 'About Us',
-  description:
-    'The about us page provides an overview of our mission, values, and the team behind our company. It highlights our commitment to excellence and innovation in our industry.',
+  title: 'Sobre Nosotros',
+  description: 'Conoce a DoCoolture, la plataforma de experiencias únicas e inolvidables.',
 }
 
 const PageAbout = () => {
   return (
     <div className="relative overflow-hidden">
-      {/* ======== BG GLASS ======== */}
       <BgGlassmorphism />
-
       <div className="container flex flex-col gap-y-16 py-16 lg:gap-y-28 lg:py-28">
         <SectionHero
           rightImg={rightImg}
-          heading="👋 About Us."
-          subHeading="We're impartial and independent, and every day we create distinctive, world-class programmes and content which inform, educate and entertain millions of people in the around the world."
+          heading="👋 Sobre DoCoolture."
+          subHeading="Somos una plataforma dedicada a conectar viajeros con experiencias auténticas e inolvidables. Creemos que los mejores recuerdos no se compran, se viven."
+          // OCULTO - Texto original de Chisfis:
+          // heading="👋 About Us."
+          // subHeading="We're impartial and independent, and every day we create distinctive, world-class programmes and content which inform, educate and entertain millions of people in the around the world."
         />
 
         <SectionFounder />
+
         <div className="relative py-20">
           <BackgroundSection />
           <SectionClientSay />

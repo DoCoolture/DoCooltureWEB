@@ -2,20 +2,20 @@ import { Link } from '@/shared/link'
 import { ListingType } from '@/type'
 import * as Headless from '@headlessui/react'
 import {
-  Airplane02Icon,
-  Car05Icon,
+  // Airplane02Icon,   // OCULTO - No se usa en DoCoolture
+  // Car05Icon,        // OCULTO - No se usa en DoCoolture
   HotAirBalloonFreeIcons,
-  House03Icon,
-  RealEstate02Icon,
+  // House03Icon,      // OCULTO - No se usa en DoCoolture
+  // RealEstate02Icon, // OCULTO - No se usa en DoCoolture
 } from '@hugeicons/core-free-icons'
 import { IconSvgElement } from '@hugeicons/react'
 import clsx from 'clsx'
 import { Fragment } from 'react'
 import { ExperiencesSearchForm } from './ExperiencesSearchForm'
-import { FlightSearchForm } from './FlightSearchForm'
-import { RealEstateHeroSearchForm } from './RealEstateHeroSearchForm'
-import { RentalCarSearchForm } from './RentalCarSearchForm'
-import { StaySearchForm } from './StaySearchForm'
+// import { FlightSearchForm } from './FlightSearchForm'         // OCULTO - No se usa en DoCoolture
+// import { RealEstateHeroSearchForm } from './RealEstateHeroSearchForm' // OCULTO
+// import { RentalCarSearchForm } from './RentalCarSearchForm'   // OCULTO - No se usa en DoCoolture
+// import { StaySearchForm } from './StaySearchForm'             // OCULTO - No se usa en DoCoolture
 
 export const formTabs: {
   name: ListingType
@@ -23,14 +23,14 @@ export const formTabs: {
   href: string
   formComponent: React.ComponentType<{ formStyle: 'default' | 'small' }>
 }[] = [
-  { name: 'Stays', icon: House03Icon, href: '/', formComponent: StaySearchForm },
-  { name: 'Cars', icon: Car05Icon, href: '/car', formComponent: RentalCarSearchForm },
+  // { name: 'Stays', icon: House03Icon, href: '/', formComponent: StaySearchForm },                              // OCULTO
+  // { name: 'Cars', icon: Car05Icon, href: '/car', formComponent: RentalCarSearchForm },                         // OCULTO
   { name: 'Experiences', icon: HotAirBalloonFreeIcons, href: '/experience', formComponent: ExperiencesSearchForm },
-  { name: 'RealEstates', icon: RealEstate02Icon, href: '/real-estate', formComponent: RealEstateHeroSearchForm },
-  { name: 'Flights', icon: Airplane02Icon, href: '/flight-categories/all', formComponent: FlightSearchForm },
+  // { name: 'RealEstates', icon: RealEstate02Icon, href: '/real-estate', formComponent: RealEstateHeroSearchForm }, // OCULTO
+  // { name: 'Flights', icon: Airplane02Icon, href: '/flight-categories/all', formComponent: FlightSearchForm },  // OCULTO
 ]
 
-const HeroSearchForm = ({ className, initTab = 'Stays' }: { className?: string; initTab: ListingType }) => {
+const HeroSearchForm = ({ className, initTab = 'Experiences' }: { className?: string; initTab: ListingType }) => {
   return (
     <div className={clsx('hero-search-form', className)}>
       <Headless.TabGroup defaultIndex={formTabs.findIndex((tab) => tab.name === initTab)}>

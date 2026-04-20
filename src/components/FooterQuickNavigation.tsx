@@ -8,27 +8,22 @@ import { RefObject, useCallback, useEffect, useRef } from 'react'
 import { useIntersection } from 'react-use'
 import { useAside } from './aside'
 
+// ✅ DOCOOLTURE - Navegación móvil inferior
 const FOOTER_QUICK_NAV = [
-  {
-    name: 'Explore',
-    link: '/',
-    icon: MagnifyingGlassIcon,
-  },
-  {
-    name: 'Wishlists',
-    link: '/account-savelists',
-    icon: HeartIcon,
-  },
-  {
-    name: 'Account',
-    link: '/authors/john-doe',
-    icon: UserCircleIcon,
-  },
-  {
-    name: 'Menu',
-    icon: Bars3Icon,
-  },
+  { name: 'Explorar', link: '/experience', icon: MagnifyingGlassIcon },
+  { name: 'Guardados', link: '/account-savelists', icon: HeartIcon },
+  { name: 'Cuenta', link: '/account', icon: UserCircleIcon },
+  { name: 'Menú', icon: Bars3Icon },
 ]
+
+// OCULTO - Navegación original de Chisfis
+// const FOOTER_QUICK_NAV = [
+//   { name: 'Explore', link: '/', icon: MagnifyingGlassIcon },
+//   { name: 'Wishlists', link: '/account-savelists', icon: HeartIcon },
+//   { name: 'Account', link: '/authors/john-doe', icon: UserCircleIcon },
+//   { name: 'Menu', icon: Bars3Icon },
+// ]
+
 const SCROLL_THRESHOLD = 80
 
 const FooterQuickNavigation = () => {
@@ -45,26 +40,17 @@ const FooterQuickNavigation = () => {
   const isInViewport = intersection && intersection.intersectionRatio >= 1
 
   useEffect(() => {
-    // update the lastScrollY position when the showNav is shown/hidden
     lastScrollY.current = window.pageYOffset
   }, [isInViewport])
 
   const showHideHeaderMenu = useCallback(() => {
-    if (!containerRef?.current) {
-      return
-    }
+    if (!containerRef?.current) return
     const currentScrollPos = window.pageYOffset
-
-    // SHOW _ HIDE NAV MENU
     if (currentScrollPos > lastScrollY.current) {
-      if (isInViewport && currentScrollPos - lastScrollY.current < SCROLL_THRESHOLD) {
-        return
-      }
+      if (isInViewport && currentScrollPos - lastScrollY.current < SCROLL_THRESHOLD) return
       containerRef.current.classList.add('translate-y-[calc(100%+1.5rem)]')
     } else {
-      if (!isInViewport && lastScrollY.current - currentScrollPos < SCROLL_THRESHOLD) {
-        return
-      }
+      if (!isInViewport && lastScrollY.current - currentScrollPos < SCROLL_THRESHOLD) return
       containerRef.current.classList.remove('translate-y-[calc(100%+1.5rem)]')
     }
     lastScrollY.current = currentScrollPos
@@ -78,14 +64,9 @@ const FooterQuickNavigation = () => {
     window.addEventListener('scroll', handleEventScroll, { passive: true })
     return () => {
       window.removeEventListener('scroll', handleEventScroll)
-      // Cleanup requestAnimationFrame if pending
-      if (rafId.current) {
-        window.cancelAnimationFrame(rafId.current)
-      }
+      if (rafId.current) window.cancelAnimationFrame(rafId.current)
     }
   }, [handleEventScroll])
-
-  //
 
   return (
     <div
@@ -93,7 +74,6 @@ const FooterQuickNavigation = () => {
       className="fixed inset-x-0 bottom-0 z-30 flex items-center gap-6 bg-white/90 px-2.5 py-4 shadow ring-1 shadow-slate-200/80 ring-slate-900/5 backdrop-blur-sm transition-transform lg:hidden dark:bg-neutral-950/90"
     >
       <div className="mx-auto flex w-full max-w-lg justify-around text-center">
-        {/* MENU */}
         {FOOTER_QUICK_NAV.map((item) => {
           const isActive = pathname === item.link
           return item.link ? (
@@ -116,15 +96,13 @@ const FooterQuickNavigation = () => {
               key={item.name}
               role="menuitem"
               tabIndex={0}
-              aria-label={`Open menu`}
+              aria-label="Open menu"
               className={clsx(
                 '-mx-2 flex cursor-pointer flex-col items-center justify-between px-2 text-neutral-500 dark:text-neutral-300',
                 isActive && 'text-red-600'
               )}
               onClick={() => {
-                if (item.name === 'Menu') {
-                  openAside('sidebar-navigation')
-                }
+                if (item.name === 'Menú') openAside('sidebar-navigation')
               }}
             >
               <item.icon className="size-6" />

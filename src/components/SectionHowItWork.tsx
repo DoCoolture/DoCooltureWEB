@@ -18,31 +18,39 @@ export interface SectionHowItWorkProps {
   title?: string
 }
 
+// ✅ DOCOOLTURE - Textos adaptados a experiencias
 const DEMO_DATA: SectionHowItWorkProps['data'] = [
   {
     id: 1,
     img: HIW1img,
-    title: 'Book & relax',
-    desc: 'Let each trip be an inspirational journey, each room a peaceful space',
+    title: 'Encuentra tu experiencia',
+    desc: 'Explora cientos de experiencias únicas cerca de ti o en cualquier parte del mundo.',
   },
   {
     id: 2,
     img: HIW2img,
-    title: 'Smart checklist',
-    desc: 'Let each trip be an inspirational journey, each room a peaceful space',
+    title: 'Reserva fácil y seguro',
+    desc: 'Selecciona la fecha, el número de personas y confirma tu reserva en minutos.',
   },
   {
     id: 3,
     img: HIW3img,
-    title: 'Save more',
-    desc: 'Let each trip be an inspirational journey, each room a peaceful space',
+    title: 'Vive el momento',
+    desc: 'Disfruta experiencias inolvidables guiadas por expertos locales.',
   },
 ]
 
-const SectionHowItWork: FC<SectionHowItWorkProps> = ({ className = '', data = DEMO_DATA, title = 'How it work' }) => {
+// OCULTO - Textos originales de Chisfis
+// const DEMO_DATA = [
+//   { id: 1, img: HIW1img, title: 'Book & relax', desc: 'Let each trip be an inspirational journey, each room a peaceful space' },
+//   { id: 2, img: HIW2img, title: 'Smart checklist', desc: 'Let each trip be an inspirational journey, each room a peaceful space' },
+//   { id: 3, img: HIW3img, title: 'Save more', desc: 'Let each trip be an inspirational journey, each room a peaceful space' },
+// ]
+
+const SectionHowItWork: FC<SectionHowItWorkProps> = ({ className = '', data = DEMO_DATA, title = 'Cómo funciona' }) => {
   return (
     <div className={`nc-SectionHowItWork ${className}`} data-nc-id="SectionHowItWork">
-      <Heading isCenter subheading="Keep calm & travel on">
+      <Heading isCenter subheading="Simple, rápido y seguro">
         {title}
       </Heading>
       <div className="relative mt-20 grid gap-20 md:grid-cols-3">

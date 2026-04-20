@@ -5,23 +5,23 @@ import '@/styles/tailwind.css'
 import { Metadata } from 'next'
 import { Poppins } from 'next/font/google'
 import 'rc-slider/assets/index.css'
-import CustomizeControl from './customize-control'
+// import CustomizeControl from './customize-control' // OCULTO - Panel demo de Chisfis
 
 const poppins = Poppins({ subsets: ['latin'], variable: '--font-sans', weight: ['300', '400', '500', '600', '700'] })
 
 export const metadata: Metadata = {
   title: {
     template: '%s - DoCoolture',
-    default: 'DoCoolture - Booking online React Next.js template',
+    default: 'DoCoolture - Experiencias únicas',
   },
-  description: 'Booking online & rental online Next.js Template',
-  keywords: ['DoCoolture', 'Booking online', 'Rental online', 'React Next.js template'],
+  description: 'Descubre y reserva experiencias inolvidables con DoCoolture.',
+  keywords: ['DoCoolture', 'Experiencias', 'Tours', 'Aventura', 'Gastronomía'],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang={process.env.NEXT_PUBLIC_THEME_DIR === 'rtl' ? 'ar' : 'en'}
+      lang="es"
       dir={process.env.NEXT_PUBLIC_THEME_DIR || 'ltr'}
       suppressHydrationWarning
       className={cn('font-sans', poppins.variable)}
@@ -34,9 +34,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           >
             <div>
               {children}
-
-              {/* For DoCoolture's demo  -- you can remove it  */}
-              <CustomizeControl />
+              {/* OCULTO - Panel demo de Chisfis */}
+              {/* <CustomizeControl /> */}
             </div>
           </DirectionProvider>
         </ThemeProvider>

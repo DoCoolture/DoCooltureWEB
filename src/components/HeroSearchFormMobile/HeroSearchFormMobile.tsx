@@ -8,12 +8,12 @@ import T from '@/utils/getT'
 import { CloseButton, Dialog, DialogPanel, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import {
-  Airplane02Icon,
-  Car05Icon,
+  // Airplane02Icon,    // OCULTO - No se usa en DoCoolture
+  // Car05Icon,         // OCULTO - No se usa en DoCoolture
   FilterVerticalIcon,
   HotAirBalloonFreeIcons,
-  House03Icon,
-  RealEstate02Icon,
+  // House03Icon,       // OCULTO - No se usa en DoCoolture
+  // RealEstate02Icon,  // OCULTO - No se usa en DoCoolture
   Search01Icon,
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon, IconSvgElement } from '@hugeicons/react'
@@ -21,36 +21,31 @@ import clsx from 'clsx'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { useTimeoutFn } from 'react-use'
-import CarSearchFormMobile from './car-search-form/CarSearchFormMobile'
+// import CarSearchFormMobile from './car-search-form/CarSearchFormMobile'           // OCULTO
 import ExperienceSearchFormMobile from './experience-search-form/ExperienceSearchFormMobile'
-import FlightSearchFormMobile from './flight-search-form/FlightSearchFormMobile'
-import RealestateSearchFormMobile from './real-estate-search-form/RealestateSearchFormMobile'
-import StaySearchFormMobile from './stay-search-form/StaySearchFormMobile'
+// import FlightSearchFormMobile from './flight-search-form/FlightSearchFormMobile'  // OCULTO
+// import RealestateSearchFormMobile from './real-estate-search-form/RealestateSearchFormMobile' // OCULTO
+// import StaySearchFormMobile from './stay-search-form/StaySearchFormMobile'        // OCULTO
 
 const formTabs: { name: ListingType; icon: IconSvgElement; formComponent: React.ComponentType<{}> }[] = [
-  { name: 'Stays', icon: House03Icon, formComponent: StaySearchFormMobile },
-  { name: 'Cars', icon: Car05Icon, formComponent: CarSearchFormMobile },
+  // { name: 'Stays', icon: House03Icon, formComponent: StaySearchFormMobile },           // OCULTO
+  // { name: 'Cars', icon: Car05Icon, formComponent: CarSearchFormMobile },               // OCULTO
   { name: 'Experiences', icon: HotAirBalloonFreeIcons, formComponent: ExperienceSearchFormMobile },
-  { name: 'RealEstates', icon: RealEstate02Icon, formComponent: RealestateSearchFormMobile },
-  { name: 'Flights', icon: Airplane02Icon, formComponent: FlightSearchFormMobile },
+  // { name: 'RealEstates', icon: RealEstate02Icon, formComponent: RealestateSearchFormMobile }, // OCULTO
+  // { name: 'Flights', icon: Airplane02Icon, formComponent: FlightSearchFormMobile },    // OCULTO
 ]
 
 const HeroSearchFormMobile = ({ className }: { className?: string }) => {
   const [showModal, setShowModal] = useState(false)
-
-  // FOR RESET ALL DATA WHEN CLICK CLEAR BUTTON
   const [showDialog, setShowDialog] = useState(false)
   let [, , resetIsShowingDialog] = useTimeoutFn(() => setShowDialog(true), 1)
-
-  // pathname
   const pathname = usePathname()
 
   let locationText = 'Where to?'
   let weekText = 'Any week'
   let guestsText = 'Add guests'
-  let activeTabName: ListingType = 'Stays'
+  let activeTabName: ListingType = 'Experiences' // DOCOOLTURE: default Experiences
 
-  // TODO: Check that the pathname matches each listing type.
   if (pathname.startsWith('/experience')) {
     activeTabName = 'Experiences'
     if (pathname.startsWith('/experience-categories')) {
@@ -58,49 +53,45 @@ const HeroSearchFormMobile = ({ className }: { className?: string }) => {
       weekText = 'Mar 22 - 27'
       guestsText = '2 guests'
     }
-  } else if (pathname.startsWith('/car')) {
-    activeTabName = 'Cars'
-    guestsText = ''
-    if (pathname.startsWith('/car-categories')) {
-      locationText = 'Car rentals in Tokyo'
-      weekText = 'Mar 25 - 28'
-    }
-  } else if (pathname.startsWith('/flight')) {
-    activeTabName = 'Flights'
-    if (pathname.startsWith('/flight-categories')) {
-      locationText = 'Flights to Rome'
-      weekText = 'Mar 10 - 15'
-      guestsText = '1 guest'
-    }
-  } else if (pathname.startsWith('/stay')) {
-    activeTabName = 'Stays'
-    if (pathname.startsWith('/stay-categories')) {
-      locationText = 'Homes in London'
-      weekText = 'Mar 20 - 25'
-      guestsText = '1 guest'
-    }
-  } else if (pathname.startsWith('/real-estate')) {
-    activeTabName = 'RealEstates'
-    if (pathname.startsWith('/real-estate-categories')) {
-      locationText = 'Real Estates in Bali'
-      weekText = 'Rent'
-      guestsText = '$10k - $1M'
-    }
   }
+  // OCULTO - Rutas no usadas en DoCoolture
+  // } else if (pathname.startsWith('/car')) {
+  //   activeTabName = 'Cars'
+  //   guestsText = ''
+  //   if (pathname.startsWith('/car-categories')) {
+  //     locationText = 'Car rentals in Tokyo'
+  //     weekText = 'Mar 25 - 28'
+  //   }
+  // } else if (pathname.startsWith('/flight')) {
+  //   activeTabName = 'Flights'
+  //   if (pathname.startsWith('/flight-categories')) {
+  //     locationText = 'Flights to Rome'
+  //     weekText = 'Mar 10 - 15'
+  //     guestsText = '1 guest'
+  //   }
+  // } else if (pathname.startsWith('/stay')) {
+  //   activeTabName = 'Stays'
+  //   if (pathname.startsWith('/stay-categories')) {
+  //     locationText = 'Homes in London'
+  //     weekText = 'Mar 20 - 25'
+  //     guestsText = '1 guest'
+  //   }
+  // } else if (pathname.startsWith('/real-estate')) {
+  //   activeTabName = 'RealEstates'
+  //   if (pathname.startsWith('/real-estate-categories')) {
+  //     locationText = 'Real Estates in Bali'
+  //     weekText = 'Rent'
+  //     guestsText = '$10k - $1M'
+  //   }
+  // }
 
   const defaultIndex = Math.max(
     0,
     formTabs.findIndex((t) => t.name === activeTabName)
   )
 
-  //
-  function closeModal() {
-    setShowModal(false)
-  }
-
-  function openModal() {
-    setShowModal(true)
-  }
+  function closeModal() { setShowModal(false) }
+  function openModal() { setShowModal(true) }
 
   const renderButtonOpenModal = () => {
     return (
@@ -109,14 +100,12 @@ const HeroSearchFormMobile = ({ className }: { className?: string }) => {
         className="relative flex w-full items-center rounded-full border border-neutral-200 px-4 py-2 pe-11 shadow-lg dark:border-neutral-600"
       >
         <HugeiconsIcon icon={Search01Icon} size={20} color="currentColor" strokeWidth={1.5} />
-
         <div className="ms-4 flex-1 overflow-hidden text-start">
           <span className="block text-sm/5 font-medium">{locationText}</span>
           <span className="mt-px flex gap-2 text-sm/5 font-normal text-neutral-500 dark:text-neutral-400">
             {weekText} {activeTabName !== 'Cars' && <span>•</span>} {activeTabName !== 'Cars' ? guestsText : ''}
           </span>
         </div>
-
         <span className="absolute end-2 top-1/2 hidden h-9 w-9 -translate-y-1/2 transform items-center justify-center rounded-full border border-neutral-200 sm:flex dark:border-neutral-600 dark:text-neutral-300">
           <HugeiconsIcon icon={FilterVerticalIcon} size={20} color="currentColor" strokeWidth={1.5} />
         </span>
@@ -145,26 +134,22 @@ const HeroSearchFormMobile = ({ className }: { className?: string }) => {
                       <XMarkIcon className="size-4!" />
                     </CloseButton>
                   </div>
-
                   <TabList className="flex justify-center gap-x-8 sm:gap-x-14">
-                    {formTabs.map((tab) => {
-                      return (
-                        <Tab
-                          key={tab.name}
-                          className={clsx(
-                            'group relative -mx-3 flex shrink-0 cursor-pointer items-center justify-center px-3 pt-10 pb-5 text-neutral-400 data-[selected]:text-neutral-950 dark:data-[selected]:text-neutral-100'
-                          )}
-                        >
-                          <div className="relative">
-                            <span className="sr-only">{tab.name}</span>
-                            <HugeiconsIcon icon={tab.icon} size={26} />
-                            <span className="absolute top-full mt-1 hidden h-0.5 w-full bg-neutral-800 group-data-[selected]:block dark:bg-neutral-100" />
-                          </div>
-                        </Tab>
-                      )
-                    })}
+                    {formTabs.map((tab) => (
+                      <Tab
+                        key={tab.name}
+                        className={clsx(
+                          'group relative -mx-3 flex shrink-0 cursor-pointer items-center justify-center px-3 pt-10 pb-5 text-neutral-400 data-[selected]:text-neutral-950 dark:data-[selected]:text-neutral-100'
+                        )}
+                      >
+                        <div className="relative">
+                          <span className="sr-only">{tab.name}</span>
+                          <HugeiconsIcon icon={tab.icon} size={26} />
+                          <span className="absolute top-full mt-1 hidden h-0.5 w-full bg-neutral-800 group-data-[selected]:block dark:bg-neutral-100" />
+                        </div>
+                      </Tab>
+                    ))}
                   </TabList>
-
                   <TabPanels className="flex flex-1 overflow-hidden px-1.5 sm:px-4">
                     <div className="hidden-scrollbar flex-1 overflow-y-auto pt-2 pb-4">
                       {formTabs.map((tab) => (
