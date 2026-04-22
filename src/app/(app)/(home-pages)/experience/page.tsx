@@ -21,28 +21,31 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Experiences',
-  description: 'Descubre y reserva experiencias únicas con DoCoolture.',
+  title: 'Experiencias',
+  description:
+    'Descubre la República Dominicana que no aparece en los resorts. Experiencias culturales auténticas, diseñadas para entender el país desde su historia, su gente y su identidad.',
 }
 
 async function Home() {
   const categories = await getExperienceCategories()
   const experienceListings = await getExperienceListings()
-  // const authors = await getAuthors()  // OCULTO - No se usa sin Become a host
+  // const authors = await getAuthors() // OCULTO - No se usa sin Become a host
 
   return (
     <main className="relative overflow-hidden">
       <BgGlassmorphism />
       <div className="relative container mb-24 flex flex-col gap-y-24 lg:mb-28 lg:gap-y-32">
+
+        {/* ===== HERO ===== */}
         <HeroSectionWithSearchForm1
-          heading="Vive experiencias únicas"
+          heading="Descubre la República Dominicana que no aparece en los resorts."
           image={heroImage}
-          imageAlt="hero"
+          imageAlt="Experiencias auténticas en la República Dominicana"
           searchForm={<HeroSearchForm initTab="Experiences" />}
           description={
             <>
               <p className="max-w-xl text-base text-neutral-500 sm:text-xl dark:text-neutral-400">
-                Descubre y reserva experiencias inolvidables con DoCoolture.
+                Experiencias culturales auténticas, diseñadas para entender el país desde su historia, su gente y su identidad.
               </p>
               <ButtonPrimary href={'/experience-categories/all'} className="sm:text-base/normal">
                 Explorar experiencias
@@ -51,8 +54,9 @@ async function Home() {
           }
         />
 
+        {/* ===== SECCIÓN: Explora por categorías (slider) ===== */}
         <div>
-          <HeadingWithSub subheading="Encuentra la aventura perfecta para ti">
+          <HeadingWithSub subheading="Elige tu destino en la República Dominicana">
             Explora por categorías
           </HeadingWithSub>
           <SectionSliderNewCategories
@@ -62,9 +66,10 @@ async function Home() {
           />
         </div>
 
+        {/* ===== SECCIÓN: Experiencias destacadas ===== */}
         <div className="relative py-20">
           <BackgroundSection />
-          <HeadingWithSub isCenter subheading="Experiencias seleccionadas para ti.">
+          <HeadingWithSub isCenter subheading="Seleccionadas especialmente para ti.">
             Experiencias destacadas
           </HeadingWithSub>
           <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 md:gap-x-8 md:gap-y-12 lg:mt-10 lg:grid-cols-3 xl:grid-cols-4">
@@ -86,30 +91,37 @@ async function Home() {
           </div>
         </div>
 
+        {/* ===== SECCIÓN: Cómo funciona ===== */}
         <SectionHowItWork />
 
-        {/* OCULTO - Become a host / Sección de autores */}
-        {/* <div className="relative py-20">
+        {/* OCULTO - Sección "Become a host" / Autores
+        <div className="relative py-20">
           <BackgroundSection />
           <HeadingWithSub isCenter subheading="Meet the best our authors.">
             Become a host
           </HeadingWithSub>
           <SectionGridAuthorBox authors={authors} />
-        </div> */}
+        </div>
+        */}
 
+        {/* ===== SECCIÓN: Explora por destino (grid de ciudades) ===== */}
         <div>
-          <HeadingWithSub isCenter subheading={'Explora experiencias cerca de ti'}>
+          <HeadingWithSub isCenter subheading="Destinos piloto disponibles en DoCoolture">
             Explora por destino
           </HeadingWithSub>
-          <SectionGridCategoryBox categories={categories} />
+          <SectionGridCategoryBox categories={categories.slice(0, 3)} />
         </div>
 
+        {/* ===== SECCIÓN: Newsletter ===== */}
         <SectionSubscribe2 />
+
         <Divider />
 
+        {/* ===== SECCIÓN: Testimonios ===== */}
         <div className="relative py-10">
           <SectionClientSay />
         </div>
+
       </div>
     </main>
   )
