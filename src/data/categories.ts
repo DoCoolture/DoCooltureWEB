@@ -1,8 +1,4 @@
-import stayCategoryCoverImage from '@/images/hero-right-2.png'
-import carCategoryCoverImage from '@/images/hero-right-car.png'
 import experienceCategoryCoverImage from '@/images/hero-right-experience.png'
-import filghtCategoryCoverImage from '@/images/hero-right-flight.png'
-import realEstateCategoryCoverImage from '@/images/hero-right-real-estate.png'
 
 // ✅ DOCOOLTURE - Ciudades dominicanas como destinos piloto
 export async function getExperienceCategories() {
@@ -153,32 +149,37 @@ export async function getExperienceCategoryByHandle(handle?: string) {
   return categories.find((category) => category.handle === handle)
 }
 
-// ============================================================
-// OCULTO - Categorías originales de Chisfis (no se usan en DoCoolture)
-// ============================================================
-// export async function getStayCategories() { ... }
-// export async function getStayCategoryByHandle() { ... }
-// export async function getRealEstateCategories() { ... }
-// export async function getRealEstateCategoryByHandle() { ... }
-// export async function getCarCategories() { ... }
-// export async function getCarCategoryByHandle() { ... }
-// export async function getFlightCategories() { ... }
-// export async function getFlightCategoryByHandle() { ... }
+// ✅ Tipo explícito para categorías stub (evita inferencia de `never`)
+export interface TBaseCategory {
+  id: string
+  name: string
+  handle: string
+  href: string
+  description: string
+  count: number
+  thumbnail: string
+  region: string
+  coverImage: {
+    src: string
+    width: number
+    height: number
+  }
+}
 
 // MANTENEMOS las funciones vacías para no romper imports existentes
-export async function getStayCategories() { return [] }
-export async function getStayCategoryByHandle(handle?: string) { return undefined }
-export async function getRealEstateCategories() { return [] }
-export async function getRealEstateCategoryByHandle(handle?: string) { return undefined }
-export async function getCarCategories() { return [] }
-export async function getCarCategoryByHandle(handle?: string) { return undefined }
-export async function getFlightCategories() { return [] }
-export async function getFlightCategoryByHandle(handle?: string) { return undefined }
+export async function getStayCategories(): Promise<TBaseCategory[]> { return [] }
+export async function getStayCategoryByHandle(handle?: string): Promise<TBaseCategory | undefined> { return undefined }
+export async function getRealEstateCategories(): Promise<TBaseCategory[]> { return [] }
+export async function getRealEstateCategoryByHandle(handle?: string): Promise<TBaseCategory | undefined> { return undefined }
+export async function getCarCategories(): Promise<TBaseCategory[]> { return [] }
+export async function getCarCategoryByHandle(handle?: string): Promise<TBaseCategory | undefined> { return undefined }
+export async function getFlightCategories(): Promise<TBaseCategory[]> { return [] }
+export async function getFlightCategoryByHandle(handle?: string): Promise<TBaseCategory | undefined> { return undefined }
 
 // types
-export type TStayCategory = Awaited<ReturnType<typeof getStayCategories>>[number]
+export type TStayCategory = TBaseCategory
 export type TExperienceCategory = Awaited<ReturnType<typeof getExperienceCategories>>[number]
-export type TCarCategory = Awaited<ReturnType<typeof getCarCategories>>[number]
-export type TRealEstateCategory = Awaited<ReturnType<typeof getRealEstateCategories>>[number]
-export type TFlightCategory = Awaited<ReturnType<typeof getFlightCategories>>[number]
+export type TCarCategory = TBaseCategory
+export type TRealEstateCategory = TBaseCategory
+export type TFlightCategory = TBaseCategory
 export type TCategory = TStayCategory | TExperienceCategory | TCarCategory | TRealEstateCategory | TFlightCategory

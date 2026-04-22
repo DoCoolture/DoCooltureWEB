@@ -1,5 +1,4 @@
 'use client'
-
 import CarCardH from '@/components/CarCardH'
 import ListingFilterTabs from '@/components/ListingFilterTabs'
 import { TCarCategory } from '@/data/categories'
@@ -45,7 +44,6 @@ const SectionGridHasMap: FC<Props> = ({ className, listings, category, filterOpt
           <Pagination />
         </div>
       </div>
-
       <MapFixedSection
         closeButtonHref={`/car-categories/${category.handle}#heading`}
         currentHoverID={currentHoverID}
