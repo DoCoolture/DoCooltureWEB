@@ -1,5 +1,6 @@
 import { ThemeProvider } from '@/components/theme-provider'
 import { DirectionProvider } from '@/components/ui/direction'
+import { LanguageProvider } from '@/context/LanguageContext'
 import { cn } from '@/lib/utils'
 import '@/styles/tailwind.css'
 import { Metadata } from 'next'
@@ -7,7 +8,11 @@ import { Poppins } from 'next/font/google'
 import 'rc-slider/assets/index.css'
 // import CustomizeControl from './customize-control' // OCULTO - Panel demo de Chisfis
 
-const poppins = Poppins({ subsets: ['latin'], variable: '--font-sans', weight: ['300', '400', '500', '600', '700'] })
+const poppins = Poppins({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  weight: ['300', '400', '500', '600', '700'],
+})
 
 export const metadata: Metadata = {
   title: {
@@ -15,7 +20,7 @@ export const metadata: Metadata = {
     default: 'DoCoolture - Experiencias únicas',
   },
   description: 'Descubre y reserva experiencias inolvidables con DoCoolture.',
-  keywords: ['DoCoolture', 'Experiencias', 'Tours', 'Aventura', 'Gastronomía'],
+  keywords: ['DoCoolture', 'Experiencias', 'Tours', 'Aventura', 'República Dominicana'],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -32,11 +37,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             dir={process.env.NEXT_PUBLIC_THEME_DIR || 'ltr'}
             direction={process.env.NEXT_PUBLIC_THEME_DIR || 'ltr'}
           >
-            <div>
-              {children}
-              {/* OCULTO - Panel demo de Chisfis */}
-              {/* <CustomizeControl /> */}
-            </div>
+            <LanguageProvider>
+              <div>
+                {children}
+                {/* OCULTO - Panel demo de Chisfis */}
+                {/* <CustomizeControl /> */}
+              </div>
+            </LanguageProvider>
           </DirectionProvider>
         </ThemeProvider>
       </body>

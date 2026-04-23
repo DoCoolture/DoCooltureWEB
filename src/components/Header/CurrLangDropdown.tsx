@@ -1,7 +1,7 @@
 'use client'
 
+import { useLanguage, type Locale } from '@/context/LanguageContext'
 import { getCurrencies, getLanguages } from '@/data/navigation'
-import { Link } from '@/shared/link'
 import {
   CloseButton,
   Popover,
@@ -23,42 +23,60 @@ const Currencies = ({ currencies }: { currencies: Awaited<ReturnType<typeof getC
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {currencies.map((item, index) => (
-        <CloseButton
-          as={Link}
+        <button
           key={index}
-          href={item.href}
           className={clsx(
-            '-m-2.5 flex items-center rounded-lg p-2.5 transition duration-150 ease-in-out hover:bg-neutral-100 focus:outline-hidden dark:hover:bg-neutral-700',
+            '-m-2.5 flex items-center rounded-lg p-2.5 transition duration-150 ease-in-out hover:bg-neutral-100 focus:outline-hidden dark:hover:bg-neutral-700 w-full text-left',
             item.active ? 'bg-neutral-100 dark:bg-neutral-700' : 'opacity-80'
           )}
         >
           <div dangerouslySetInnerHTML={{ __html: item.icon }} />
           <p className="ms-2 text-sm font-medium">{item.name}</p>
-        </CloseButton>
+        </button>
       ))}
     </div>
   )
 }
 
-const Languages = ({ languages }: { languages: Awaited<ReturnType<typeof getLanguages>> }) => {
+const Languages = ({
+  languages,
+  currentLocale,
+  onSelectLanguage,
+}: {
+  languages: Awaited<ReturnType<typeof getLanguages>>
+  currentLocale: Locale
+  onSelectLanguage: (locale: Locale) => void
+}) => {
+  const localeMap: Record<string, Locale> = {
+    Spanish: 'es',
+    English: 'en',
+    French: 'fr',
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      {languages.map((item, index) => (
-        <CloseButton
-          as={Link}
-          href={item.href}
-          key={index}
-          className={clsx(
-            '-m-2.5 flex items-center rounded-lg p-2.5 transition duration-150 ease-in-out hover:bg-neutral-100 focus:outline-hidden dark:hover:bg-neutral-700',
-            item.active ? 'bg-neutral-100 dark:bg-neutral-700' : 'opacity-80'
-          )}
-        >
-          <div>
-            <p className="text-sm font-medium">{item.name}</p>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">{item.description}</p>
-          </div>
-        </CloseButton>
-      ))}
+      {languages.map((item, index) => {
+        const itemLocale = localeMap[item.id] || 'es'
+        const isActive = currentLocale === itemLocale
+        return (
+          <button
+            key={index}
+            onClick={() => onSelectLanguage(itemLocale)}
+            className={clsx(
+              '-m-2.5 flex items-center rounded-lg p-2.5 transition duration-150 ease-in-out hover:bg-neutral-100 focus:outline-hidden dark:hover:bg-neutral-700 w-full text-left',
+              isActive ? 'bg-neutral-100 dark:bg-neutral-700' : 'opacity-80'
+            )}
+          >
+            <div>
+              <p className="text-sm font-medium">{item.name}</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">{item.description}</p>
+            </div>
+            {isActive && (
+              <span className="ml-auto text-primary-600 text-xs font-semibold">✓</span>
+            )}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -66,22 +84,24 @@ const Languages = ({ languages }: { languages: Awaited<ReturnType<typeof getLang
 interface Props {
   panelAnchor?: PopoverPanelProps['anchor']
   panelClassName?: PopoverPanelProps['className']
-
   className?: string
   currencies: Awaited<ReturnType<typeof getCurrencies>>
   languages: Awaited<ReturnType<typeof getLanguages>>
 }
 
 const CurrLangDropdown: FC<Props> = ({
-  panelAnchor = {
-    to: 'bottom end',
-    gap: 16,
-  },
+  panelAnchor = { to: 'bottom end', gap: 16 },
   className,
   languages,
   currencies,
   panelClassName = 'w-sm',
 }) => {
+  const { locale, setLocale } = useLanguage()
+
+  const handleSelectLanguage = (newLocale: Locale) => {
+    setLocale(newLocale)
+  }
+
   return (
     <Popover className={clsx('group', className)}>
       <PopoverButton className="-m-2.5 flex items-center p-2.5 text-sm font-medium text-neutral-600 group-hover:text-neutral-950 focus:outline-hidden focus-visible:outline-hidden dark:text-neutral-200 dark:group-hover:text-neutral-100">
@@ -101,7 +121,7 @@ const CurrLangDropdown: FC<Props> = ({
       >
         <TabGroup>
           <TabList className="flex space-x-1 rounded-full bg-neutral-100 p-1 dark:bg-neutral-700">
-            {['Language', 'Currency'].map((category) => (
+            {['Idioma', 'Moneda'].map((category) => (
               <Tab
                 key={category}
                 className={({ selected }) =>
@@ -119,7 +139,11 @@ const CurrLangDropdown: FC<Props> = ({
           </TabList>
           <TabPanels className="mt-5">
             <TabPanel className="rounded-xl p-3 focus:ring-0 focus:outline-hidden">
-              <Languages languages={languages} />
+              <Languages
+                languages={languages}
+                currentLocale={locale}
+                onSelectLanguage={handleSelectLanguage}
+              />
             </TabPanel>
             <TabPanel className="rounded-xl p-3 focus:ring-0 focus:outline-hidden">
               <Currencies currencies={currencies} />
@@ -130,4 +154,5 @@ const CurrLangDropdown: FC<Props> = ({
     </Popover>
   )
 }
+
 export default CurrLangDropdown
