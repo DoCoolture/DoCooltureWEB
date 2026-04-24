@@ -4,93 +4,137 @@ import StartRating from '@/components/StartRating'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
 import { Divider } from '@/shared/divider'
+import { ClockIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 import Form from 'next/form'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import React from 'react'
 import PayWith from './PayWith'
 import YourTrip from './YourTrip'
 
 const Page = () => {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   React.useEffect(() => {
-    document.documentElement.scrollTo({
-      top: 0,
-      behavior: 'instant',
-    })
+    document.documentElement.scrollTo({ top: 0, behavior: 'instant' })
   }, [])
+
+  // Datos de la experiencia modelo — en producción vendrán de searchParams o contexto
+  const experiencia = {
+    titulo: searchParams.get('titulo') || 'Tour gastronómico por el mercado de Villa Consuelo',
+    ubicacion: searchParams.get('ubicacion') || 'Villa Consuelo, Santo Domingo',
+    duracion: searchParams.get('duracion') || '3 horas',
+    precio: searchParams.get('precio') || '$45',
+    imagen:
+      searchParams.get('imagen') ||
+      'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800',
+    anfitrion: searchParams.get('anfitrion') || 'Chef María Rodríguez',
+    explorers: Number(searchParams.get('explorers') || 2),
+  }
+
+  const precioNum = Number(experiencia.precio.replace('$', ''))
+  const subtotal = precioNum * experiencia.explorers
+  const cargoProcesamiento = 2.5
+  const total = subtotal + cargoProcesamiento
 
   const handleSubmitForm = async (formData: FormData) => {
     const formObject = Object.fromEntries(formData.entries())
-    console.log('Form submitted:', formObject)
-    // Here you can handle the form submission, e.g., send it to an API
-    router.push('/pay-done') // Uncomment this line if you want to redirect after form submission
+    console.log('Reserva DoCoolture:', formObject)
+    // TODO Fase 1: Integrar PayPal SDK aquí
+    // TODO Fase 2: Integrar CardNet aquí
+    router.push('/pay-done')
   }
 
-  const renderSidebar = () => {
-    return (
-      <div className="flex w-full flex-col gap-y-6 border-neutral-200 px-0 sm:gap-y-8 sm:rounded-4xl sm:p-6 lg:border xl:p-8 dark:border-neutral-700">
-        <div className="flex flex-col sm:flex-row sm:items-center">
-          <div className="w-full shrink-0 sm:w-40">
-            <div className="aspect-w-4 overflow-hidden rounded-2xl aspect-h-3 sm:aspect-h-4">
-              <Image
-                alt=""
-                fill
-                sizes="200px"
-                src="https://images.pexels.com/photos/6373478/pexels-photo-6373478.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-y-3 py-5 text-start sm:ps-5">
-            <div>
-              <span className="line-clamp-1 text-sm text-neutral-500 dark:text-neutral-400">
-                Hotel room in Tokyo, Jappan
-              </span>
-              <span className="mt-1 block text-base font-medium">The Lounge & Bar</span>
-            </div>
-            <p className="block text-sm text-neutral-500 dark:text-neutral-400">2 beds · 2 baths</p>
-            <Divider className="w-10!" />
-            <StartRating />
+  const renderSidebar = () => (
+    <div className="flex w-full flex-col gap-y-6 border-neutral-200 px-0 sm:gap-y-8 sm:rounded-4xl sm:p-6 lg:border xl:p-8 dark:border-neutral-700">
+      {/* Imagen + info de la experiencia */}
+      <div className="flex flex-col gap-y-4 sm:flex-row sm:items-start">
+        <div className="w-full shrink-0 sm:w-44">
+          <div className="aspect-w-4 aspect-h-3 overflow-hidden rounded-2xl">
+            <Image
+              alt={experiencia.titulo}
+              fill
+              sizes="200px"
+              src={experiencia.imagen}
+              className="object-cover"
+            />
           </div>
         </div>
-
-        <Divider className="block lg:hidden" />
-
-        <DescriptionList>
-          <DescriptionTerm>$19.00 x 3 day</DescriptionTerm>
-          <DescriptionDetails className="sm:text-right">$57.00</DescriptionDetails>
-          <DescriptionTerm>Service charge</DescriptionTerm>
-          <DescriptionDetails className="sm:text-right">$0.00</DescriptionDetails>
-          <DescriptionTerm>Fee</DescriptionTerm>
-          <DescriptionDetails className="sm:text-right">$0.00</DescriptionDetails>
-          <DescriptionTerm>Tax</DescriptionTerm>
-          <DescriptionDetails className="sm:text-right">$0.00</DescriptionDetails>
-          <DescriptionTerm className="font-semibold text-neutral-900">Total</DescriptionTerm>
-          <DescriptionDetails className="font-semibold sm:text-right">$57.00</DescriptionDetails>
-        </DescriptionList>
+        <div className="flex flex-col gap-y-2 sm:ps-5">
+          <span className="text-xs font-medium uppercase tracking-wide text-primary-600">
+            DoCoolture Experience
+          </span>
+          <span className="text-base font-semibold leading-snug">{experiencia.titulo}</span>
+          <div className="flex items-center gap-x-1.5 text-sm text-neutral-500">
+            <MapPinIcon className="size-4" />
+            {experiencia.ubicacion}
+          </div>
+          <div className="flex items-center gap-x-1.5 text-sm text-neutral-500">
+            <ClockIcon className="size-4" />
+            {experiencia.duracion}
+          </div>
+          <Divider className="w-10!" />
+          <StartRating />
+        </div>
       </div>
-    )
-  }
 
-  const renderMain = () => {
-    return (
-      <Form
-        action={handleSubmitForm}
-        className="flex w-full flex-col gap-y-8 border-neutral-200 px-0 sm:rounded-4xl sm:border sm:p-6 xl:p-8 dark:border-neutral-700"
-      >
-        <h1 className="text-3xl font-semibold lg:text-4xl">Confirm and payment</h1>
-        <Divider />
-        <YourTrip />
-        <PayWith />
-        <div>
-          <ButtonPrimary type="submit" className="mt-10 text-base/6!">
-            Confirm and pay
-          </ButtonPrimary>
+      <Divider className="block lg:hidden" />
+
+      {/* Desglose de precio */}
+      <DescriptionList>
+        <DescriptionTerm>
+          {experiencia.precio} × {experiencia.explorers} explorers
+        </DescriptionTerm>
+        <DescriptionDetails className="sm:text-right">${subtotal.toFixed(2)}</DescriptionDetails>
+        <DescriptionTerm>Cargo de procesamiento</DescriptionTerm>
+        <DescriptionDetails className="sm:text-right">${cargoProcesamiento.toFixed(2)}</DescriptionDetails>
+        <DescriptionTerm>Impuestos</DescriptionTerm>
+        <DescriptionDetails className="sm:text-right">$0.00</DescriptionDetails>
+        <DescriptionTerm className="font-semibold text-neutral-900 dark:text-neutral-100">
+          Total
+        </DescriptionTerm>
+        <DescriptionDetails className="font-semibold sm:text-right">
+          ${total.toFixed(2)}
+        </DescriptionDetails>
+      </DescriptionList>
+
+      {/* Info del anfitrión */}
+      <div className="rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
+        <div className="flex items-center gap-x-2 text-sm text-neutral-600 dark:text-neutral-400">
+          <UserGroupIcon className="size-4" />
+          <span>Anfitrión: <strong>{experiencia.anfitrion}</strong></span>
         </div>
-      </Form>
-    )
-  }
+        <p className="mt-1.5 text-xs text-neutral-500">
+          Cancelación gratuita hasta 24 horas antes de la experiencia.
+        </p>
+      </div>
+    </div>
+  )
+
+  const renderMain = () => (
+    <Form
+      action={handleSubmitForm}
+      className="flex w-full flex-col gap-y-8 border-neutral-200 px-0 sm:rounded-4xl sm:border sm:p-6 xl:p-8 dark:border-neutral-700"
+    >
+      <h1 className="text-3xl font-semibold lg:text-4xl">Confirmar y pagar</h1>
+      <Divider />
+      <YourTrip />
+      <PayWith />
+      <div>
+        <ButtonPrimary type="submit" className="mt-10 w-full text-base/6! sm:w-auto">
+          Confirmar reserva
+        </ButtonPrimary>
+        <p className="mt-3 text-sm text-neutral-500">
+          Al confirmar aceptas los{' '}
+          <a href="/terminos" className="underline">
+            términos y condiciones
+          </a>{' '}
+          de DoCoolture.
+        </p>
+      </div>
+    </Form>
+  )
 
   return (
     <main className="container mt-10 mb-24 flex flex-col gap-14 lg:mb-32 lg:flex-row lg:gap-10">
