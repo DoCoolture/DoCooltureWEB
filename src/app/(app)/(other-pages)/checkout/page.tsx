@@ -5,14 +5,17 @@ import ButtonPrimary from '@/shared/ButtonPrimary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
 import { Divider } from '@/shared/divider'
 import { ClockIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline'
-import Form from 'next/form'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React from 'react'
+import React, { Suspense } from 'react'
 import PayWith from './PayWith'
 import YourTrip from './YourTrip'
 
-const Page = () => {
+// ============================================================
+// Componente interno que usa useSearchParams
+// Separado para poder envolverlo en Suspense
+// ============================================================
+const CheckoutContent = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -20,7 +23,6 @@ const Page = () => {
     document.documentElement.scrollTo({ top: 0, behavior: 'instant' })
   }, [])
 
-  // Datos de la experiencia modelo — en producción vendrán de searchParams o contexto
   const experiencia = {
     titulo: searchParams.get('titulo') || 'Tour gastronómico por el mercado de Villa Consuelo',
     ubicacion: searchParams.get('ubicacion') || 'Villa Consuelo, Santo Domingo',
@@ -38,9 +40,8 @@ const Page = () => {
   const cargoProcesamiento = 2.5
   const total = subtotal + cargoProcesamiento
 
-  const handleSubmitForm = async (formData: FormData) => {
-    const formObject = Object.fromEntries(formData.entries())
-    console.log('Reserva DoCoolture:', formObject)
+  const handleSubmitForm = async (e: React.FormEvent) => {
+    e.preventDefault()
     // TODO Fase 1: Integrar PayPal SDK aquí
     // TODO Fase 2: Integrar CardNet aquí
     router.push('/pay-done')
@@ -51,7 +52,7 @@ const Page = () => {
       {/* Imagen + info de la experiencia */}
       <div className="flex flex-col gap-y-4 sm:flex-row sm:items-start">
         <div className="w-full shrink-0 sm:w-44">
-          <div className="aspect-w-4 aspect-h-3 overflow-hidden rounded-2xl">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
             <Image
               alt={experiencia.titulo}
               fill
@@ -65,7 +66,9 @@ const Page = () => {
           <span className="text-xs font-medium uppercase tracking-wide text-primary-600">
             DoCoolture Experience
           </span>
-          <span className="text-base font-semibold leading-snug">{experiencia.titulo}</span>
+          <span className="text-base font-semibold leading-snug">
+            {experiencia.titulo}
+          </span>
           <div className="flex items-center gap-x-1.5 text-sm text-neutral-500">
             <MapPinIcon className="size-4" />
             {experiencia.ubicacion}
@@ -86,9 +89,13 @@ const Page = () => {
         <DescriptionTerm>
           {experiencia.precio} × {experiencia.explorers} explorers
         </DescriptionTerm>
-        <DescriptionDetails className="sm:text-right">${subtotal.toFixed(2)}</DescriptionDetails>
+        <DescriptionDetails className="sm:text-right">
+          ${subtotal.toFixed(2)}
+        </DescriptionDetails>
         <DescriptionTerm>Cargo de procesamiento</DescriptionTerm>
-        <DescriptionDetails className="sm:text-right">${cargoProcesamiento.toFixed(2)}</DescriptionDetails>
+        <DescriptionDetails className="sm:text-right">
+          ${cargoProcesamiento.toFixed(2)}
+        </DescriptionDetails>
         <DescriptionTerm>Impuestos</DescriptionTerm>
         <DescriptionDetails className="sm:text-right">$0.00</DescriptionDetails>
         <DescriptionTerm className="font-semibold text-neutral-900 dark:text-neutral-100">
@@ -103,7 +110,9 @@ const Page = () => {
       <div className="rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
         <div className="flex items-center gap-x-2 text-sm text-neutral-600 dark:text-neutral-400">
           <UserGroupIcon className="size-4" />
-          <span>Anfitrión: <strong>{experiencia.anfitrion}</strong></span>
+          <span>
+            Anfitrión: <strong>{experiencia.anfitrion}</strong>
+          </span>
         </div>
         <p className="mt-1.5 text-xs text-neutral-500">
           Cancelación gratuita hasta 24 horas antes de la experiencia.
@@ -113,8 +122,8 @@ const Page = () => {
   )
 
   const renderMain = () => (
-    <Form
-      action={handleSubmitForm}
+    <form
+      onSubmit={handleSubmitForm}
       className="flex w-full flex-col gap-y-8 border-neutral-200 px-0 sm:rounded-4xl sm:border sm:p-6 xl:p-8 dark:border-neutral-700"
     >
       <h1 className="text-3xl font-semibold lg:text-4xl">Confirmar y pagar</h1>
@@ -133,7 +142,7 @@ const Page = () => {
           de DoCoolture.
         </p>
       </div>
-    </Form>
+    </form>
   )
 
   return (
@@ -142,6 +151,43 @@ const Page = () => {
       <Divider className="block lg:hidden" />
       <div className="grow">{renderSidebar()}</div>
     </main>
+  )
+}
+
+// ============================================================
+// Loading fallback mientras carga el checkout
+// ============================================================
+const CheckoutLoading = () => (
+  <main className="container mt-10 mb-24 flex flex-col gap-14 lg:mb-32 lg:flex-row lg:gap-10">
+    <div className="w-full lg:w-3/5 xl:w-2/3">
+      <div className="animate-pulse space-y-6 rounded-4xl border border-neutral-200 p-6 dark:border-neutral-700">
+        <div className="h-8 w-48 rounded-lg bg-neutral-200 dark:bg-neutral-700" />
+        <div className="h-px bg-neutral-200 dark:bg-neutral-700" />
+        <div className="space-y-3">
+          <div className="h-4 w-full rounded bg-neutral-200 dark:bg-neutral-700" />
+          <div className="h-4 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700" />
+          <div className="h-4 w-1/2 rounded bg-neutral-200 dark:bg-neutral-700" />
+        </div>
+      </div>
+    </div>
+    <div className="grow">
+      <div className="animate-pulse space-y-4 rounded-4xl border border-neutral-200 p-6 dark:border-neutral-700">
+        <div className="h-32 w-full rounded-2xl bg-neutral-200 dark:bg-neutral-700" />
+        <div className="h-4 w-3/4 rounded bg-neutral-200 dark:bg-neutral-700" />
+        <div className="h-4 w-1/2 rounded bg-neutral-200 dark:bg-neutral-700" />
+      </div>
+    </div>
+  </main>
+)
+
+// ============================================================
+// Page principal — envuelve CheckoutContent en Suspense
+// ============================================================
+const Page = () => {
+  return (
+    <Suspense fallback={<CheckoutLoading />}>
+      <CheckoutContent />
+    </Suspense>
   )
 }
 
