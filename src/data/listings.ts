@@ -521,39 +521,47 @@ export type TCarListing = Awaited<ReturnType<typeof getCarListings>>[number]
 //  EXPERIENCE LISTING  //
 export async function getExperienceListings() {
   return [
+    // ============================================================
+    // EXPERIENCIA 1 — REAL DOCOOLTURE
+    // ============================================================
     {
       id: 'experience-listing://1',
-      title: 'Tour gastronómico por el mercado de Villa Consuelo',
-      handle: 'tour-gastronomico-villa-consuelo',
+      title: 'Taste of Dominican Culture',
+      handle: 'taste-of-dominican-culture',
       host: {
-        displayName: 'Chef María Rodríguez',
+        displayName: 'DoCoolture Gastronomy',
         avatarUrl: avatars1.src,
-        handle: 'chef-maria-rodriguez',
+        handle: 'docoolture-gastronomy',
       },
       listingCategory: 'Gastronomía',
-      date: 'Disponible todos los sábados',
+      date: 'Disponible fines de semana',
       description:
-        'Sumérgete en los sabores auténticos de Santo Domingo. Visitaremos el mercado de Villa Consuelo, probaremos frituras típicas, jugos de frutas locales y terminaremos cocinando un sancocho tradicional con ingredientes frescos del mercado. Una experiencia que te conecta con la cocina dominicana de verdad.',
-      durationTime: '3 horas',
+        'Descubre la esencia de la República Dominicana a través de su gastronomía. Un recorrido sensorial que combina historia, tradición y sabor — desde ingredientes taínos hasta influencias africanas y europeas. Cada plato cuenta una historia. Guiado por expertos locales en la Zona Colonial de Santo Domingo.',
+      durationTime: '3–4 horas',
       languages: ['Español', 'English'],
-      featuredImage:
-        'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      featuredImage: '/images/experiences/taste-dominican/Sancocho_jpg.jpeg',
       galleryImgs: [
-        'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/3184183/pexels-photo-3184183.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/2347311/pexels-photo-2347311.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/958545/pexels-photo-958545.jpeg?auto=compress&cs=tinysrgb&w=1600',
+        '/images/experiences/taste-dominican/Sancocho_jpg.jpeg',
+        '/images/experiences/taste-dominican/Desayuno_jpg.jpeg',
+        '/images/experiences/taste-dominican/Locrio__jpg.jpeg',
+        '/images/experiences/taste-dominican/Cacao_jpg.jpeg',
+        '/images/experiences/taste-dominican/Chocolate_jpg.jpeg',
+        '/images/experiences/taste-dominican/Cafe_jpg.jpeg',
       ],
       like: true,
-      address: 'Villa Consuelo, Santo Domingo',
-      reviewStart: 4.9,
-      reviewCount: 38,
-      price: '$45',
+      address: 'Zona Colonial, Santo Domingo',
+      reviewStart: 5.0,
+      reviewCount: 0,
+      price: '$120',
       maxGuests: 8,
       saleOff: null,
       isAds: null,
-      map: { lat: 18.4861, lng: -69.9312 },
+      map: { lat: 18.4733, lng: -69.8833 },
     },
+
+    // ============================================================
+    // EXPERIENCIAS ADICIONALES (mantener como demo)
+    // ============================================================
     {
       id: 'experience-listing://2',
       title: 'Caminata histórica por la Zona Colonial',
@@ -566,7 +574,7 @@ export async function getExperienceListings() {
       listingCategory: 'Tour Cultural',
       date: 'Martes, jueves y sábados',
       description:
-        'Recorre las calles empedradas de la primera ciudad del Nuevo Mundo. Conocerás la Catedral Primada de América, el Alcázar de Colón, la Fortaleza Ozama y las historias detrás de cada piedra colonial. Pedro lleva 15 años contando la historia dominicana con pasión y detalle.',
+        'Recorre las calles empedradas de la primera ciudad del Nuevo Mundo. Conocerás la Catedral Primada de América, el Alcázar de Colón, la Fortaleza Ozama y las historias detrás de cada piedra colonial.',
       durationTime: '2.5 horas',
       languages: ['Español', 'English', 'Français'],
       featuredImage:
@@ -599,7 +607,7 @@ export async function getExperienceListings() {
       listingCategory: 'Música y Baile',
       date: 'Viernes y sábados',
       description:
-        'Aprende a bailar merengue y bachata con un músico santiaguero de toda la vida. Julio toca el acordeón desde los 8 años y te enseñará los pasos básicos, la historia detrás del ritmo y por qué estas músicas son el alma dominicana. Incluye bebidas típicas y snacks.',
+        'Aprende a bailar merengue y bachata con un músico santiaguero de toda la vida. Julio toca el acordeón desde los 8 años y te enseñará los pasos básicos, la historia detrás del ritmo y por qué estas músicas son el alma dominicana.',
       durationTime: '2 horas',
       languages: ['Español'],
       featuredImage:
@@ -622,50 +630,17 @@ export async function getExperienceListings() {
     },
     {
       id: 'experience-listing://4',
-      title: 'Excursión al Salto de Jimaní y comunidades locales',
-      handle: 'excursion-salto-jimani-comunidades',
-      host: {
-        displayName: 'Guía Ana Féliz',
-        avatarUrl: avatars4.src,
-        handle: 'guia-ana-felix',
-      },
-      listingCategory: 'Aventura y Naturaleza',
-      date: 'Domingos',
-      description:
-        'Una experiencia fuera de los circuitos turísticos. Visitaremos cascadas escondidas y comunidades campesinas de la frontera con Haití. Ana lleva 8 años trabajando con estas comunidades y parte del pago va directamente a proyectos locales de educación.',
-      durationTime: '8 horas',
-      languages: ['Español', 'English'],
-      featuredImage:
-        'https://images.pexels.com/photos/1320684/pexels-photo-1320684.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      galleryImgs: [
-        'https://images.pexels.com/photos/1320684/pexels-photo-1320684.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      ],
-      like: false,
-      address: 'Jimaní, República Dominicana',
-      reviewStart: 4.7,
-      reviewCount: 19,
-      price: '$85',
-      maxGuests: 6,
-      saleOff: null,
-      isAds: null,
-      map: { lat: 18.4921, lng: -71.8493 },
-    },
-    {
-      id: 'experience-listing://5',
-      title: 'Taller de artesanía en larimar y ámbar con artesano local',
+      title: 'Taller de artesanía en larimar y ámbar',
       handle: 'taller-artesania-larimar-ambar',
       host: {
         displayName: 'Artesano Ramón Díaz',
-        avatarUrl: avatars5.src,
+        avatarUrl: avatars4.src,
         handle: 'artesano-ramon-diaz',
       },
       listingCategory: 'Arte y Artesanía',
       date: 'Lunes a viernes',
       description:
-        'El larimar y el ámbar son exclusivos de la República Dominicana. En este taller, Ramón — artesano con 25 años de oficio — te enseñará a reconocer piedras auténticas, cómo se trabajan y crearás tu propia pieza para llevar. Una experiencia íntima en su taller de Puerto Plata.',
+        'El larimar y el ámbar son exclusivos de la República Dominicana. En este taller, Ramón — artesano con 25 años de oficio — te enseñará a reconocer piedras auténticas, cómo se trabajan y crearás tu propia pieza para llevar.',
       durationTime: '2.5 horas',
       languages: ['Español', 'English'],
       featuredImage:
@@ -685,6 +660,39 @@ export async function getExperienceListings() {
       saleOff: null,
       isAds: null,
       map: { lat: 19.7934, lng: -70.6880 },
+    },
+    {
+      id: 'experience-listing://5',
+      title: 'Excursión a Jarabacoa: cascadas y comunidades',
+      handle: 'excursion-jarabacoa-cascadas',
+      host: {
+        displayName: 'Guía Ana Féliz',
+        avatarUrl: avatars5.src,
+        handle: 'guia-ana-felix',
+      },
+      listingCategory: 'Aventura y Naturaleza',
+      date: 'Domingos',
+      description:
+        'Visita cascadas escondidas y comunidades campesinas del Cibao. Una experiencia fuera de los circuitos turísticos, donde parte del pago va directamente a proyectos locales de educación.',
+      durationTime: '8 horas',
+      languages: ['Español', 'English'],
+      featuredImage:
+        'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      galleryImgs: [
+        'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg?auto=compress&cs=tinysrgb&w=1600',
+        'https://images.pexels.com/photos/1320684/pexels-photo-1320684.jpeg?auto=compress&cs=tinysrgb&w=1600',
+        'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=1600',
+        'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600',
+      ],
+      like: false,
+      address: 'Jarabacoa, República Dominicana',
+      reviewStart: 4.7,
+      reviewCount: 19,
+      price: '$85',
+      maxGuests: 6,
+      saleOff: null,
+      isAds: null,
+      map: { lat: 19.1167, lng: -70.6500 },
     },
   ]
 }
