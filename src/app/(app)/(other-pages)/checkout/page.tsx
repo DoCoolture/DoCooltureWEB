@@ -1,13 +1,14 @@
 'use client'
 
 import StartRating from '@/components/StartRating'
+import { supabase } from '@/lib/supabase'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
 import { Divider } from '@/shared/divider'
 import { ClockIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
-import React, { Suspense } from 'react'
+import React, { Suspense, useState } from 'react'
 import PayWith from './PayWith'
 import YourTrip from './YourTrip'
 
@@ -18,6 +19,9 @@ import YourTrip from './YourTrip'
 const CheckoutContent = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
+
+  const [isLoading, setIsLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   React.useEffect(() => {
     document.documentElement.scrollTo({ top: 0, behavior: 'instant' })
@@ -40,9 +44,52 @@ const CheckoutContent = () => {
   const cargoProcesamiento = 2.5
   const total = subtotal + cargoProcesamiento
 
-  const handleSubmitForm = async (e: React.FormEvent) => {
+  // ============================================================
+  // handleSubmitForm — guarda la reserva en Supabase
+  // ============================================================
+  const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // TODO Fase 1: Integrar PayPal SDK aquí
+    setIsLoading(true)
+    setErrorMsg(null)
+
+    const formData = new FormData(e.currentTarget)
+
+    // Datos del formulario
+    const customerEmail = (formData.get('paypal-email') as string) || ''
+    const notes         = (formData.get('message') as string) || null
+    const startDateRaw  = formData.get('startDate') as string
+    const guestAdults   = Number(formData.get('guestAdults') || 0)
+    const guestChildren = Number(formData.get('guestChildren') || 0)
+    const totalGuests   = guestAdults + guestChildren || experiencia.explorers
+
+    // Formatea la fecha — si el usuario no seleccionó usa hoy
+    const bookingDate = startDateRaw
+      ? new Date(startDateRaw).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0]
+
+    // ── Inserción en Supabase ──────────────────────────────────
+    const { error } = await supabase.from('bookings').insert({
+      customer_name:  'Nombre pendiente',   // TODO: reemplazar con datos de auth cuando esté listo
+      customer_email: customerEmail,
+      customer_phone: '',                   // TODO: agregar campo de teléfono en el formulario
+      tour_name:      experiencia.titulo,
+      booking_date:   bookingDate,
+      guests:         totalGuests,
+      status:         'pending',
+      notes:          notes,
+    })
+
+    if (error) {
+      console.error('❌ Error al guardar reserva en Supabase:', error)
+      setErrorMsg('Hubo un error al guardar tu reserva. Por favor intenta de nuevo.')
+      setIsLoading(false)
+      return
+    }
+
+    // ── Reserva guardada con éxito ─────────────────────────────
+    console.log('✅ Reserva guardada correctamente')
+
+    // TODO Fase 1: Integrar PayPal SDK aquí (antes del router.push)
     // TODO Fase 2: Integrar CardNet aquí
     router.push('/pay-done')
   }
@@ -130,9 +177,21 @@ const CheckoutContent = () => {
       <Divider />
       <YourTrip />
       <PayWith />
+
+      {/* Mensaje de error si falla Supabase */}
+      {errorMsg && (
+        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+          ⚠️ {errorMsg}
+        </div>
+      )}
+
       <div>
-        <ButtonPrimary type="submit" className="mt-10 w-full text-base/6! sm:w-auto">
-          Confirmar reserva
+        <ButtonPrimary
+          type="submit"
+          disabled={isLoading}
+          className="mt-10 w-full text-base/6! sm:w-auto disabled:opacity-60"
+        >
+          {isLoading ? 'Guardando reserva...' : 'Confirmar reserva'}
         </ButtonPrimary>
         <p className="mt-3 text-sm text-neutral-500">
           Al confirmar aceptas los{' '}
