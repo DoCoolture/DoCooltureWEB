@@ -12,46 +12,39 @@ interface Props {
 }
 
 const GuestsInputPopover: FC<Props> = ({ className = 'flex-1' }) => {
-  const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(2)
-  const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(1)
-  const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(1)
+  // ✅ FIX: valores por defecto corregidos — empieza con 1 adulto, 0 niños, 0 bebés
+  const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(1)
+  const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(0)
+  const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(0)
 
   const handleChangeData = (value: number, type: keyof GuestsObject) => {
-    let newValue = {
-      guestAdults: guestAdultsInputValue,
-      guestChildren: guestChildrenInputValue,
-      guestInfants: guestInfantsInputValue,
-    }
-    if (type === 'guestAdults') {
-      setGuestAdultsInputValue(value)
-      newValue.guestAdults = value
-    }
-    if (type === 'guestChildren') {
-      setGuestChildrenInputValue(value)
-      newValue.guestChildren = value
-    }
-    if (type === 'guestInfants') {
-      setGuestInfantsInputValue(value)
-      newValue.guestInfants = value
-    }
+    if (type === 'guestAdults') setGuestAdultsInputValue(value)
+    if (type === 'guestChildren') setGuestChildrenInputValue(value)
+    if (type === 'guestInfants') setGuestInfantsInputValue(value)
   }
 
-  const totalGuests = guestChildrenInputValue + guestAdultsInputValue + guestInfantsInputValue
+  // ✅ FIX: total solo cuenta adultos + niños (bebés no cuentan como explorers)
+  const totalGuests = guestAdultsInputValue + guestChildrenInputValue
+
   return (
     <Popover className={`relative flex ${className}`}>
       {({ open }) => (
         <>
-          <div className={`flex flex-1 items-center rounded-b-3xl focus:outline-hidden ${open ? 'shadow-lg' : ''}`}>
+          <div
+            className={`flex flex-1 items-center rounded-b-3xl focus:outline-hidden ${
+              open ? 'shadow-lg' : ''
+            }`}
+          >
             <PopoverButton className="relative z-10 flex flex-1 cursor-pointer items-center gap-x-3 p-3 text-start focus:outline-hidden">
               <div className="text-neutral-300 dark:text-neutral-400">
                 <UserPlusIcon className="h-5 w-5 lg:h-7 lg:w-7" />
               </div>
               <div className="grow">
                 <span className="block font-semibold xl:text-lg">
-                  {totalGuests || ''} {T['HeroSearchForm']['Guests']}
+                  {totalGuests > 0 ? `${totalGuests} Explorers` : 'Agregar explorers'}
                 </span>
                 <span className="mt-1 block text-sm leading-none font-light text-neutral-400">
-                  {totalGuests ? T['HeroSearchForm']['Guests'] : T['HeroSearchForm']['Add guests']}
+                  {totalGuests > 0 ? 'Explorers' : 'Agregar explorers'}
                 </span>
               </div>
             </PopoverButton>
@@ -69,8 +62,8 @@ const GuestsInputPopover: FC<Props> = ({ className = 'flex-1' }) => {
               inputName="guestAdults"
               max={10}
               min={1}
-              label={T['HeroSearchForm']['Adults']}
-              description={T['HeroSearchForm']['Ages 13 or above']}
+              label="Adultos"
+              description="13 años o más"
             />
             <NcInputNumber
               className="mt-6 w-full"
@@ -78,19 +71,25 @@ const GuestsInputPopover: FC<Props> = ({ className = 'flex-1' }) => {
               onChange={(value) => handleChangeData(value, 'guestChildren')}
               inputName="guestChildren"
               max={4}
-              label={T['HeroSearchForm']['Children']}
-              description={T['HeroSearchForm']['Ages 2–12']}
+              min={0}
+              label="Niños"
+              description="2 a 12 años"
             />
-
             <NcInputNumber
               className="mt-6 w-full"
               defaultValue={guestInfantsInputValue}
               onChange={(value) => handleChangeData(value, 'guestInfants')}
               inputName="guestInfants"
               max={4}
-              label={T['HeroSearchForm']['Infants']}
-              description={T['HeroSearchForm']['Ages 0–2']}
+              min={0}
+              label="Bebés"
+              description="0 a 2 años"
             />
+
+            {/* Hidden inputs para el form */}
+            <input type="hidden" name="guestAdults" value={guestAdultsInputValue} />
+            <input type="hidden" name="guestChildren" value={guestChildrenInputValue} />
+            <input type="hidden" name="guestInfants" value={guestInfantsInputValue} />
           </PopoverPanel>
         </>
       )}

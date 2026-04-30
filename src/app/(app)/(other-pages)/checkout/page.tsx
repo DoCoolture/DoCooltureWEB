@@ -1,6 +1,7 @@
 'use client'
 
 import StartRating from '@/components/StartRating'
+import { useCurrency } from '@/context/CurrencyContext'
 import { supabase } from '@/lib/supabase'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
@@ -12,13 +13,13 @@ import React, { Suspense, useState } from 'react'
 import PayWith from './PayWith'
 import YourTrip from './YourTrip'
 
-// ============================================================
-// Componente interno que usa useSearchParams
-// Separado para poder envolverlo en Suspense
-// ============================================================
+const FALLBACK_IMAGE =
+  'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800'
+
 const CheckoutContent = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { convertPrice } = useCurrency()
 
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -28,75 +29,71 @@ const CheckoutContent = () => {
   }, [])
 
   const experiencia = {
-    titulo: searchParams.get('titulo') || 'Tour gastronómico por el mercado de Villa Consuelo',
-    ubicacion: searchParams.get('ubicacion') || 'Villa Consuelo, Santo Domingo',
-    duracion: searchParams.get('duracion') || '3 horas',
-    precio: searchParams.get('precio') || '$45',
-    imagen:
-      searchParams.get('imagen') ||
-      'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800',
-    anfitrion: searchParams.get('anfitrion') || 'Chef María Rodríguez',
-    explorers: Number(searchParams.get('explorers') || 2),
+    titulo: searchParams.get('titulo') || 'Taste of Dominican Culture',
+    ubicacion: searchParams.get('ubicacion') || 'Zona Colonial, Santo Domingo',
+    duracion: searchParams.get('duracion') || '3–4 horas',
+    precio: searchParams.get('precio') || '$120',
+    // ✅ FIX imagen — usa fallback si la ruta es local o está vacía
+    imagen: (() => {
+      const img = searchParams.get('imagen') || ''
+      return img.startsWith('http') ? img : FALLBACK_IMAGE
+    })(),
+    anfitrion: searchParams.get('anfitrion') || 'DoCoolture Gastronomy',
+    // ✅ FIX explorers — lee correctamente del URL param
+    explorers: Math.max(1, Number(searchParams.get('explorers') || 1)),
   }
 
-  const precioNum = Number(experiencia.precio.replace('$', ''))
+  const precioNum = Number(experiencia.precio.replace('$', '').replace(',', ''))
   const subtotal = precioNum * experiencia.explorers
   const cargoProcesamiento = 2.5
   const total = subtotal + cargoProcesamiento
 
-  // ============================================================
-  // handleSubmitForm — guarda la reserva en Supabase
-  // ============================================================
+  // ✅ Precios convertidos a la moneda seleccionada
+  const subtotalConvertido = convertPrice(subtotal)
+  const cargoConvertido = convertPrice(cargoProcesamiento)
+  const totalConvertido = convertPrice(total)
+  const precioUnitConvertido = convertPrice(precioNum)
+
   const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     setErrorMsg(null)
 
     const formData = new FormData(e.currentTarget)
-
-    // Datos del formulario
     const customerEmail = (formData.get('paypal-email') as string) || ''
-    const notes         = (formData.get('message') as string) || null
-    const startDateRaw  = formData.get('startDate') as string
-    const guestAdults   = Number(formData.get('guestAdults') || 0)
-    const guestChildren = Number(formData.get('guestChildren') || 0)
-    const totalGuests   = guestAdults + guestChildren || experiencia.explorers
+    const notes = (formData.get('message') as string) || null
+    const startDateRaw = formData.get('startDate') as string
 
-    // Formatea la fecha — si el usuario no seleccionó usa hoy
     const bookingDate = startDateRaw
       ? new Date(startDateRaw).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0]
 
-    // ── Inserción en Supabase ──────────────────────────────────
     const { error } = await supabase.from('bookings').insert({
-      customer_name:  'Nombre pendiente',   // TODO: reemplazar con datos de auth cuando esté listo
+      customer_name: 'Pendiente',
       customer_email: customerEmail,
-      customer_phone: '',                   // TODO: agregar campo de teléfono en el formulario
-      tour_name:      experiencia.titulo,
-      booking_date:   bookingDate,
-      guests:         totalGuests,
-      status:         'pending',
-      notes:          notes,
+      customer_phone: '',
+      tour_name: experiencia.titulo,
+      booking_date: bookingDate,
+      guests: experiencia.explorers,
+      status: 'pending',
+      notes: notes,
+      total_amount: total,
+      payment_method: 'paypal',
     })
 
     if (error) {
-      console.error('❌ Error al guardar reserva en Supabase:', error)
+      console.error('❌ Error Supabase:', error)
       setErrorMsg('Hubo un error al guardar tu reserva. Por favor intenta de nuevo.')
       setIsLoading(false)
       return
     }
 
-    // ── Reserva guardada con éxito ─────────────────────────────
-    console.log('✅ Reserva guardada correctamente')
-
-    // TODO Fase 1: Integrar PayPal SDK aquí (antes del router.push)
-    // TODO Fase 2: Integrar CardNet aquí
     router.push('/pay-done')
   }
 
   const renderSidebar = () => (
     <div className="flex w-full flex-col gap-y-6 border-neutral-200 px-0 sm:gap-y-8 sm:rounded-4xl sm:p-6 lg:border xl:p-8 dark:border-neutral-700">
-      {/* Imagen + info de la experiencia */}
+      {/* Imagen + info */}
       <div className="flex flex-col gap-y-4 sm:flex-row sm:items-start">
         <div className="w-full shrink-0 sm:w-44">
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
@@ -106,6 +103,11 @@ const CheckoutContent = () => {
               sizes="200px"
               src={experiencia.imagen}
               className="object-cover"
+              // ✅ FIX: si la imagen falla, muestra el fallback
+              onError={(e) => {
+                const target = e.target as HTMLImageElement
+                target.src = FALLBACK_IMAGE
+              }}
             />
           </div>
         </div>
@@ -131,17 +133,17 @@ const CheckoutContent = () => {
 
       <Divider className="block lg:hidden" />
 
-      {/* Desglose de precio */}
+      {/* ✅ Desglose con moneda convertida */}
       <DescriptionList>
         <DescriptionTerm>
-          {experiencia.precio} × {experiencia.explorers} explorers
+          {precioUnitConvertido} × {experiencia.explorers} explorer{experiencia.explorers > 1 ? 's' : ''}
         </DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
-          ${subtotal.toFixed(2)}
+          {subtotalConvertido}
         </DescriptionDetails>
         <DescriptionTerm>Cargo de procesamiento</DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
-          ${cargoProcesamiento.toFixed(2)}
+          {cargoConvertido}
         </DescriptionDetails>
         <DescriptionTerm>Impuestos</DescriptionTerm>
         <DescriptionDetails className="sm:text-right">$0.00</DescriptionDetails>
@@ -149,11 +151,11 @@ const CheckoutContent = () => {
           Total
         </DescriptionTerm>
         <DescriptionDetails className="font-semibold sm:text-right">
-          ${total.toFixed(2)}
+          {totalConvertido}
         </DescriptionDetails>
       </DescriptionList>
 
-      {/* Info del anfitrión */}
+      {/* Info anfitrión */}
       <div className="rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
         <div className="flex items-center gap-x-2 text-sm text-neutral-600 dark:text-neutral-400">
           <UserGroupIcon className="size-4" />
@@ -178,7 +180,6 @@ const CheckoutContent = () => {
       <YourTrip />
       <PayWith />
 
-      {/* Mensaje de error si falla Supabase */}
       {errorMsg && (
         <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
           ⚠️ {errorMsg}
@@ -213,9 +214,6 @@ const CheckoutContent = () => {
   )
 }
 
-// ============================================================
-// Loading fallback mientras carga el checkout
-// ============================================================
 const CheckoutLoading = () => (
   <main className="container mt-10 mb-24 flex flex-col gap-14 lg:mb-32 lg:flex-row lg:gap-10">
     <div className="w-full lg:w-3/5 xl:w-2/3">
@@ -239,9 +237,6 @@ const CheckoutLoading = () => (
   </main>
 )
 
-// ============================================================
-// Page principal — envuelve CheckoutContent en Suspense
-// ============================================================
 const Page = () => {
   return (
     <Suspense fallback={<CheckoutLoading />}>
