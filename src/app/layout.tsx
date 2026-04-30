@@ -1,12 +1,12 @@
 import { ThemeProvider } from '@/components/theme-provider'
 import { DirectionProvider } from '@/components/ui/direction'
+import { CurrencyProvider } from '@/context/CurrencyContext'
 import { LanguageProvider } from '@/context/LanguageContext'
 import { cn } from '@/lib/utils'
 import '@/styles/tailwind.css'
 import { Metadata } from 'next'
 import { Poppins } from 'next/font/google'
 import 'rc-slider/assets/index.css'
-// import CustomizeControl from './customize-control' // OCULTO - Panel demo de Chisfis
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -38,11 +38,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             direction={process.env.NEXT_PUBLIC_THEME_DIR || 'ltr'}
           >
             <LanguageProvider>
-              <div>
-                {children}
-                {/* OCULTO - Panel demo de Chisfis */}
-                {/* <CustomizeControl /> */}
-              </div>
+              <CurrencyProvider>
+                <div>
+                  {children}
+                </div>
+              </CurrencyProvider>
             </LanguageProvider>
           </DirectionProvider>
         </ThemeProvider>
