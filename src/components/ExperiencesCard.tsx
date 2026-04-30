@@ -1,7 +1,10 @@
+'use client'
+
 import BtnLikeIcon from '@/components/BtnLikeIcon'
 import GallerySlider from '@/components/GallerySlider'
 import SaleOffBadge from '@/components/SaleOffBadge'
 import StartRating from '@/components/StartRating'
+import { useCurrency } from '@/context/CurrencyContext'
 import { TExperienceListing } from '@/data/listings'
 import { Badge } from '@/shared/Badge'
 import Link from 'next/link'
@@ -31,8 +34,12 @@ const ExperiencesCard: FC<Props> = ({
     price,
     reviewStart,
     reviewCount,
-    id,
   } = data
+
+  // ✅ Conversión de moneda real
+  const { convertPrice } = useCurrency()
+  const precioNum = Number(price.replace('$', '').replace(',', ''))
+  const precioConvertido = convertPrice(precioNum)
 
   const listingHref = `/experience-listings/${listingHandle}`
 
@@ -50,23 +57,29 @@ const ExperiencesCard: FC<Props> = ({
     return (
       <div className={size === 'default' ? 'space-y-2.5 px-1 pt-4' : 'space-y-1 p-3'}>
         <div>
-          <div className="text-sm text-neutral-500 dark:text-neutral-400">{address}</div>
-
+          <div className="text-sm text-neutral-500 dark:text-neutral-400">
+            {address}
+          </div>
           <div className="mt-1.5 flex items-center gap-x-2">
             {isAds && <Badge color="green">ADS</Badge>}
-            <h2 className={`text-base font-medium capitalize`}>
+            <h2 className="text-base font-medium capitalize">
               <span className="line-clamp-1">{title}</span>
             </h2>
           </div>
         </div>
-        <div className="w-14 border-b border-neutral-100 dark:border-neutral-800"></div>
+        <div className="w-14 border-b border-neutral-100 dark:border-neutral-800" />
         <div className="flex items-center justify-between gap-2">
           <div>
-            <span className="text-base font-semibold">{price}</span>
+            {/* ✅ Precio convertido a la moneda seleccionada */}
+            <span className="text-base font-semibold">{precioConvertido}</span>
             {size === 'default' && (
               <>
-                <span className="mx-1 text-xs font-light text-neutral-400 dark:text-neutral-500">/</span>
-                <span className="text-sm font-normal text-neutral-500 dark:text-neutral-400">guest</span>
+                <span className="mx-1 text-xs font-light text-neutral-400 dark:text-neutral-500">
+                  /
+                </span>
+                <span className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
+                  explorer
+                </span>
               </>
             )}
           </div>
