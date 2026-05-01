@@ -46,18 +46,20 @@ const HeroSearchFormMobile = ({ className }: { className?: string }) => {
   const [, , resetIsShowingDialog] = useTimeoutFn(() => setShowDialog(true), 1)
   const pathname = usePathname()
 
-  let locationText = 'Where to?'
-  let weekText = 'Any week'
-  let guestsText = 'Add guests'
+  // ✅ Textos por defecto en español para DoCoolture
+  let locationText = '¿A dónde quieres ir?'
+  let weekText = 'Cualquier fecha'
+  let guestsText = 'Agregar explorers'
   let activeTabName: ListingType = 'Experiences'
 
   if (pathname.startsWith('/experience')) {
     activeTabName = 'Experiences'
 
     if (pathname.startsWith('/experience-categories')) {
-      locationText = 'Experiences in Bali'
-      weekText = 'Mar 22 - 27'
-      guestsText = '2 guests'
+      // ✅ FIX: República Dominicana en vez de Bali
+      locationText = 'Experiencias en República Dominicana'
+      weekText = 'Cualquier fecha'
+      guestsText = '1 Explorer'
     }
   }
 
@@ -66,13 +68,8 @@ const HeroSearchFormMobile = ({ className }: { className?: string }) => {
     formTabs.findIndex((t) => t.name === activeTabName)
   )
 
-  function closeModal() {
-    setShowModal(false)
-  }
-
-  function openModal() {
-    setShowModal(true)
-  }
+  function closeModal() { setShowModal(false) }
+  function openModal() { setShowModal(true) }
 
   const renderButtonOpenModal = () => {
     return (
@@ -86,17 +83,14 @@ const HeroSearchFormMobile = ({ className }: { className?: string }) => {
           color="currentColor"
           strokeWidth={1.5}
         />
-
         <div className="ms-4 flex-1 overflow-hidden text-start">
           <span className="block text-sm/5 font-medium">{locationText}</span>
-
           <span className="mt-px flex gap-2 text-sm/5 font-normal text-neutral-500 dark:text-neutral-400">
             <span>{weekText}</span>
             {guestsText && <span>•</span>}
             {guestsText && <span>{guestsText}</span>}
           </span>
         </div>
-
         <span className="absolute end-2 top-1/2 hidden h-9 w-9 -translate-y-1/2 transform items-center justify-center rounded-full border border-neutral-200 sm:flex dark:border-neutral-600 dark:text-neutral-300">
           <HugeiconsIcon
             icon={FilterVerticalIcon}
@@ -177,7 +171,6 @@ const HeroSearchFormMobile = ({ className }: { className?: string }) => {
                     >
                       {T['HeroSearchForm']['Clear all']}
                     </ButtonThird>
-
                     <ButtonPrimary
                       type="submit"
                       form="form-hero-search-form-mobile"

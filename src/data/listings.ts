@@ -31,7 +31,6 @@ export async function getStayListings() {
       description: 'Located in the heart of the city',
       featuredImage:
         'https://images.pexels.com/photos/6129967/pexels-photo-6129967.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260',
-
       galleryImgs: [
         'https://images.pexels.com/photos/6129967/pexels-photo-6129967.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260',
         'https://images.pexels.com/photos/261394/pexels-photo-261394.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -60,7 +59,6 @@ export async function getStayListings() {
       description: 'Located in the heart of the city',
       featuredImage:
         'https://images.pexels.com/photos/261394/pexels-photo-261394.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-
       galleryImgs: [
         'https://images.pexels.com/photos/261394/pexels-photo-261394.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
         'https://images.pexels.com/photos/1320686/pexels-photo-1320686.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -89,7 +87,6 @@ export async function getStayListings() {
       description: 'Located in the heart of the city',
       featuredImage:
         'https://images.pexels.com/photos/2861361/pexels-photo-2861361.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-
       galleryImgs: [
         'https://images.pexels.com/photos/2861361/pexels-photo-2861361.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
         'https://images.pexels.com/photos/261394/pexels-photo-261394.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -118,7 +115,6 @@ export async function getStayListings() {
       description: 'Located in the heart of the city',
       featuredImage:
         'https://images.pexels.com/photos/2677398/pexels-photo-2677398.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-
       galleryImgs: [
         'https://images.pexels.com/photos/2677398/pexels-photo-2677398.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
         'https://images.pexels.com/photos/261394/pexels-photo-261394.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -147,7 +143,6 @@ export async function getStayListings() {
       description: 'Located in the heart of the city',
       featuredImage:
         'https://images.pexels.com/photos/1320686/pexels-photo-1320686.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-
       galleryImgs: [
         'https://images.pexels.com/photos/1320686/pexels-photo-1320686.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
         'https://images.pexels.com/photos/7163619/pexels-photo-7163619.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -176,7 +171,6 @@ export async function getStayListings() {
       description: 'Located in the heart of the city',
       featuredImage:
         'https://images.pexels.com/photos/7163619/pexels-photo-7163619.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-
       galleryImgs: [
         'https://images.pexels.com/photos/7163619/pexels-photo-7163619.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
         'https://images.pexels.com/photos/6129967/pexels-photo-6129967.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260',
@@ -205,7 +199,6 @@ export async function getStayListings() {
       description: 'Located in the heart of the city',
       featuredImage:
         'https://images.pexels.com/photos/6527036/pexels-photo-6527036.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-
       galleryImgs: [
         'https://images.pexels.com/photos/6527036/pexels-photo-6527036.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
         'https://images.pexels.com/photos/7163619/pexels-photo-7163619.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -234,7 +227,6 @@ export async function getStayListings() {
       description: 'Located in the heart of the city',
       featuredImage:
         'https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-
       galleryImgs: [
         'https://images.pexels.com/photos/6969831/pexels-photo-6969831.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
         'https://images.pexels.com/photos/6527036/pexels-photo-6527036.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -260,12 +252,8 @@ export const getStayListingByHandle = async (handle: string) => {
   const listings = await getStayListings()
   let listing = listings.find((listing) => listing.handle === handle)
   if (!listing?.id) {
-    // return null
-
-    // for demo porpose, we will return the first listing if not found
     listing = listings[0]
   }
-
   return {
     ...(listing || {}),
     galleryImgs: [
@@ -472,12 +460,8 @@ export const getCarListingByHandle = async (handle: string) => {
   const listings = await getCarListings()
   let listing = listings.find((listing) => listing.handle === handle)
   if (!listing?.id) {
-    // return null
-
-    // for demo porpose, we will return the first listing if not found
     listing = listings[0]
   }
-
   return {
     ...(listing || {}),
     bags: 3,
@@ -485,7 +469,6 @@ export const getCarListingByHandle = async (handle: string) => {
     pickUpTime: 'Monday, August 12 · 10:00',
     dropOffAddress: '123 Main Street, Neverland',
     dropOffTime: 'Monday, August 16 · 10:00',
-
     galleryImgs: [
       'https://images.pexels.com/photos/381292/pexels-photo-381292.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
       'https://images.pexels.com/photos/2526128/pexels-photo-2526128.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -518,12 +501,12 @@ export const getCarListingByHandle = async (handle: string) => {
 }
 export type TCarListing = Awaited<ReturnType<typeof getCarListings>>[number]
 
-//  EXPERIENCE LISTING  //
+// ============================================================
+// ✅ DOCOOLTURE — EXPERIENCE LISTINGS
+// Experiencias reales de la República Dominicana
+// ============================================================
 export async function getExperienceListings() {
   return [
-    // ============================================================
-    // EXPERIENCIA 1 — REAL DOCOOLTURE
-    // ============================================================
     {
       id: 'experience-listing://1',
       title: 'Taste of Dominican Culture',
@@ -539,7 +522,7 @@ export async function getExperienceListings() {
         'Descubre la esencia de la República Dominicana a través de su gastronomía. Un recorrido sensorial que combina historia, tradición y sabor — desde ingredientes taínos hasta influencias africanas y europeas. Cada plato cuenta una historia. Guiado por expertos locales en la Zona Colonial de Santo Domingo.',
       durationTime: '3–4 horas',
       languages: ['Español', 'English'],
-      featuredImage: '/images/experiences/taste-dominican/Sancocho_jpg.jpeg',
+      featuredImage: '/images/experiences/taste-dominican/sancocho.jpeg',
       galleryImgs: [
         '/images/experiences/taste-dominican/sancocho.jpeg',
         '/images/experiences/taste-dominican/desayuno.jpeg',
@@ -558,10 +541,6 @@ export async function getExperienceListings() {
       isAds: null,
       map: { lat: 18.4733, lng: -69.8833 },
     },
-
-    // ============================================================
-    // EXPERIENCIAS ADICIONALES (mantener como demo)
-    // ============================================================
     {
       id: 'experience-listing://2',
       title: 'Caminata histórica por la Zona Colonial',
@@ -574,7 +553,7 @@ export async function getExperienceListings() {
       listingCategory: 'Tour Cultural',
       date: 'Martes, jueves y sábados',
       description:
-        'Recorre las calles empedradas de la primera ciudad del Nuevo Mundo. Conocerás la Catedral Primada de América, el Alcázar de Colón, la Fortaleza Ozama y las historias detrás de cada piedra colonial.',
+        'Recorre las calles empedradas de la primera ciudad del Nuevo Mundo. Conocerás la Catedral Primada de América, el Alcázar de Colón, la Fortaleza Ozama y las historias detrás de cada piedra colonial. Pedro lleva 15 años contando la historia dominicana con pasión y detalle.',
       durationTime: '2.5 horas',
       languages: ['Español', 'English', 'Français'],
       featuredImage:
@@ -607,7 +586,7 @@ export async function getExperienceListings() {
       listingCategory: 'Música y Baile',
       date: 'Viernes y sábados',
       description:
-        'Aprende a bailar merengue y bachata con un músico santiaguero de toda la vida. Julio toca el acordeón desde los 8 años y te enseñará los pasos básicos, la historia detrás del ritmo y por qué estas músicas son el alma dominicana.',
+        'Aprende a bailar merengue y bachata con un músico santiaguero de toda la vida. Julio toca el acordeón desde los 8 años y te enseñará los pasos básicos, la historia detrás del ritmo y por qué estas músicas son el alma dominicana. Incluye bebidas típicas y snacks.',
       durationTime: '2 horas',
       languages: ['Español'],
       featuredImage:
@@ -626,7 +605,7 @@ export async function getExperienceListings() {
       maxGuests: 10,
       saleOff: null,
       isAds: null,
-      map: { lat: 19.4517, lng: -70.6970 },
+      map: { lat: 19.4517, lng: -70.697 },
     },
     {
       id: 'experience-listing://4',
@@ -640,7 +619,7 @@ export async function getExperienceListings() {
       listingCategory: 'Arte y Artesanía',
       date: 'Lunes a viernes',
       description:
-        'El larimar y el ámbar son exclusivos de la República Dominicana. En este taller, Ramón — artesano con 25 años de oficio — te enseñará a reconocer piedras auténticas, cómo se trabajan y crearás tu propia pieza para llevar.',
+        'El larimar y el ámbar son exclusivos de la República Dominicana. En este taller, Ramón — artesano con 25 años de oficio — te enseñará a reconocer piedras auténticas, cómo se trabajan y crearás tu propia pieza para llevar. Una experiencia íntima en su taller de Puerto Plata.',
       durationTime: '2.5 horas',
       languages: ['Español', 'English'],
       featuredImage:
@@ -659,7 +638,7 @@ export async function getExperienceListings() {
       maxGuests: 4,
       saleOff: null,
       isAds: null,
-      map: { lat: 19.7934, lng: -70.6880 },
+      map: { lat: 19.7934, lng: -70.688 },
     },
     {
       id: 'experience-listing://5',
@@ -692,20 +671,17 @@ export async function getExperienceListings() {
       maxGuests: 6,
       saleOff: null,
       isAds: null,
-      map: { lat: 19.1167, lng: -70.6500 },
+      map: { lat: 19.1167, lng: -70.65 },
     },
   ]
 }
+
 export const getExperienceListingByHandle = async (handle: string) => {
   const listings = await getExperienceListings()
   let listing = listings.find((listing) => listing.handle === handle)
   if (!listing?.id) {
-    // return null
-
-    // for demo porpose, we will return the first listing if not found
     listing = listings[0]
   }
-
   return {
     ...(listing || {}),
     galleryImgs: [
@@ -723,19 +699,19 @@ export const getExperienceListingByHandle = async (handle: string) => {
       'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&w=1600',
     ],
     host: {
-      displayName: 'Jane Smith',
+      displayName: 'DoCoolture Team',
       avatarUrl: avatars1.src,
-      handle: 'jane-smith',
+      handle: 'docoolture-team',
       description:
-        'Providing lake views, The Symphony 9 Tam Coc in Ninh Binh provides accommodation, an outdoor swimming pool, a bar, a shared lounge, a garden and barbecue facilities.',
+        'Somos un equipo apasionado por mostrar la República Dominicana auténtica — su cultura, su gente y sus tradiciones.',
       listingsCount: 5,
-      reviewsCount: 120,
-      rating: 4.8,
-      responseRate: 95,
-      responseTime: 'within an hour',
+      reviewsCount: 152,
+      rating: 4.9,
+      responseRate: 98,
+      responseTime: 'en menos de una hora',
       isSuperhost: true,
       isVerified: true,
-      joinedDate: 'March 2024',
+      joinedDate: 'Enero 2025',
     },
   }
 }
@@ -811,7 +787,6 @@ export async function getRealEstateListings() {
       handle: 'half-moon-sherborne-by-marstons-inns',
       featuredImage:
         'https://images.pexels.com/photos/6438752/pexels-photo-6438752.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
-
       galleryImgs: [
         'https://images.pexels.com/photos/6438752/pexels-photo-6438752.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
         'https://images.pexels.com/photos/7163619/pexels-photo-7163619.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260',
@@ -977,12 +952,8 @@ export const getRealEstateListingByHandle = async (handle: string) => {
   const listings = await getRealEstateListings()
   let listing = listings.find((listing) => listing.handle === handle)
   if (!listing?.id) {
-    // return null
-
-    // for demo porpose, we will return the first listing if not found
     listing = listings[0]
   }
-
   return {
     ...(listing || {}),
     galleryImgs: [
@@ -1017,7 +988,6 @@ export const getRealEstateListingByHandle = async (handle: string) => {
     },
   }
 }
-
 export type TRealEstateListing = Awaited<ReturnType<typeof getRealEstateListings>>[number]
 
 // FLIGHT LISTING //
@@ -1034,13 +1004,9 @@ export async function getFlightListings() {
       stopNumber: 1,
       stopAirport: 'SGN',
       layover: '2h 30m',
-      // This is a placeholder link, replace with actual flight details
       href: '#',
       price: '$4,100',
-      airlines: {
-        logo: airlineLogo1.src,
-        name: 'Korean Air',
-      },
+      airlines: { logo: airlineLogo1.src, name: 'Korean Air' },
     },
     {
       id: 'flight-listing://2',
@@ -1054,12 +1020,8 @@ export async function getFlightListings() {
       stopAirport: 'Ho Chi Minh City (SGN)',
       layover: '2h 30m',
       price: '$3,380',
-      // This is a placeholder link, replace with actual flight details
       href: '#',
-      airlines: {
-        logo: airlineLogo2.src,
-        name: 'Singapore Airlines',
-      },
+      airlines: { logo: airlineLogo2.src, name: 'Singapore Airlines' },
     },
     {
       id: 'flight-listing://3',
@@ -1073,12 +1035,8 @@ export async function getFlightListings() {
       stopAirport: 'Sydney (SYD)',
       layover: '2h 30m',
       price: '$2,380',
-      // This is a placeholder link, replace with actual flight details
       href: '#',
-      airlines: {
-        logo: airlineLogo3.src,
-        name: 'Philippine Airlines',
-      },
+      airlines: { logo: airlineLogo3.src, name: 'Philippine Airlines' },
     },
     {
       id: 'flight-listing://4',
@@ -1091,13 +1049,9 @@ export async function getFlightListings() {
       stopNumber: 1,
       stopAirport: 'Sydney (SYD)',
       layover: '2h 30m',
-      // This is a placeholder link, replace with actual flight details
       price: '$4,100',
       href: '#',
-      airlines: {
-        logo: airlineLogo4.src,
-        name: 'Korean Air',
-      },
+      airlines: { logo: airlineLogo4.src, name: 'Korean Air' },
     },
     {
       id: 'flight-listing://5',
@@ -1111,12 +1065,8 @@ export async function getFlightListings() {
       stopAirport: 'Singapore (SIN)',
       layover: '2h 30m',
       price: '$2,380',
-      // This is a placeholder link, replace with actual flight details
       href: '#',
-      airlines: {
-        logo: airlineLogo1.src,
-        name: 'Singapore Airlines',
-      },
+      airlines: { logo: airlineLogo1.src, name: 'Singapore Airlines' },
     },
     {
       id: 'flight-listing://6',
@@ -1129,19 +1079,18 @@ export async function getFlightListings() {
       stopNumber: 1,
       stopAirport: 'Auckland (AKL)',
       layover: '2h 30m',
-      // This is a placeholder link, replace with actual flight details
       href: '#',
       price: '$4,100',
-      airlines: {
-        logo: airlineLogo3.src,
-        name: 'Korean Air',
-      },
+      airlines: { logo: airlineLogo3.src, name: 'Korean Air' },
     },
   ]
 }
 export type TFlightListing = Awaited<ReturnType<typeof getFlightListings>>[number]
 
-// get Filter Options
+// ============================================================
+// FILTER OPTIONS
+// ============================================================
+
 export async function getStayListingFilterOptions() {
   return [
     {
@@ -1149,357 +1098,81 @@ export async function getStayListingFilterOptions() {
       name: 'propertyType',
       tabUIType: 'checkbox',
       options: [
-        {
-          name: 'Entire place',
-          value: 'entire_place',
-          description: 'Have a place to yourself',
-          defaultChecked: true,
-        },
-        {
-          name: 'Private room',
-          value: 'private_room',
-          description: 'Have your own room and share some common spaces',
-          defaultChecked: true,
-        },
-        {
-          name: 'Hotel room',
-          value: 'hotel_room',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Shared room',
-          value: 'shared_room',
-          description: 'Stay in a shared space, like a common room',
-        },
+        { name: 'Entire place', value: 'entire_place', description: 'Have a place to yourself', defaultChecked: true },
+        { name: 'Private room', value: 'private_room', description: 'Have your own room and share some common spaces', defaultChecked: true },
+        { name: 'Hotel room', value: 'hotel_room', description: 'Have a private or shared room in a boutique hotel, hostel, and more' },
+        { name: 'Shared room', value: 'shared_room', description: 'Stay in a shared space, like a common room' },
       ],
     },
-    {
-      label: 'Price range',
-      name: 'priceRange',
-      tabUIType: 'price-range',
-      min: 0,
-      max: 1000,
-    },
+    { label: 'Price range', name: 'priceRange', tabUIType: 'price-range', min: 0, max: 1000 },
     {
       label: 'Rooms & Beds',
       name: 'roomsAndBeds',
       tabUIType: 'select-number',
-      options: [
-        { name: 'Beds', max: 10 },
-        { name: 'Bedrooms', max: 10 },
-        { name: 'Bathrooms', max: 10 },
-      ],
+      options: [{ name: 'Beds', max: 10 }, { name: 'Bedrooms', max: 10 }, { name: 'Bathrooms', max: 10 }],
     },
     {
       label: 'Amenities',
       name: 'amenities',
       tabUIType: 'checkbox',
       options: [
-        {
-          name: 'Kitchen',
-          value: 'kitchen',
-          description: 'Have a place to yourself',
-          defaultChecked: true,
-        },
-        {
-          name: 'Air conditioning',
-          value: 'air_conditioning',
-          description: 'Have your own room and share some common spaces',
-          defaultChecked: true,
-        },
-        {
-          name: 'Heating',
-          value: 'heating',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Dryer',
-          value: 'dryer',
-          description: 'Stay in a shared space, like a common room',
-        },
-        {
-          name: 'Washer',
-          value: 'washer',
-          description: 'Stay in a shared space, like a common room',
-        },
-      ],
-    },
-    {
-      label: 'Facilities',
-      name: 'facilities',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Free parking on premise',
-          value: 'free_parking_on_premise',
-          description: 'Have a place to yourself',
-        },
-        {
-          name: 'Hot tub',
-          value: 'hot_tub',
-          description: 'Have your own room and share some common spaces',
-        },
-        {
-          name: 'Gym',
-          value: 'gym',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Pool',
-          value: 'pool',
-          description: 'Stay in a shared space, like a common room',
-        },
-        {
-          name: 'EV charger',
-          value: 'ev_charger',
-          description: 'Stay in a shared space, like a common room',
-        },
-      ],
-    },
-    {
-      label: 'Property type',
-      name: 'listingCategory',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'House',
-          value: 'house',
-          description: 'Have a place to yourself',
-        },
-        {
-          name: 'Bed and breakfast',
-          value: 'bed_and_breakfast',
-          description: 'Have your own room and share some common spaces',
-        },
-        {
-          name: 'Apartment',
-          defaultChecked: true,
-          value: 'apartment',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Boutique hotel',
-          value: 'boutique_hotel',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Bungalow',
-          value: 'bungalow',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Chalet',
-          defaultChecked: true,
-          value: 'chalet',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Condominium',
-          defaultChecked: true,
-          value: 'condominium',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Cottage',
-          value: 'cottage',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Guest suite',
-          value: 'guest_suite',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Guesthouse',
-          value: 'guesthouse',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-      ],
-    },
-    {
-      label: 'House rules',
-      name: 'houseRules',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Pets allowed',
-          value: 'pets_allowed',
-          description: 'Have a place to yourself',
-        },
-        {
-          name: 'Smoking allowed',
-          value: 'smoking_allowed',
-          description: 'Have your own room and share some common spaces',
-        },
+        { name: 'Kitchen', value: 'kitchen', description: 'Have a place to yourself', defaultChecked: true },
+        { name: 'Air conditioning', value: 'air_conditioning', description: 'Have your own room and share some common spaces', defaultChecked: true },
+        { name: 'Heating', value: 'heating', description: 'Have a private or shared room in a boutique hotel, hostel, and more' },
+        { name: 'Dryer', value: 'dryer', description: 'Stay in a shared space, like a common room' },
+        { name: 'Washer', value: 'washer', description: 'Stay in a shared space, like a common room' },
       ],
     },
   ]
 }
+
+// ✅ DOCOOLTURE — Filtros de experiencias en español
 export async function getExperienceListingFilterOptions() {
   return [
     {
-      label: 'Exprience type',
+      label: 'Tipo de experiencia',
       name: 'experienceType',
       tabUIType: 'checkbox',
       options: [
-        {
-          name: 'Food & drink',
-          value: 'food_drink',
-          description: 'Try local cooking classes, and more.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Outdoor',
-          value: 'outdoor',
-          description: 'Explore nature, and outdoor activities.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Arts & culture',
-          value: 'arts_culture',
-          description: 'Discover local art experiences.',
-        },
-
-        {
-          name: 'Adventure',
-          value: 'adventure',
-          description: 'Experience thrilling activities.',
-        },
+        { name: 'Gastronomía', value: 'food_drink', description: 'Clases de cocina, mercados, degustaciones y más.', defaultChecked: false },
+        { name: 'Naturaleza y aventura', value: 'outdoor', description: 'Cascadas, senderismo y actividades al aire libre.', defaultChecked: false },
+        { name: 'Arte y cultura', value: 'arts_culture', description: 'Historia, artesanía, música y tradiciones dominicanas.', defaultChecked: false },
+        { name: 'Tours históricos', value: 'history', description: 'Recorre los lugares que forjaron la identidad dominicana.', defaultChecked: false },
+        { name: 'Música y baile', value: 'music_dance', description: 'Merengue, bachata y ritmos del Caribe.', defaultChecked: false },
+        { name: 'Bienestar', value: 'wellness', description: 'Retiros, yoga y experiencias de relajación.', defaultChecked: false },
       ],
     },
     {
-      label: 'Price range',
+      label: 'Rango de precio',
       name: 'priceRange',
       tabUIType: 'price-range',
       min: 0,
       max: 1000,
     },
     {
-      label: 'Duration',
+      label: 'Duración',
       name: 'duration',
       tabUIType: 'checkbox',
       options: [
-        {
-          name: 'Less than 1 hour',
-          value: 'less_than_1_hour',
-          description: 'Experience activities that last less than 1 hour.',
-          defaultChecked: true,
-        },
-        {
-          name: '1-2 hours',
-          value: '1_2_hours',
-          description: 'Experience activities that last 1-2 hours.',
-          defaultChecked: true,
-        },
-        {
-          name: '2-4 hours',
-          value: '2_4_hours',
-          description: 'Experience activities that last 2-4 hours.',
-        },
-        {
-          name: 'More than 4 hours',
-          value: 'more_than_4_hours',
-          description: 'Experience activities that last more than 4 hours.',
-        },
+        { name: 'Menos de 1 hora', value: 'less_than_1_hour', description: 'Experiencias cortas e intensas.', defaultChecked: false },
+        { name: '1 a 2 horas', value: '1_2_hours', description: 'Perfectas para una mañana o tarde.', defaultChecked: false },
+        { name: '2 a 4 horas', value: '2_4_hours', description: 'Experiencias completas con tiempo para disfrutar.', defaultChecked: false },
+        { name: 'Más de 4 horas', value: 'more_than_4_hours', description: 'Días completos de aventura y exploración.', defaultChecked: false },
       ],
     },
     {
-      label: 'Time of day',
+      label: 'Momento del día',
       name: 'timeOfDay',
       tabUIType: 'checkbox',
       options: [
-        {
-          name: 'Morning',
-          value: 'morning',
-          description: 'Experience activities in the morning.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Afternoon',
-          value: 'afternoon',
-          description: 'Experience activities in the afternoon.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Evening',
-          value: 'evening',
-          description: 'Experience activities in the evening.',
-        },
-        {
-          name: 'Night',
-          value: 'night',
-          description: 'Experience activities at night.',
-        },
-      ],
-    },
-    {
-      label: 'Amenities',
-      name: 'amenities',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Kitchen',
-          value: 'kitchen',
-          description: 'Have a place to yourself',
-          defaultChecked: true,
-        },
-        {
-          name: 'Air conditioning',
-          value: 'air_conditioning',
-          description: 'Have your own room and share some common spaces',
-          defaultChecked: true,
-        },
-        {
-          name: 'Heating',
-          value: 'heating',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Dryer',
-          value: 'dryer',
-          description: 'Stay in a shared space, like a common room',
-        },
-        {
-          name: 'Washer',
-          value: 'washer',
-          description: 'Stay in a shared space, like a common room',
-        },
-      ],
-    },
-    {
-      label: 'Facilities',
-      name: 'facilities',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Free parking on premise',
-          value: 'free_parking_on_premise',
-          description: 'Have a place to yourself',
-        },
-        {
-          name: 'Hot tub',
-          value: 'hot_tub',
-          description: 'Have your own room and share some common spaces',
-        },
-        {
-          name: 'Gym',
-          value: 'gym',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Pool',
-          value: 'pool',
-          description: 'Stay in a shared space, like a common room',
-        },
-        {
-          name: 'EV charger',
-          value: 'ev_charger',
-          description: 'Stay in a shared space, like a common room',
-        },
+        { name: 'Mañana', value: 'morning', description: 'Comienza el día con energía.', defaultChecked: false },
+        { name: 'Tarde', value: 'afternoon', description: 'Ideal para después del almuerzo.', defaultChecked: false },
+        { name: 'Noche', value: 'evening', description: 'Experiencias nocturnas y vida cultural.', defaultChecked: false },
       ],
     },
   ]
 }
+
 export async function getRealEstateListingFilterOptions() {
   return [
     {
@@ -1507,192 +1180,22 @@ export async function getRealEstateListingFilterOptions() {
       name: 'listingCategory',
       tabUIType: 'checkbox',
       options: [
-        {
-          name: 'Entire place',
-          value: 'entire_place',
-          description: 'Have a place to yourself',
-          defaultChecked: true,
-        },
-        {
-          name: 'Private room',
-          value: 'private_room',
-          description: 'Have your own room and share some common spaces',
-          defaultChecked: true,
-        },
-        {
-          name: 'Hotel room',
-          value: 'hotel_room',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Shared room',
-          value: 'shared_room',
-          description: 'Stay in a shared space, like a common room',
-        },
+        { name: 'Entire place', value: 'entire_place', description: 'Have a place to yourself', defaultChecked: true },
+        { name: 'Private room', value: 'private_room', description: 'Have your own room and share some common spaces', defaultChecked: true },
+        { name: 'Hotel room', value: 'hotel_room', description: 'Have a private or shared room in a boutique hotel, hostel, and more' },
+        { name: 'Shared room', value: 'shared_room', description: 'Stay in a shared space, like a common room' },
       ],
     },
-    {
-      label: 'Price range',
-      name: 'priceRange',
-      tabUIType: 'price-range',
-      min: 0,
-      max: 1000,
-    },
+    { label: 'Price range', name: 'priceRange', tabUIType: 'price-range', min: 0, max: 1000 },
     {
       label: 'Rooms & Beds',
       name: 'roomsAndBeds',
       tabUIType: 'select-number',
-      options: [
-        { name: 'Beds', max: 10 },
-        { name: 'Bedrooms', max: 10 },
-        { name: 'Bathrooms', max: 10 },
-      ],
-    },
-    {
-      label: 'Amenities',
-      name: 'amenities',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Kitchen',
-          value: 'kitchen',
-          description: 'Have a place to yourself',
-          defaultChecked: true,
-        },
-        {
-          name: 'Air conditioning',
-          value: 'air_conditioning',
-          description: 'Have your own room and share some common spaces',
-          defaultChecked: true,
-        },
-        {
-          name: 'Heating',
-          value: 'heating',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Dryer',
-          value: 'dryer',
-          description: 'Stay in a shared space, like a common room',
-        },
-        {
-          name: 'Washer',
-          value: 'washer',
-          description: 'Stay in a shared space, like a common room',
-        },
-      ],
-    },
-    {
-      label: 'Facilities',
-      name: 'facilities',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Free parking on premise',
-          value: 'free_parking_on_premise',
-          description: 'Have a place to yourself',
-        },
-        {
-          name: 'Hot tub',
-          value: 'hot_tub',
-          description: 'Have your own room and share some common spaces',
-        },
-        {
-          name: 'Gym',
-          value: 'gym',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Pool',
-          value: 'pool',
-          description: 'Stay in a shared space, like a common room',
-        },
-        {
-          name: 'EV charger',
-          value: 'ev_charger',
-          description: 'Stay in a shared space, like a common room',
-        },
-      ],
-    },
-    {
-      label: 'Property type',
-      name: 'propertyType',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'House',
-          value: 'house',
-          description: 'Have a place to yourself',
-        },
-        {
-          name: 'Bed and breakfast',
-          value: 'bed_and_breakfast',
-          description: 'Have your own room and share some common spaces',
-        },
-        {
-          name: 'Apartment',
-          defaultChecked: true,
-          value: 'apartment',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Boutique hotel',
-          value: 'boutique_hotel',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Bungalow',
-          value: 'bungalow',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Chalet',
-          defaultChecked: true,
-          value: 'chalet',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Condominium',
-          defaultChecked: true,
-          value: 'condominium',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Cottage',
-          value: 'cottage',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Guest suite',
-          value: 'guest_suite',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-        {
-          name: 'Guesthouse',
-          value: 'guesthouse',
-          description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-        },
-      ],
-    },
-    {
-      label: 'House rules',
-      name: 'houseRules',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Pets allowed',
-          value: 'pets_allowed',
-          description: 'Have a place to yourself',
-        },
-        {
-          name: 'Smoking allowed',
-          value: 'smoking_allowed',
-          description: 'Have your own room and share some common spaces',
-        },
-      ],
+      options: [{ name: 'Beds', max: 10 }, { name: 'Bedrooms', max: 10 }, { name: 'Bathrooms', max: 10 }],
     },
   ]
 }
+
 export async function getCarListingFilterOptions() {
   return [
     {
@@ -1700,115 +1203,16 @@ export async function getCarListingFilterOptions() {
       name: 'Car-type',
       tabUIType: 'checkbox',
       options: [
-        {
-          name: 'Sedan',
-          value: 'sedan',
-          description: 'Comfortable and spacious for city driving.',
-          defaultChecked: true,
-        },
-        {
-          name: 'SUV',
-          value: 'suv',
-          description: 'Perfect for off-road adventures and family trips.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Truck',
-          value: 'truck',
-          description: 'Ideal for heavy loads and rugged terrain.',
-        },
-        {
-          name: 'Convertible',
-          value: 'convertible',
-          description: 'Enjoy the open air with a stylish ride.',
-        },
+        { name: 'Sedan', value: 'sedan', description: 'Comfortable and spacious for city driving.', defaultChecked: true },
+        { name: 'SUV', value: 'suv', description: 'Perfect for off-road adventures and family trips.', defaultChecked: true },
+        { name: 'Truck', value: 'truck', description: 'Ideal for heavy loads and rugged terrain.' },
+        { name: 'Convertible', value: 'convertible', description: 'Enjoy the open air with a stylish ride.' },
       ],
     },
-    {
-      label: 'Price range',
-      name: 'Price-range',
-      tabUIType: 'price-range',
-      min: 0,
-      max: 1000,
-    },
-    {
-      label: 'Fuel type',
-      name: 'Fuel-type',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Petrol',
-          value: 'petrol',
-          description: 'Standard fuel type for most vehicles.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Diesel',
-          value: 'diesel',
-          description: 'More fuel-efficient for long distances.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Electric',
-          value: 'electric',
-          description: 'Eco-friendly and cost-effective.',
-        },
-        {
-          name: 'Hybrid',
-          value: 'hybrid',
-          description: 'Combines petrol and electric for efficiency.',
-        },
-      ],
-    },
-    {
-      label: 'Transmission type',
-      name: 'Transmission-type',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Automatic',
-          value: 'automatic',
-          description: 'Easy to drive with no manual shifting.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Manual',
-          value: 'manual',
-          description: 'For those who prefer more control.',
-        },
-      ],
-    },
-    {
-      label: 'Amenities',
-      name: 'Amenities',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Air conditioning',
-          value: 'air_conditioning',
-          description: 'Stay cool during your drive.',
-          defaultChecked: true,
-        },
-        {
-          name: 'GPS',
-          value: 'gps',
-          description: 'Never get lost with built-in navigation.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Bluetooth',
-          value: 'bluetooth',
-          description: 'Connect your devices for hands-free calls and music.',
-        },
-        {
-          name: 'Sunroof',
-          value: 'sunroof',
-          description: 'Enjoy the sunshine and fresh air.',
-        },
-      ],
-    },
+    { label: 'Price range', name: 'Price-range', tabUIType: 'price-range', min: 0, max: 1000 },
   ]
 }
+
 export async function getFlightFilterOptions() {
   return [
     {
@@ -1816,151 +1220,11 @@ export async function getFlightFilterOptions() {
       name: 'airlines',
       tabUIType: 'checkbox',
       options: [
-        {
-          name: 'Korean Air',
-          value: 'korean_air',
-          description: 'Flag carrier and largest airline of South Korea.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Singapore Airlines',
-          value: 'singapore_airlines',
-          description: 'Flag carrier of Singapore, known for its service.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Philippine Airlines',
-          value: 'philippine_airlines',
-          description: 'Flag carrier of the Philippines.',
-        },
+        { name: 'Korean Air', value: 'korean_air', description: 'Flag carrier and largest airline of South Korea.', defaultChecked: true },
+        { name: 'Singapore Airlines', value: 'singapore_airlines', description: 'Flag carrier of Singapore, known for its service.', defaultChecked: true },
+        { name: 'Philippine Airlines', value: 'philippine_airlines', description: 'Flag carrier of the Philippines.' },
       ],
     },
-    {
-      label: 'Guests',
-      name: 'guests',
-      tabUIType: 'select-number',
-      options: [
-        { name: 'Adults', max: 10 },
-        { name: 'Children', max: 10 },
-        { name: 'Infants', max: 10 },
-      ],
-    },
-    {
-      label: 'Price range',
-      name: 'priceRange',
-      tabUIType: 'price-range',
-      min: 0,
-      max: 10000,
-    },
-    {
-      label: 'Number of stops',
-      name: 'numberOfStops',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Any number of stops',
-          value: 'any_stops',
-          description: 'Include flights with any number of stops.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Non-stop',
-          value: 'non_stop',
-          description: 'Direct flights with no layovers.',
-        },
-        {
-          name: '1 stop',
-          value: '1_stop',
-          description: 'Flights with one layover.',
-        },
-        {
-          name: '2+ stops',
-          value: '2_plus_stops',
-          description: 'Flights with two or more layovers.',
-        },
-      ],
-    },
-    {
-      label: 'Flight duration',
-      name: 'flightDuration',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Less than 5 hours',
-          value: 'less_than_5_hours',
-          description: 'Short flights for quick trips.',
-          defaultChecked: true,
-        },
-        {
-          name: '5-10 hours',
-          value: '5_10_hours',
-          description: 'Medium-haul flights for regional travel.',
-          defaultChecked: true,
-        },
-        {
-          name: 'More than 10 hours',
-          value: 'more_than_10_hours',
-          description: 'Long-haul flights for international travel.',
-        },
-      ],
-    },
-    {
-      label: 'Class type',
-      name: 'classType',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'Economy Class',
-          value: 'economy_class',
-          description: 'Affordable and comfortable seating.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Business Class',
-          value: 'business_class',
-          description: 'Premium seating with extra amenities.',
-          defaultChecked: true,
-        },
-        {
-          name: 'First Class',
-          value: 'first_class',
-          description: 'Luxury seating with top-notch service.',
-        },
-        {
-          name: 'Premium Economy',
-          value: 'premium_economy',
-          description: 'Enhanced comfort and service in economy.',
-        },
-      ],
-    },
-    {
-      label: 'Amenities',
-      name: 'amenities',
-      tabUIType: 'checkbox',
-      options: [
-        {
-          name: 'In-flight entertainment',
-          value: 'in_flight_entertainment',
-          description: 'Enjoy movies, music, and games during your flight.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Wi-Fi',
-          value: 'wifi',
-          description: 'Stay connected with in-flight Wi-Fi.',
-          defaultChecked: true,
-        },
-        {
-          name: 'Meal service',
-          value: 'meal_service',
-          description: 'Enjoy complimentary meals and snacks.',
-        },
-        {
-          name: 'Extra legroom',
-          value: 'extra_legroom',
-          description: 'More space for a comfortable journey.',
-        },
-      ],
-    },
+    { label: 'Price range', name: 'priceRange', tabUIType: 'price-range', min: 0, max: 10000 },
   ]
 }

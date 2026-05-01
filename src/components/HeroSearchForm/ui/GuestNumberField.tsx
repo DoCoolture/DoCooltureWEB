@@ -38,48 +38,40 @@ export const GuestNumberField: FC<Props> = ({
   className = 'flex-1',
   clearDataButtonClassName,
 }) => {
-  const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(2)
-  const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(1)
-  const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(1)
+  // ✅ FIX: 1 adulto por defecto, 0 niños, 0 bebés
+  const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(1)
+  const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(0)
+  const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(0)
 
   const handleChangeData = (value: number, type: keyof GuestsObject) => {
-    let newValue = {
-      guestAdults: guestAdultsInputValue,
-      guestChildren: guestChildrenInputValue,
-      guestInfants: guestInfantsInputValue,
-    }
-    if (type === 'guestAdults') {
-      setGuestAdultsInputValue(value)
-      newValue.guestAdults = value
-    }
-    if (type === 'guestChildren') {
-      setGuestChildrenInputValue(value)
-      newValue.guestChildren = value
-    }
-    if (type === 'guestInfants') {
-      setGuestInfantsInputValue(value)
-      newValue.guestInfants = value
-    }
+    if (type === 'guestAdults') setGuestAdultsInputValue(value)
+    if (type === 'guestChildren') setGuestChildrenInputValue(value)
+    if (type === 'guestInfants') setGuestInfantsInputValue(value)
   }
 
-  const totalGuests = guestChildrenInputValue + guestAdultsInputValue + guestInfantsInputValue
+  // ✅ Total = solo adultos + niños (bebés no cuentan como explorers)
+  const totalGuests = guestAdultsInputValue + guestChildrenInputValue
+
   return (
     <Popover className={`group relative z-10 flex ${className}`}>
       {({ open: showPopover }) => (
         <>
           <PopoverButton
-            className={clsx(styles.button.base, styles.button[fieldStyle], showPopover && styles.button.focused)}
+            className={clsx(
+              styles.button.base,
+              styles.button[fieldStyle],
+              showPopover && styles.button.focused
+            )}
           >
             {fieldStyle === 'default' && (
               <UserPlusIcon className="size-5 text-neutral-300 lg:size-7 dark:text-neutral-400" />
             )}
-
             <div className="grow">
               <span className={clsx('block font-semibold', styles.mainText[fieldStyle])}>
-                {totalGuests || ''} {T['HeroSearchForm']['Guests']}
+                {totalGuests > 0 ? `${totalGuests} Explorers` : 'Agregar explorers'}
               </span>
               <span className="mt-1 block text-sm leading-none font-light text-neutral-400">
-                {totalGuests ? T['HeroSearchForm']['Guests'] : T['HeroSearchForm']['Add guests']}
+                {totalGuests > 0 ? 'Explorers' : 'Agregar explorers'}
               </span>
             </div>
           </PopoverButton>
@@ -87,21 +79,25 @@ export const GuestNumberField: FC<Props> = ({
           <ClearDataButton
             className={clsx(!totalGuests && 'sr-only', clearDataButtonClassName)}
             onClick={() => {
-              setGuestAdultsInputValue(0)
+              setGuestAdultsInputValue(1)
               setGuestChildrenInputValue(0)
               setGuestInfantsInputValue(0)
             }}
           />
 
-          <PopoverPanel unmount={false} transition className={clsx(styles.panel.base, styles.panel[fieldStyle])}>
+          <PopoverPanel
+            unmount={false}
+            transition
+            className={clsx(styles.panel.base, styles.panel[fieldStyle])}
+          >
             <NcInputNumber
               className="w-full"
               defaultValue={guestAdultsInputValue}
               onChange={(value) => handleChangeData(value, 'guestAdults')}
               max={10}
               min={1}
-              label={T['HeroSearchForm']['Adults']}
-              description={T['HeroSearchForm']['Ages 13 or above']}
+              label="Adultos"
+              description="13 años o más"
               inputName="guestAdults"
             />
             <NcInputNumber
@@ -109,8 +105,9 @@ export const GuestNumberField: FC<Props> = ({
               defaultValue={guestChildrenInputValue}
               onChange={(value) => handleChangeData(value, 'guestChildren')}
               max={4}
-              label={T['HeroSearchForm']['Children']}
-              description={T['HeroSearchForm']['Ages 2–12']}
+              min={0}
+              label="Niños"
+              description="2 a 12 años"
               inputName="guestChildren"
             />
             <NcInputNumber
@@ -118,8 +115,9 @@ export const GuestNumberField: FC<Props> = ({
               defaultValue={guestInfantsInputValue}
               onChange={(value) => handleChangeData(value, 'guestInfants')}
               max={4}
-              label={T['HeroSearchForm']['Infants']}
-              description={T['HeroSearchForm']['Ages 0–2']}
+              min={0}
+              label="Bebés"
+              description="0 a 2 años"
               inputName="guestInfants"
             />
           </PopoverPanel>

@@ -7,7 +7,6 @@ import ButtonPrimary from '@/shared/ButtonPrimary'
 import ButtonThird from '@/shared/ButtonThird'
 import { Checkbox, CheckboxField, CheckboxGroup } from '@/shared/Checkbox'
 import { Description, Fieldset, Label } from '@/shared/fieldset'
-import T from '@/utils/getT'
 import {
   CloseButton,
   Dialog,
@@ -54,205 +53,23 @@ type SelectNumberFilter = {
   }[]
 }
 
-const demo_filters_options = [
-  {
-    name: 'type-of-place',
-    label: 'Type of place',
-    tabUIType: 'checkbox',
-    options: [
-      {
-        name: 'Entire place',
-        value: 'entire_place',
-        description: 'Have a place to yourself',
-        defaultChecked: true,
-      },
-      {
-        name: 'Private room',
-        value: 'private_room',
-        description: 'Have your own room and share some common spaces',
-        defaultChecked: true,
-      },
-      {
-        name: 'Hotel room',
-        value: 'hotel_room',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Shared room',
-        value: 'shared_room',
-        description: 'Stay in a shared space, like a common room',
-      },
-    ],
-  },
-  {
-    label: 'Price per day',
-    name: 'price-per-day',
-    tabUIType: 'price-range',
-    min: 0,
-    max: 1000,
-  },
-  {
-    label: 'Rooms & Beds',
-    name: 'rooms-beds',
-    tabUIType: 'select-number',
-    options: [
-      { name: 'Beds', max: 10 },
-      { name: 'Bedrooms', max: 10 },
-      { name: 'Bathrooms', max: 10 },
-    ],
-  },
-  {
-    label: 'Amenities',
-    name: 'amenities',
-    tabUIType: 'checkbox',
-    options: [
-      {
-        name: 'Kitchen',
-        value: 'kitchen',
-        description: 'Have a place to yourself',
-        defaultChecked: true,
-      },
-      {
-        name: 'Air conditioning',
-        value: 'air_conditioning',
-        description: 'Have your own room and share some common spaces',
-        defaultChecked: true,
-      },
-      {
-        name: 'Heating',
-        value: 'heating',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Dryer',
-        value: 'dryer',
-        description: 'Stay in a shared space, like a common room',
-      },
-      {
-        name: 'Washer',
-        value: 'washer',
-        description: 'Stay in a shared space, like a common room',
-      },
-    ],
-  },
-  {
-    name: 'Facilities',
-    label: 'Facilities',
-    tabUIType: 'checkbox',
-    options: [
-      {
-        name: 'Free parking on premise',
-        value: 'free_parking_on_premise',
-        description: 'Have a place to yourself',
-      },
-      {
-        name: 'Hot tub',
-        value: 'hot_tub',
-        description: 'Have your own room and share some common spaces',
-      },
-      {
-        name: 'Gym',
-        value: 'gym',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Pool',
-        value: 'pool',
-        description: 'Stay in a shared space, like a common room',
-      },
-      {
-        name: 'EV charger',
-        value: 'ev_charger',
-        description: 'Stay in a shared space, like a common room',
-      },
-    ],
-  },
-  {
-    name: 'Property-type',
-    label: 'Property type',
-    tabUIType: 'checkbox',
-    options: [
-      {
-        name: 'House',
-        value: 'house',
-        description: 'Have a place to yourself',
-      },
-      {
-        name: 'Bed and breakfast',
-        value: 'bed_and_breakfast',
-        description: 'Have your own room and share some common spaces',
-      },
-      {
-        name: 'Apartment',
-        defaultChecked: true,
-        value: 'apartment',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Boutique hotel',
-        value: 'boutique_hotel',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Bungalow',
-        value: 'bungalow',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Chalet',
-        defaultChecked: true,
-        value: 'chalet',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Condominium',
-        defaultChecked: true,
-        value: 'condominium',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Cottage',
-        value: 'cottage',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Guest suite',
-        value: 'guest_suite',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-      {
-        name: 'Guesthouse',
-        value: 'guesthouse',
-        description: 'Have a private or shared room in a boutique hotel, hostel, and more',
-      },
-    ],
-  },
-  {
-    name: 'House-rules',
-    label: 'House rules',
-    tabUIType: 'checkbox',
-    options: [
-      {
-        name: 'Pets allowed',
-        value: 'pets_allowed',
-        description: 'Have a place to yourself',
-      },
-      {
-        name: 'Smoking allowed',
-        value: 'smoking_allowed',
-        description: 'Have your own room and share some common spaces',
-      },
-    ],
-  },
-]
-
-const CheckboxPanel = ({ filterOption, className }: { filterOption: CheckboxFilter; className?: string }) => {
+const CheckboxPanel = ({
+  filterOption,
+  className,
+}: {
+  filterOption: CheckboxFilter
+  className?: string
+}) => {
   return (
     <Fieldset>
       <CheckboxGroup className={className}>
         {filterOption.options.map((option) => (
           <CheckboxField key={option.name}>
-            <Checkbox name={`${filterOption.name}[]`} value={option.name} defaultChecked={!!option.defaultChecked} />
+            <Checkbox
+              name={`${filterOption.name}[]`}
+              value={option.name}
+              defaultChecked={!!option.defaultChecked}
+            />
             <Label>{option.name}</Label>
             {option.description && <Description>{option.description}</Description>}
           </CheckboxField>
@@ -261,32 +78,63 @@ const CheckboxPanel = ({ filterOption, className }: { filterOption: CheckboxFilt
     </Fieldset>
   )
 }
-const PriceRagePanel = ({ filterOption: { min, max, name } }: { filterOption: PriceRangeFilter }) => {
-  const [rangePrices, setRangePrices] = useState([min, max])
 
-  return <PriceRangeSlider defaultValue={rangePrices} onChange={setRangePrices} min={min} max={max} />
+const PriceRangePanel = ({
+  filterOption: { min, max, name },
+}: {
+  filterOption: PriceRangeFilter
+}) => {
+  const [rangePrices, setRangePrices] = useState([min, max])
+  return (
+    <PriceRangeSlider
+      defaultValue={rangePrices}
+      onChange={setRangePrices}
+      min={min}
+      max={max}
+    />
+  )
 }
-const NumberSelectPanel = ({ filterOption: { name, options } }: { filterOption: SelectNumberFilter }) => {
+
+const NumberSelectPanel = ({
+  filterOption: { name, options },
+}: {
+  filterOption: SelectNumberFilter
+}) => {
   return (
     <div className="relative flex flex-col gap-y-5">
       {options.map((option) => (
-        <NcInputNumber key={option.name} inputName={option.name} label={option.name} max={option.max} />
+        <NcInputNumber
+          key={option.name}
+          inputName={option.name}
+          label={option.name}
+          max={option.max}
+        />
       ))}
     </div>
   )
 }
 
 const ListingFilterTabs = ({
-  filterOptions = demo_filters_options,
+  filterOptions = [],
 }: {
-  filterOptions?: Partial<typeof demo_filters_options>
+  filterOptions?: any[]
 }) => {
   const [showAllFilter, setShowAllFilter] = useState(false)
 
   const handleFormSubmit = async (formData: FormData) => {
     const formDataObject = Object.fromEntries(formData.entries())
-    console.log('Form submitted with data:', formDataObject)
+    console.log('Filtros aplicados:', formDataObject)
+    // TODO: implementar filtrado real con estos valores
   }
+
+  // Cuenta filtros activos (con defaultChecked)
+  const totalActiveFilters = filterOptions.reduce((acc, filterOption) => {
+    if (!filterOption) return acc
+    const checked = (filterOption as CheckboxFilter).options?.filter(
+      (o) => !!o.defaultChecked
+    )?.length || 0
+    return acc + checked
+  }, 0)
 
   const renderTabAllFilters = () => {
     return (
@@ -297,10 +145,12 @@ const ListingFilterTabs = ({
           className="w-full border-black! ring-1 ring-black ring-inset md:w-auto dark:border-neutral-200! dark:ring-neutral-200"
         >
           <HugeiconsIcon icon={FilterVerticalIcon} size={16} color="currentColor" strokeWidth={1.5} />
-          <span>{T['common']['All filters']}</span>
-          <span className="absolute top-0 -right-0.5 flex size-5 items-center justify-center rounded-full bg-black text-[0.65rem] font-semibold text-white ring-2 ring-white dark:bg-neutral-200 dark:text-neutral-900 dark:ring-neutral-900">
-            4
-          </span>
+          <span>Todos los filtros</span>
+          {totalActiveFilters > 0 && (
+            <span className="absolute top-0 -right-0.5 flex size-5 items-center justify-center rounded-full bg-black text-[0.65rem] font-semibold text-white ring-2 ring-white dark:bg-neutral-200 dark:text-neutral-900 dark:ring-neutral-900">
+              {totalActiveFilters}
+            </span>
+          )}
         </Button>
 
         <Dialog
@@ -320,8 +170,8 @@ const ListingFilterTabs = ({
               transition
             >
               <div className="relative shrink-0 border-b border-neutral-200 p-4 text-center sm:px-8 dark:border-neutral-800">
-                <DialogTitle as="h3" className="text-lg leading-6 font-medium text-gray-900">
-                  {T['common']['Filters']}
+                <DialogTitle as="h3" className="text-lg leading-6 font-medium text-gray-900 dark:text-neutral-100">
+                  Filtros
                 </DialogTitle>
                 <div className="absolute end-2 top-2">
                   <ButtonClose plain onClick={() => setShowAllFilter(false)} />
@@ -339,10 +189,10 @@ const ListingFilterTabs = ({
                             <CheckboxPanel filterOption={filterOption as CheckboxFilter} />
                           )}
                           {filterOption.tabUIType === 'price-range' && (
-                            <PriceRagePanel key={index} filterOption={filterOption as PriceRangeFilter} />
+                            <PriceRangePanel filterOption={filterOption as PriceRangeFilter} />
                           )}
                           {filterOption.tabUIType === 'select-number' && (
-                            <NumberSelectPanel key={index} filterOption={filterOption as SelectNumberFilter} />
+                            <NumberSelectPanel filterOption={filterOption as SelectNumberFilter} />
                           )}
                         </div>
                       </div>
@@ -353,10 +203,10 @@ const ListingFilterTabs = ({
 
               <div className="flex shrink-0 items-center justify-between bg-neutral-50 p-4 sm:px-8 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
                 <ButtonThird className="-mx-3" onClick={() => setShowAllFilter(false)} type="button">
-                  {T['common']['Clear All']}
+                  Limpiar todo
                 </ButtonThird>
                 <ButtonPrimary type="submit" onClick={() => setShowAllFilter(false)}>
-                  {T['common']['Apply filters']}
+                  Aplicar filtros
                 </ButtonPrimary>
               </div>
             </DialogPanel>
@@ -367,22 +217,23 @@ const ListingFilterTabs = ({
   }
 
   if (!filterOptions || filterOptions.length === 0) {
-    return <div>No filter options available</div>
+    return <div>No hay filtros disponibles</div>
   }
 
   return (
     <div className="flex flex-wrap md:gap-x-4 md:gap-y-2">
       {renderTabAllFilters()}
-      <PopoverGroup className="hidden flex-wrap gap-x-4 gap-y-2 md:flex" as={Form} action={handleFormSubmit}>
-        <div className="h-auto w-px bg-neutral-200 dark:bg-neutral-700"></div>
+      <PopoverGroup
+        className="hidden flex-wrap gap-x-4 gap-y-2 md:flex"
+        as={Form}
+        action={handleFormSubmit}
+      >
+        <div className="h-auto w-px bg-neutral-200 dark:bg-neutral-700" />
         {filterOptions.map((filterOption, index) => {
-          // only show 3 filters in the tab. Other filters will be shown in the All-filters-popover
-          if (index > 2 || !filterOption) {
-            return null
-          }
+          if (index > 2 || !filterOption) return null
 
           const checkedNumber =
-            (filterOption as CheckboxFilter).options?.filter((option) => !!option.defaultChecked)?.length || 0
+            (filterOption as CheckboxFilter).options?.filter((o) => !!o.defaultChecked)?.length || 0
 
           return (
             <Popover className="relative" key={index}>
@@ -415,19 +266,18 @@ const ListingFilterTabs = ({
                       <CheckboxPanel filterOption={filterOption as CheckboxFilter} />
                     )}
                     {filterOption.tabUIType === 'price-range' && (
-                      <PriceRagePanel key={index} filterOption={filterOption as PriceRangeFilter} />
+                      <PriceRangePanel filterOption={filterOption as PriceRangeFilter} />
                     )}
                     {filterOption.tabUIType === 'select-number' && (
-                      <NumberSelectPanel key={index} filterOption={filterOption as SelectNumberFilter} />
+                      <NumberSelectPanel filterOption={filterOption as SelectNumberFilter} />
                     )}
                   </div>
-
                   <div className="flex items-center justify-between rounded-b-2xl bg-neutral-50 p-5 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
                     <CloseButton className="-mx-3" as={ButtonThird} type="button">
-                      {T['common']['Clear']}
+                      Limpiar
                     </CloseButton>
                     <CloseButton type="submit" as={ButtonPrimary}>
-                      {T['common']['Apply']}
+                      Aplicar
                     </CloseButton>
                   </div>
                 </div>
