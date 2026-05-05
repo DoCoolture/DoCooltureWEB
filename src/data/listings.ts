@@ -699,9 +699,9 @@ export const getExperienceListingByHandle = async (handle: string) => {
       'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&w=1600',
     ],
     host: {
-      displayName: 'DoCoolture Team',
+      displayName: 'Eden Smith',
       avatarUrl: avatars1.src,
-      handle: 'docoolture-team',
+      handle: 'eden-smith',
       description:
         'Somos un equipo apasionado por mostrar la República Dominicana auténtica — su cultura, su gente y sus tradiciones.',
       listingsCount: 5,
