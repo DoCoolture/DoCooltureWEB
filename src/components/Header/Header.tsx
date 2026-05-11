@@ -47,8 +47,8 @@ const Header: FC<HeaderProps> = async ({ hasBorderBottom = true, className }) =>
               languages={languages}
               className="hidden md:block"
             />
-            <Button className="-mx-1 py-1.75! whitespace-nowrap" color="light" href="/add-listing/1">
-              Convertirme en anfitrión
+            <Button className="-mx-1 py-1.75! whitespace-nowrap" color="light" href="/become-host">
+               Convertirme en anfitrión
             </Button>
             <NotifyDropdown />
             <AvatarDropdown />
