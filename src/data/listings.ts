@@ -6,6 +6,7 @@ import avatars5 from '@/images/avatars/Image-5.png'
 import avatars6 from '@/images/avatars/Image-6.png'
 import avatars7 from '@/images/avatars/Image-7.png'
 import avatars8 from '@/images/avatars/Image-8.png'
+import { supabase } from '@/lib/supabase'
 import car1 from '@/images/cars/1.png'
 import car2 from '@/images/cars/2.png'
 import car3 from '@/images/cars/3.png'
@@ -503,215 +504,176 @@ export type TCarListing = Awaited<ReturnType<typeof getCarListings>>[number]
 
 // ============================================================
 // ✅ DOCOOLTURE — EXPERIENCE LISTINGS
-// Experiencias reales de la República Dominicana
+// Solo "Taste of Dominican Culture" está en el código.
+// El resto las agregan los anfitriones desde el dashboard.
 // ============================================================
+
+const TASTE_OF_DOMINICAN = {
+  id: 'experience-listing://1',
+  title: 'Taste of Dominican Culture',
+  handle: 'taste-of-dominican-culture',
+  host: {
+    displayName: 'DoCoolture Gastronomy',
+    avatarUrl: avatars1.src,
+    handle: 'docoolture-gastronomy',
+  },
+  listingCategory: 'Gastronomía',
+  date: 'Disponible fines de semana',
+  description:
+    'Descubre la esencia de la República Dominicana a través de su gastronomía. Un recorrido sensorial que combina historia, tradición y sabor — desde ingredientes taínos hasta influencias africanas y europeas. Cada plato cuenta una historia. Guiado por expertos locales en la Zona Colonial de Santo Domingo.',
+  durationTime: '3–4 horas',
+  languages: ['Español', 'English'],
+  featuredImage: '/images/experiences/taste-dominican/sancocho.jpeg',
+  galleryImgs: [
+    '/images/experiences/taste-dominican/sancocho.jpeg',
+    '/images/experiences/taste-dominican/desayuno.jpeg',
+    '/images/experiences/taste-dominican/locrio.jpeg',
+    '/images/experiences/taste-dominican/cacao.jpeg',
+    '/images/experiences/taste-dominican/chocolate.jpeg',
+    '/images/experiences/taste-dominican/cafe.jpeg',
+  ],
+  like: true,
+  address: 'Zona Colonial, Santo Domingo',
+  reviewStart: 5.0,
+  reviewCount: 0,
+  price: '$120',
+  maxGuests: 8,
+  saleOff: null as string | null,
+  isAds: null as string | null,
+  map: { lat: 18.4733, lng: -69.8833 },
+}
+
 export async function getExperienceListings() {
-  return [
-    {
-      id: 'experience-listing://1',
-      title: 'Taste of Dominican Culture',
-      handle: 'taste-of-dominican-culture',
-      host: {
-        displayName: 'DoCoolture Gastronomy',
-        avatarUrl: avatars1.src,
-        handle: 'docoolture-gastronomy',
-      },
-      listingCategory: 'Gastronomía',
-      date: 'Disponible fines de semana',
-      description:
-        'Descubre la esencia de la República Dominicana a través de su gastronomía. Un recorrido sensorial que combina historia, tradición y sabor — desde ingredientes taínos hasta influencias africanas y europeas. Cada plato cuenta una historia. Guiado por expertos locales en la Zona Colonial de Santo Domingo.',
-      durationTime: '3–4 horas',
-      languages: ['Español', 'English'],
-      featuredImage: '/images/experiences/taste-dominican/sancocho.jpeg',
-      galleryImgs: [
-        '/images/experiences/taste-dominican/sancocho.jpeg',
-        '/images/experiences/taste-dominican/desayuno.jpeg',
-        '/images/experiences/taste-dominican/locrio.jpeg',
-        '/images/experiences/taste-dominican/cacao.jpeg',
-        '/images/experiences/taste-dominican/chocolate.jpeg',
-        '/images/experiences/taste-dominican/cafe.jpeg',
-      ],
-      like: true,
-      address: 'Zona Colonial, Santo Domingo',
-      reviewStart: 5.0,
-      reviewCount: 0,
-      price: '$120',
-      maxGuests: 8,
-      saleOff: null,
-      isAds: null,
-      map: { lat: 18.4733, lng: -69.8833 },
+  const { data } = await supabase
+    .from('experiences')
+    .select('*')
+    .eq('is_published', true)
+    .eq('is_hidden', false)
+    .order('created_at', { ascending: false })
+
+  const fromSupabase = (data ?? []).map((exp) => ({
+    id: exp.id,
+    title: exp.title,
+    handle: exp.handle,
+    host: {
+      displayName: 'Anfitrión DoCoolture',
+      avatarUrl: '',
+      handle: exp.host_id,
     },
-    {
-      id: 'experience-listing://2',
-      title: 'Caminata histórica por la Zona Colonial',
-      handle: 'caminata-historica-zona-colonial',
-      host: {
-        displayName: 'Guía Pedro Alcántara',
-        avatarUrl: avatars2.src,
-        handle: 'guia-pedro-alcantara',
-      },
-      listingCategory: 'Tour Cultural',
-      date: 'Martes, jueves y sábados',
-      description:
-        'Recorre las calles empedradas de la primera ciudad del Nuevo Mundo. Conocerás la Catedral Primada de América, el Alcázar de Colón, la Fortaleza Ozama y las historias detrás de cada piedra colonial. Pedro lleva 15 años contando la historia dominicana con pasión y detalle.',
-      durationTime: '2.5 horas',
-      languages: ['Español', 'English', 'Français'],
-      featuredImage:
-        'https://images.pexels.com/photos/3889843/pexels-photo-3889843.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      galleryImgs: [
-        'https://images.pexels.com/photos/3889843/pexels-photo-3889843.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/2901212/pexels-photo-2901212.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/1537008/pexels-photo-1537008.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/5439381/pexels-photo-5439381.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      ],
-      like: true,
-      address: 'Zona Colonial, Santo Domingo',
-      reviewStart: 5.0,
-      reviewCount: 62,
-      price: '$35',
-      maxGuests: 12,
-      saleOff: null,
-      isAds: null,
-      map: { lat: 18.4733, lng: -69.8833 },
-    },
-    {
-      id: 'experience-listing://3',
-      title: 'Taller de merengue y bachata con músicos locales',
-      handle: 'taller-merengue-bachata-santiago',
-      host: {
-        displayName: 'Maestro Julio Marte',
-        avatarUrl: avatars3.src,
-        handle: 'maestro-julio-marte',
-      },
-      listingCategory: 'Música y Baile',
-      date: 'Viernes y sábados',
-      description:
-        'Aprende a bailar merengue y bachata con un músico santiaguero de toda la vida. Julio toca el acordeón desde los 8 años y te enseñará los pasos básicos, la historia detrás del ritmo y por qué estas músicas son el alma dominicana. Incluye bebidas típicas y snacks.',
-      durationTime: '2 horas',
-      languages: ['Español'],
-      featuredImage:
-        'https://images.pexels.com/photos/2422915/pexels-photo-2422915.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      galleryImgs: [
-        'https://images.pexels.com/photos/2422915/pexels-photo-2422915.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/1047442/pexels-photo-1047442.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/3756767/pexels-photo-3756767.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/4406745/pexels-photo-4406745.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      ],
-      like: true,
-      address: 'Santiago de los Caballeros',
-      reviewStart: 4.8,
-      reviewCount: 27,
-      price: '$40',
-      maxGuests: 10,
-      saleOff: null,
-      isAds: null,
-      map: { lat: 19.4517, lng: -70.697 },
-    },
-    {
-      id: 'experience-listing://4',
-      title: 'Taller de artesanía en larimar y ámbar',
-      handle: 'taller-artesania-larimar-ambar',
-      host: {
-        displayName: 'Artesano Ramón Díaz',
-        avatarUrl: avatars4.src,
-        handle: 'artesano-ramon-diaz',
-      },
-      listingCategory: 'Arte y Artesanía',
-      date: 'Lunes a viernes',
-      description:
-        'El larimar y el ámbar son exclusivos de la República Dominicana. En este taller, Ramón — artesano con 25 años de oficio — te enseñará a reconocer piedras auténticas, cómo se trabajan y crearás tu propia pieza para llevar. Una experiencia íntima en su taller de Puerto Plata.',
-      durationTime: '2.5 horas',
-      languages: ['Español', 'English'],
-      featuredImage:
-        'https://images.pexels.com/photos/3601425/pexels-photo-3601425.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      galleryImgs: [
-        'https://images.pexels.com/photos/3601425/pexels-photo-3601425.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/1721937/pexels-photo-1721937.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/4458420/pexels-photo-4458420.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/3735149/pexels-photo-3735149.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      ],
-      like: true,
-      address: 'Puerto Plata, República Dominicana',
-      reviewStart: 4.9,
-      reviewCount: 44,
-      price: '$55',
-      maxGuests: 4,
-      saleOff: null,
-      isAds: null,
-      map: { lat: 19.7934, lng: -70.688 },
-    },
-    {
-      id: 'experience-listing://5',
-      title: 'Excursión a Jarabacoa: cascadas y comunidades',
-      handle: 'excursion-jarabacoa-cascadas',
-      host: {
-        displayName: 'Guía Ana Féliz',
-        avatarUrl: avatars5.src,
-        handle: 'guia-ana-felix',
-      },
-      listingCategory: 'Aventura y Naturaleza',
-      date: 'Domingos',
-      description:
-        'Visita cascadas escondidas y comunidades campesinas del Cibao. Una experiencia fuera de los circuitos turísticos, donde parte del pago va directamente a proyectos locales de educación.',
-      durationTime: '8 horas',
-      languages: ['Español', 'English'],
-      featuredImage:
-        'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      galleryImgs: [
-        'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/1320684/pexels-photo-1320684.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=1600',
-        'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      ],
-      like: false,
-      address: 'Jarabacoa, República Dominicana',
-      reviewStart: 4.7,
-      reviewCount: 19,
-      price: '$85',
-      maxGuests: 6,
-      saleOff: null,
-      isAds: null,
-      map: { lat: 19.1167, lng: -70.65 },
-    },
-  ]
+    listingCategory: exp.category,
+    date: (exp.available_days as string[] | null)?.join(', ') ?? 'Consultar disponibilidad',
+    description: exp.description,
+    durationTime: exp.duration_time,
+    languages: (exp.languages as string[] | null) ?? [],
+    featuredImage: exp.featured_image_url ?? '',
+    galleryImgs: (exp.gallery_urls as string[] | null) ?? [],
+    like: false,
+    address: exp.address,
+    reviewStart: exp.average_rating ?? 0,
+    reviewCount: exp.total_reviews ?? 0,
+    price: `$${exp.price_usd}`,
+    maxGuests: exp.max_guests,
+    saleOff: null as string | null,
+    isAds: null as string | null,
+    map: { lat: exp.latitude ?? 0, lng: exp.longitude ?? 0 },
+  }))
+
+  return [TASTE_OF_DOMINICAN, ...fromSupabase]
+}
+
+const TASTE_OF_DOMINICAN_DETAIL = {
+  ...TASTE_OF_DOMINICAN,
+  galleryImgs: [
+    ...TASTE_OF_DOMINICAN.galleryImgs,
+    'https://images.pexels.com/photos/4348078/pexels-photo-4348078.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/4706134/pexels-photo-4706134.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/3825578/pexels-photo-3825578.jpeg?auto=compress&cs=tinysrgb&w=1600',
+    'https://images.pexels.com/photos/123335/pexels-photo-123335.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  ],
+  host: {
+    displayName: 'Eden Smith',
+    avatarUrl: avatars1.src,
+    handle: 'eden-smith',
+    description:
+      'Somos un equipo apasionado por mostrar la República Dominicana auténtica — su cultura, su gente y sus tradiciones.',
+    listingsCount: 1,
+    reviewsCount: 0,
+    rating: 5.0,
+    responseRate: 100,
+    responseTime: 'en menos de una hora',
+    isSuperhost: true,
+    isVerified: true,
+    joinedDate: 'Enero 2025',
+  },
 }
 
 export const getExperienceListingByHandle = async (handle: string) => {
-  const listings = await getExperienceListings()
-  let listing = listings.find((listing) => listing.handle === handle)
-  if (!listing?.id) {
-    listing = listings[0]
+  if (handle === 'taste-of-dominican-culture') {
+    return TASTE_OF_DOMINICAN_DETAIL
   }
+
+  const { data: exp } = await supabase
+    .from('experiences')
+    .select('*')
+    .eq('handle', handle)
+    .eq('is_published', true)
+    .eq('is_hidden', false)
+    .single()
+
+  if (!exp) return TASTE_OF_DOMINICAN_DETAIL
+
+  const { data: hostData } = await supabase
+    .from('hosts')
+    .select('*')
+    .eq('id', exp.host_id)
+    .single()
+
+  let avatarUrl = ''
+  if (hostData) {
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('avatar_url')
+      .eq('id', hostData.profile_id)
+      .single()
+    avatarUrl = profileData?.avatar_url ?? ''
+  }
+
   return {
-    ...(listing || {}),
-    galleryImgs: [
-      ...listing.galleryImgs,
-      'https://images.pexels.com/photos/4348078/pexels-photo-4348078.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/4706134/pexels-photo-4706134.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/3825578/pexels-photo-3825578.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/123335/pexels-photo-123335.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/3761124/pexels-photo-3761124.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/8926846/pexels-photo-8926846.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/4706139/pexels-photo-4706139.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/7003624/pexels-photo-7003624.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/4348078/pexels-photo-4348078.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    ],
+    id: exp.id,
+    title: exp.title,
+    handle: exp.handle,
+    listingCategory: exp.category,
+    date: (exp.available_days as string[] | null)?.join(', ') ?? 'Consultar disponibilidad',
+    description: exp.description,
+    durationTime: exp.duration_time,
+    languages: (exp.languages as string[] | null) ?? [],
+    featuredImage: exp.featured_image_url ?? '',
+    galleryImgs: (exp.gallery_urls as string[] | null) ?? [],
+    like: false,
+    address: exp.address,
+    reviewStart: exp.average_rating ?? 0,
+    reviewCount: exp.total_reviews ?? 0,
+    price: `$${exp.price_usd}`,
+    maxGuests: exp.max_guests,
+    saleOff: null as string | null,
+    isAds: null as string | null,
+    map: { lat: exp.latitude ?? 0, lng: exp.longitude ?? 0 },
     host: {
-      displayName: 'Eden Smith',
-      avatarUrl: avatars1.src,
-      handle: 'eden-smith',
-      description:
-        'Somos un equipo apasionado por mostrar la República Dominicana auténtica — su cultura, su gente y sus tradiciones.',
-      listingsCount: 5,
-      reviewsCount: 152,
-      rating: 4.9,
-      responseRate: 98,
-      responseTime: 'en menos de una hora',
-      isSuperhost: true,
-      isVerified: true,
-      joinedDate: 'Enero 2025',
+      displayName: hostData?.display_name ?? 'Anfitrión DoCoolture',
+      avatarUrl,
+      handle: exp.host_id,
+      description: hostData?.bio ?? '',
+      listingsCount: hostData?.total_listings ?? 1,
+      reviewsCount: hostData?.total_reviews ?? 0,
+      rating: hostData?.average_rating ?? 0,
+      responseRate: hostData?.response_rate ?? 0,
+      responseTime: hostData?.response_time ?? 'En menos de un día',
+      isSuperhost: hostData?.is_superhost ?? false,
+      isVerified: hostData?.is_verified ?? false,
+      joinedDate: hostData
+        ? new Date(hostData.created_at).toLocaleDateString('es-DO', { month: 'long', year: 'numeric' })
+        : '',
     },
   }
 }
