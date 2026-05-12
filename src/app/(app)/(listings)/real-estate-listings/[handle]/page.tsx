@@ -14,8 +14,8 @@ import {
   Wifi01Icon,
 } from '@/components/Icons'
 import StartRating from '@/components/StartRating'
-import { getListingReviews } from '@/data/data'
 import { getRealEstateListingByHandle } from '@/data/listings'
+import type { ExperienceReview } from '@/data/reviews'
 import { Button } from '@/shared/Button'
 import ButtonSecondary from '@/shared/ButtonSecondary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
@@ -89,7 +89,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
     host,
     acreage,
   } = listing
-  const reviews = (await getListingReviews(handle)).slice(0, 3) // Fetching only the first 3 reviews for display
+  const reviews: ExperienceReview[] = []
 
   //
 
@@ -316,7 +316,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
             <SectionHost {...host} />
           </div>
           <div className="w-full lg:w-2/3">
-            <SectionListingReviews reviewCount={reviewCount} reviewStart={reviewStart} reviews={reviews} />
+            <SectionListingReviews reviewCount={reviewCount} reviewStart={reviewStart} reviews={reviews} experienceId="" />
           </div>
         </div>
 

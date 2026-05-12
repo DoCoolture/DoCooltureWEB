@@ -10,6 +10,7 @@ import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
 import SectionVideos from '@/components/SectionVideos'
 import { getCarCategories } from '@/data/categories'
 import { getCarListings } from '@/data/listings'
+import { getPublicTestimonials } from '@/data/reviews'
 import heroImage from '@/images/hero-right-car.png'
 import ourFeatureImage from '@/images/our-features-2.png'
 import ButtonPrimary from '@/shared/ButtonPrimary'
@@ -22,8 +23,11 @@ export const metadata: Metadata = {
 }
 
 async function PageHome() {
-  const categories = await getCarCategories()
-  const carListings = await getCarListings()
+  const [categories, carListings, testimonials] = await Promise.all([
+    getCarCategories(),
+    getCarListings(),
+    getPublicTestimonials(),
+  ])
 
   return (
     <main className="relative overflow-hidden">
@@ -87,7 +91,7 @@ async function PageHome() {
 
         <SectionVideos />
         <div className="relative py-16">
-          <SectionClientSay />
+          <SectionClientSay testimonials={testimonials.length > 0 ? testimonials : undefined} />
         </div>
       </div>
     </main>

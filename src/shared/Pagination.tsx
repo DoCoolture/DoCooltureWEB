@@ -1,3 +1,6 @@
+'use client'
+
+import { useLanguage } from '@/context/LanguageContext'
 import { ArrowLeft02Icon, ArrowRight02Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import clsx from 'clsx'
@@ -103,6 +106,7 @@ export default function PaginationComponent({
   totalPages?: number
   className?: string
 }) {
+  const { t } = useLanguage()
   if (totalPages <= 1) return null
 
   const getPageHref = (page: number) => `?page=${page}`
@@ -121,8 +125,10 @@ export default function PaginationComponent({
   }
 
   return (
-    <Pagination className={className}>
-      <PaginationPrevious href={currentPage > 1 ? getPageHref(currentPage - 1) : null} />
+    <Pagination aria-label={t.pagination.pageNavigation} className={className}>
+      <PaginationPrevious href={currentPage > 1 ? getPageHref(currentPage - 1) : null}>
+        {t.pagination.previous}
+      </PaginationPrevious>
       <PaginationList>
         {pages.map((page, i) =>
           page === 'gap' ? (
@@ -134,7 +140,9 @@ export default function PaginationComponent({
           )
         )}
       </PaginationList>
-      <PaginationNext href={currentPage < totalPages ? getPageHref(currentPage + 1) : null} />
+      <PaginationNext href={currentPage < totalPages ? getPageHref(currentPage + 1) : null}>
+        {t.pagination.next}
+      </PaginationNext>
     </Pagination>
   )
 }

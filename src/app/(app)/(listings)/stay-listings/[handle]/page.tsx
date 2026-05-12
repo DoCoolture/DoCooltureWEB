@@ -1,6 +1,6 @@
 import { Bathtub02Icon, BedSingle01Icon, MeetingRoomIcon } from '@/components/Icons'
-import { getListingReviews } from '@/data/data'
 import { getStayListingByHandle } from '@/data/listings'
+import type { ExperienceReview } from '@/data/reviews'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
 import { Divider } from '@/shared/divider'
@@ -67,7 +67,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
     host,
     beds,
   } = listing
-  const reviews = await getListingReviews(handle) // Fetching only the first 3 reviews for display
+  const reviews: ExperienceReview[] = []
 
   // Server action to handle form submission
   const handleSubmitForm = async (formData: FormData) => {
@@ -241,7 +241,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
             <SectionHost {...host} />
           </div>
           <div className="w-full lg:w-2/3">
-            <SectionListingReviews reviewCount={reviewCount} reviewStart={reviewStart} reviews={reviews} />
+            <SectionListingReviews reviewCount={reviewCount} reviewStart={reviewStart} reviews={reviews} experienceId="" />
           </div>
         </div>
 

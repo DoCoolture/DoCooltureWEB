@@ -31,31 +31,9 @@ const Header3: FC<Header3Props> = ({ className, hasBorderBottom = true, initSear
   // pathname
   const pathname = usePathname()
 
-  let locationText = 'Anywhere'
-  let dateText = 'Any week'
-  let guestsText = 'Add guests'
-
-  // FOR DEMO
-  if (pathname.startsWith('/experience-categories') && initSearchFormTab === 'Experiences') {
-    locationText = 'Experiences in Bali'
-    dateText = 'Mar 22 - 27'
-    guestsText = '2 guests'
-  } else if (pathname.startsWith('/car-categories') && initSearchFormTab === 'Cars') {
-    locationText = 'Car rentals in Tokyo'
-    dateText = 'Mar 25 - 28'
-  } else if (pathname.startsWith('/flight-categories') && initSearchFormTab === 'Flights') {
-    locationText = 'Flights to Rome'
-    dateText = 'Mar 10 - 15'
-    guestsText = '1 guest'
-  } else if (pathname.startsWith('/stay-categories') && initSearchFormTab === 'Stays') {
-    locationText = 'Homes in London'
-    dateText = 'Mar 20 - 25'
-    guestsText = '1 guest'
-  } else if (pathname.startsWith('/real-estate-categories') && initSearchFormTab === 'RealEstates') {
-    locationText = 'Real Estates in Bali'
-    dateText = 'Rent'
-    guestsText = '$10k - $1M'
-  }
+  let locationText = 'República Dominicana'
+  let dateText = 'Cualquier semana'
+  let guestsText = 'Agregar explorers'
 
   // for memoization of the close function
   const closeHeroSearch = useCallback(() => {

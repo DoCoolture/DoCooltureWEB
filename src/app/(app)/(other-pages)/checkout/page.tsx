@@ -2,6 +2,7 @@
 
 import StartRating from '@/components/StartRating'
 import { useCurrency } from '@/context/CurrencyContext'
+import { useLanguage } from '@/context/LanguageContext'
 import { supabase } from '@/lib/supabase'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
@@ -20,6 +21,7 @@ const CheckoutContent = () => {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { convertPrice } = useCurrency()
+  const { t } = useLanguage()
 
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
@@ -83,7 +85,7 @@ const CheckoutContent = () => {
 
     if (error) {
       console.error('❌ Error Supabase:', error)
-      setErrorMsg('Hubo un error al guardar tu reserva. Por favor intenta de nuevo.')
+      setErrorMsg(t.booking.bookingError)
       setIsLoading(false)
       return
     }
@@ -136,19 +138,19 @@ const CheckoutContent = () => {
       {/* ✅ Desglose con moneda convertida */}
       <DescriptionList>
         <DescriptionTerm>
-          {precioUnitConvertido} × {experiencia.explorers} explorer{experiencia.explorers > 1 ? 's' : ''}
+          {precioUnitConvertido} × {experiencia.explorers} {experiencia.explorers > 1 ? t.booking.explorers : t.booking.explorer}
         </DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
           {subtotalConvertido}
         </DescriptionDetails>
-        <DescriptionTerm>Cargo de procesamiento</DescriptionTerm>
+        <DescriptionTerm>{t.booking.processingFee}</DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
           {cargoConvertido}
         </DescriptionDetails>
-        <DescriptionTerm>Impuestos</DescriptionTerm>
+        <DescriptionTerm>{t.booking.taxes}</DescriptionTerm>
         <DescriptionDetails className="sm:text-right">$0.00</DescriptionDetails>
         <DescriptionTerm className="font-semibold text-neutral-900 dark:text-neutral-100">
-          Total
+          {t.booking.total}
         </DescriptionTerm>
         <DescriptionDetails className="font-semibold sm:text-right">
           {totalConvertido}
@@ -160,11 +162,11 @@ const CheckoutContent = () => {
         <div className="flex items-center gap-x-2 text-sm text-neutral-600 dark:text-neutral-400">
           <UserGroupIcon className="size-4" />
           <span>
-            Anfitrión: <strong>{experiencia.anfitrion}</strong>
+            {t.booking.host}: <strong>{experiencia.anfitrion}</strong>
           </span>
         </div>
         <p className="mt-1.5 text-xs text-neutral-500">
-          Cancelación gratuita hasta 24 horas antes de la experiencia.
+          {t.booking.cancellationNote}
         </p>
       </div>
     </div>
@@ -175,7 +177,7 @@ const CheckoutContent = () => {
       onSubmit={handleSubmitForm}
       className="flex w-full flex-col gap-y-8 border-neutral-200 px-0 sm:rounded-4xl sm:border sm:p-6 xl:p-8 dark:border-neutral-700"
     >
-      <h1 className="text-3xl font-semibold lg:text-4xl">Confirmar y pagar</h1>
+      <h1 className="text-3xl font-semibold lg:text-4xl">{t.booking.confirmAndPay}</h1>
       <Divider />
       <YourTrip
         initialExplorers={experiencia.explorers}
@@ -195,12 +197,12 @@ const CheckoutContent = () => {
           disabled={isLoading}
           className="mt-10 w-full text-base/6! sm:w-auto disabled:opacity-60"
         >
-          {isLoading ? 'Guardando reserva...' : 'Confirmar reserva'}
+          {isLoading ? t.booking.savingBooking : t.booking.confirmBooking}
         </ButtonPrimary>
         <p className="mt-3 text-sm text-neutral-500">
           Al confirmar aceptas los{' '}
           <a href="/terminos" className="underline">
-            términos y condiciones
+            {t.booking.termsLink}
           </a>{' '}
           de DoCoolture.
         </p>

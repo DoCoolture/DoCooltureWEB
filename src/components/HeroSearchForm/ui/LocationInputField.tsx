@@ -28,51 +28,51 @@ type Suggest = {
 const demoInitSuggests: Suggest[] = [
   {
     id: '1',
-    name: 'Bangkok, Thailand',
-    icon: HutIcon,
-  },
-  {
-    id: '2',
-    name: 'Ueno, Taito, Tokyo',
-    icon: EiffelTowerIcon,
-  },
-  {
-    id: '3',
-    name: 'Ikebukuro, Toshima, Tokyo',
+    name: 'Zona Colonial, Santo Domingo',
     icon: TwinTowerIcon,
   },
   {
-    id: '4',
-    name: 'San Diego, CA',
+    id: '2',
+    name: 'Punta Cana, La Altagracia',
     icon: BeachIcon,
   },
   {
-    id: '5',
-    name: 'Humboldt Park, Chicago, IL',
+    id: '3',
+    name: 'Santiago de los Caballeros',
+    icon: HutIcon,
+  },
+  {
+    id: '4',
+    name: 'Puerto Plata, República Dominicana',
     icon: LakeIcon,
+  },
+  {
+    id: '5',
+    name: 'Samaná, República Dominicana',
+    icon: EiffelTowerIcon,
   },
 ]
 
 const demoSearchingSuggests: Suggest[] = [
   {
     id: '1',
-    name: 'San Diego, CA',
+    name: 'Zona Colonial, Santo Domingo',
   },
   {
     id: '2',
-    name: 'Humboldt Park, Chicago, IL',
+    name: 'Punta Cana, La Altagracia',
   },
   {
     id: '3',
-    name: 'Bangor, Northern Ireland',
+    name: 'Puerto Plata, RD',
   },
   {
     id: '4',
-    name: 'New York, NY, United States',
+    name: 'Jarabacoa, La Vega',
   },
   {
     id: '5',
-    name: 'Los Angeles, CA, United States',
+    name: 'Boca Chica, Santo Domingo',
   },
 ]
 

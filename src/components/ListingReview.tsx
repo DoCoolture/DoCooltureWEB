@@ -1,4 +1,4 @@
-import { TListingReivew } from '@/data/data'
+import { ExperienceReview } from '@/data/reviews'
 import Avatar from '@/shared/Avatar'
 import { StarIcon } from '@heroicons/react/24/solid'
 import clsx from 'clsx'
@@ -6,16 +6,21 @@ import { FC } from 'react'
 
 interface Props {
   className?: string
-  reivew: TListingReivew
+  review: ExperienceReview
 }
 
-const ListingReview: FC<Props> = ({ className = '', reivew }) => {
-  const { author, authorAvatar, content, date, rating, title } = reivew
+const ListingReview: FC<Props> = ({ className = '', review }) => {
+  const { reviewer_name, reviewer_avatar_url, comment, created_at, rating } = review
+  const date = new Date(created_at).toLocaleDateString('es-DO', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
 
   return (
     <div className={`flex gap-x-4 ${className}`}>
       <div className="pt-0.5">
-        <Avatar className="size-10" src={authorAvatar.src} />
+        <Avatar className="size-10" src={reviewer_avatar_url ?? undefined} />
       </div>
       <div className="flex grow flex-col gap-2.5">
         <div className="flex items-center">
@@ -28,14 +33,14 @@ const ListingReview: FC<Props> = ({ className = '', reivew }) => {
           ))}
         </div>
         <div className="flex flex-col">
-          <div className="font-medium">{author}</div>
+          <div className="font-medium">{reviewer_name}</div>
           <span className="mt-0.5 text-sm text-neutral-500 dark:text-neutral-400">{date}</span>
         </div>
-
-        <div
-          className="mt-2 block max-w-xl text-sm/relaxed text-neutral-700 sm:text-base/relaxed dark:text-neutral-300"
-          dangerouslySetInnerHTML={{ __html: content }}
-        ></div>
+        {comment && (
+          <p className="mt-2 block max-w-xl text-sm/relaxed text-neutral-700 sm:text-base/relaxed dark:text-neutral-300">
+            {comment}
+          </p>
+        )}
       </div>
     </div>
   )

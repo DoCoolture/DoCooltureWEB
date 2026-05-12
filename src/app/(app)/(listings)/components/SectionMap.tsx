@@ -1,34 +1,39 @@
+'use client'
+
+import { Map, MapControls, MapMarker, MarkerContent } from '@/components/ui/map'
 import { Divider } from '@/shared/divider'
+import { MapPinIcon } from '@heroicons/react/24/outline'
 import { SectionHeading, SectionSubheading } from './SectionHeading'
 
 interface Props {
   className?: string
-  heading?: string
-  subheading?: string
+  lat?: number
+  lng?: number
+  address?: string
 }
 
-const SectionMap = ({ className, heading, subheading }: Props) => {
+const SectionMap = ({ className, lat, lng, address }: Props) => {
+  if (!lat || !lng) return null
+
   return (
-    <div className="listingSection__wrap">
-      {/* HEADING */}
+    <div className={`listingSection__wrap ${className ?? ''}`}>
       <div>
-        <SectionHeading>Location </SectionHeading>
-        <SectionSubheading> San Diego, CA, United States of America (SAN-San Diego Intl.) </SectionSubheading>
+        <SectionHeading>Ubicación</SectionHeading>
+        {address && <SectionSubheading>{address}</SectionSubheading>}
       </div>
       <Divider className="w-14!" />
 
-      {/* MAP */}
-      <div className="aspect-w-5 rounded-xl ring-1 ring-black/10 aspect-h-6 sm:aspect-h-3 lg:aspect-h-2">
-        <div className="z-0 overflow-hidden rounded-xl">
-          <iframe
-            width="100%"
-            height="100%"
-            loading="lazy"
-            allowFullScreen
-            referrerPolicy="no-referrer-when-downgrade"
-            src="https://www.google.com/maps/embed/v1/place?key=AIzaSyAGVJfZMAKYfZ71nzL_v5i3LjTTWnCYwTY&q=Eiffel+Tower,Paris+France"
-          ></iframe>
-        </div>
+      <div className="h-64 overflow-hidden rounded-xl ring-1 ring-black/10 sm:h-80 lg:h-96 dark:ring-white/10">
+        <Map center={[lng, lat]} zoom={13} className="h-full w-full">
+          <MapControls showZoom position="bottom-right" />
+          <MapMarker longitude={lng} latitude={lat}>
+            <MarkerContent>
+              <div className="flex size-9 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg ring-2 ring-white">
+                <MapPinIcon className="size-4" />
+              </div>
+            </MarkerContent>
+          </MapMarker>
+        </Map>
       </div>
     </div>
   )

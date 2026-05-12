@@ -66,6 +66,12 @@ export const getLanguages = async () => {
       description: 'France',
       href: '#',
     },
+    {
+      id: 'Italian',
+      name: 'Italiano',
+      description: 'Italia',
+      href: '#',
+    },
     // OCULTO - idiomas originales no relevantes
     // { id: 'Vietnamese', name: 'Vietnamese', description: 'Vietnamese', href: '#' },
     // { id: 'Francais', name: 'Francais', description: 'Belgique', href: '#' },

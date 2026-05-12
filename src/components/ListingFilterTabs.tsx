@@ -21,6 +21,7 @@ import {
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { FilterVerticalIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
+import { useLanguage } from '@/context/LanguageContext'
 import clsx from 'clsx'
 import Form from 'next/form'
 import { useRouter } from 'next/navigation'
@@ -121,6 +122,7 @@ const ListingFilterTabs = ({
   filterOptions?: any[]
 }) => {
   const router = useRouter()
+  const { t } = useLanguage()
   const [showAllFilter, setShowAllFilter] = useState(false)
 
   const handleFormSubmit = (formData: FormData) => {
@@ -166,7 +168,7 @@ const ListingFilterTabs = ({
           className="w-full border-black! ring-1 ring-black ring-inset md:w-auto dark:border-neutral-200! dark:ring-neutral-200"
         >
           <HugeiconsIcon icon={FilterVerticalIcon} size={16} color="currentColor" strokeWidth={1.5} />
-          <span>Todos los filtros</span>
+          <span>{t.filters.allFilters}</span>
           {totalActiveFilters > 0 && (
             <span className="absolute top-0 -right-0.5 flex size-5 items-center justify-center rounded-full bg-black text-[0.65rem] font-semibold text-white ring-2 ring-white dark:bg-neutral-200 dark:text-neutral-900 dark:ring-neutral-900">
               {totalActiveFilters}
@@ -192,7 +194,7 @@ const ListingFilterTabs = ({
             >
               <div className="relative shrink-0 border-b border-neutral-200 p-4 text-center sm:px-8 dark:border-neutral-800">
                 <DialogTitle as="h3" className="text-lg leading-6 font-medium text-gray-900 dark:text-neutral-100">
-                  Filtros
+                  {t.filters.filtersTitle}
                 </DialogTitle>
                 <div className="absolute end-2 top-2">
                   <ButtonClose plain onClick={() => setShowAllFilter(false)} />
@@ -224,10 +226,10 @@ const ListingFilterTabs = ({
 
               <div className="flex shrink-0 items-center justify-between bg-neutral-50 p-4 sm:px-8 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
                 <ButtonThird className="-mx-3" onClick={handleClearAll} type="button">
-                  Limpiar todo
+                  {t.filters.clearAll}
                 </ButtonThird>
                 <ButtonPrimary type="submit">
-                  Aplicar filtros
+                  {t.filters.applyFilters}
                 </ButtonPrimary>
               </div>
             </DialogPanel>
@@ -238,7 +240,7 @@ const ListingFilterTabs = ({
   }
 
   if (!filterOptions || filterOptions.length === 0) {
-    return <div>No hay filtros disponibles</div>
+    return <div>{t.filters.noFilters}</div>
   }
 
   return (
@@ -295,10 +297,10 @@ const ListingFilterTabs = ({
                   </div>
                   <div className="flex items-center justify-between rounded-b-2xl bg-neutral-50 p-5 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
                     <CloseButton className="-mx-3" as={ButtonThird} type="button" onClick={handleClearAll}>
-                      Limpiar
+                      {t.filters.clear}
                     </CloseButton>
                     <CloseButton type="submit" as={ButtonPrimary}>
-                      Aplicar
+                      {t.filters.apply}
                     </CloseButton>
                   </div>
                 </div>

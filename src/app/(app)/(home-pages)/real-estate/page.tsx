@@ -5,10 +5,10 @@ import SectionGridAuthorBox from '@/components/SectionGridAuthorBox'
 import SectionGridFeatureProperty from '@/components/SectionGridFeatureProperty'
 import SectionOurFeatures from '@/components/SectionOurFeatures'
 import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
-// import SectionSubscribe2 from '@/components/SectionSubscribe2'
 import { getAuthors } from '@/data/authors'
 import { getRealEstateCategories } from '@/data/categories'
 import { getRealEstateListings } from '@/data/listings'
+import { getServerT } from '@/lib/locale-server'
 import heroImage from '@/images/hero-right-3.png'
 import logo1Dark from '@/images/logos/dark/1.png'
 import logo2Dark from '@/images/logos/dark/2.png'
@@ -25,12 +25,16 @@ import HeadingWithSub from '@/shared/Heading'
 import { Metadata } from 'next'
 import Image from 'next/image'
 
-export const metadata: Metadata = {
-  title: 'Propiedades',
-  description: 'Encuentra propiedades en venta y alquiler en la República Dominicana. Casas, apartamentos y villas con los mejores anfitriones locales.',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getServerT()
+  return {
+    title: t.realEstatePage.title,
+    description: t.realEstatePage.description,
+  }
 }
 
-const SectionHero = () => {
+const SectionHero = ({ heroText }: { heroText: string }) => {
+  const [line1, line2] = heroText.split('\n')
   return (
     <div className="relative">
       <div className="absolute inset-y-0 end-0 w-full grow lg:w-3/4">
@@ -48,8 +52,7 @@ const SectionHero = () => {
           <div className="absolute inset-y-0 end-20 w-screen bg-primary-500 md:end-40"></div>
           <div className="relative max-w-2xl py-10 text-white sm:py-20 xl:py-24">
             <h2 className="text-4xl/[1.1] font-semibold text-pretty md:text-6xl/[1.1] xl:text-7xl/[1.1]">
-              Encuentra tu <br />
-              propiedad ideal
+              {line1} <br /> {line2}
             </h2>
           </div>
         </div>
@@ -103,28 +106,32 @@ const SectionLogoCloud = () => {
 }
 
 async function Home() {
-  const authors = await getAuthors()
-  const categories = await getRealEstateCategories()
-  const listings = await getRealEstateListings()
+  const [authors, categories, listings, t] = await Promise.all([
+    getAuthors(),
+    getRealEstateCategories(),
+    getRealEstateListings(),
+    getServerT(),
+  ])
+  const re = t.realEstatePage
 
   return (
     <main className="relative overflow-hidden">
       <div className="relative container mb-24 flex flex-col gap-y-24 lg:mb-28 lg:gap-y-32">
-        <SectionHero />
+        <SectionHero heroText={re.hero} />
         <SectionOurFeatures type="type2" rightImg={ourFeatureImage} />
         <SectionGridFeatureProperty listing={listings} />
         <div className="relative py-20">
           <BackgroundSection className="bg-neutral-100 dark:bg-black/20" />
-          <HeadingWithSub isCenter subheading="Conoce a los anfitriones que hacen posible DoCoolture">
-            Nuestros anfitriones
+          <HeadingWithSub isCenter subheading={re.ourHostsSubheading}>
+            {re.ourHostsHeading}
           </HeadingWithSub>
           <SectionGridAuthorBox boxCard="box2" authors={authors} />
         </div>
         <SectionLogoCloud />
         <SectionDowloadApp />
         <div>
-          <HeadingWithSub subheading="Explora los mejores lugares para alojarte en la República Dominicana">
-            Empieza tu aventura
+          <HeadingWithSub subheading={re.adventureSubheading}>
+            {re.adventureHeading}
           </HeadingWithSub>
           <SectionSliderNewCategories categoryCardType="card4" categories={categories.slice(0, 7)} />
         </div>

@@ -1,10 +1,7 @@
 import { Calendar01Icon, Comment01Icon } from '@/components/Icons'
-import ListingReview from '@/components/ListingReview'
 import StartRating from '@/components/StartRating'
 import { getAuthorByHandle } from '@/data/authors'
-import { getListingReviews } from '@/data/data'
 import Avatar from '@/shared/Avatar'
-import ButtonSecondary from '@/shared/ButtonSecondary'
 import { Divider } from '@/shared/divider'
 import { Link } from '@/shared/link'
 import SocialsList from '@/shared/SocialsList'
@@ -35,7 +32,6 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
 const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const { handle } = await params
 
-  const reviews = await getListingReviews(handle)
   const author = await getAuthorByHandle(handle)
 
   if (!author?.id) {
@@ -125,20 +121,11 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const renderSectionReviews = () => {
     return (
       <div className="listingSection__wrap">
-        {/* HEADING */}
         <h2 className="text-2xl font-semibold">What guests are saying about {displayName}</h2>
         <div className="w-14 border-b border-neutral-200 dark:border-neutral-700"></div>
-
-        {/* comment */}
-        <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-          {reviews.map((review) => (
-            <ListingReview key={review.id} className="py-8 first:pt-0 last:pb-0" reivew={review} />
-          ))}
-
-          <div className="pt-8">
-            <ButtonSecondary>View more 20 reviews</ButtonSecondary>
-          </div>
-        </div>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+          Aún no hay reseñas para este anfitrión.
+        </p>
       </div>
     )
   }

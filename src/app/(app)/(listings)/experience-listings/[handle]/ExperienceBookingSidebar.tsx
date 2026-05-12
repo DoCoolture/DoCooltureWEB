@@ -1,6 +1,7 @@
 'use client'
 
 import StartRating from '@/components/StartRating'
+import { useLanguage } from '@/context/LanguageContext'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
 import Form from 'next/form'
@@ -25,6 +26,7 @@ export function ExperienceBookingSidebar({
   reviewCount,
   action,
 }: Props) {
+  const { t } = useLanguage()
   const [explorerCount, setExplorerCount] = useState(1)
   const precioNum = Number(price.replace('$', ''))
 
@@ -35,7 +37,7 @@ export function ExperienceBookingSidebar({
         <span className="text-3xl font-semibold">
           {price}
           <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
-            /persona
+            /{t.booking.explorer}
           </span>
         </span>
         <StartRating size="lg" point={reviewStart} reviewCount={reviewCount} />
@@ -55,15 +57,15 @@ export function ExperienceBookingSidebar({
       {/* DESGLOSE DINÁMICO */}
       <DescriptionList>
         <DescriptionTerm>
-          {price} × {explorerCount} explorer{explorerCount > 1 ? 's' : ''}
+          {price} × {explorerCount} {explorerCount > 1 ? t.booking.explorers : t.booking.explorer}
         </DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
           ${(precioNum * explorerCount).toFixed(2)}
         </DescriptionDetails>
-        <DescriptionTerm>Cargo de procesamiento</DescriptionTerm>
+        <DescriptionTerm>{t.booking.processingFee}</DescriptionTerm>
         <DescriptionDetails className="sm:text-right">$2.50</DescriptionDetails>
         <DescriptionTerm className="font-semibold text-neutral-900 dark:text-neutral-100">
-          Total
+          {t.booking.total}
         </DescriptionTerm>
         <DescriptionDetails className="font-semibold sm:text-right">
           ${(precioNum * explorerCount + 2.5).toFixed(2)}
@@ -72,14 +74,14 @@ export function ExperienceBookingSidebar({
 
       {/* INFO IMPORTANTE */}
       <div className="rounded-xl bg-neutral-50 p-4 text-sm text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
-        <p>⏰ Cancelación gratuita hasta 24 horas antes.</p>
-        <p className="mt-1">👥 Máximo {maxGuests} personas por grupo.</p>
+        <p>⏰ {t.booking.cancellationNote}</p>
+        <p className="mt-1">👥 {t.booking.maxGuests} {maxGuests}</p>
         {date && <p className="mt-1">📅 {date}</p>}
       </div>
 
       {/* BOTÓN RESERVAR */}
       <ButtonPrimary form="booking-form" type="submit">
-        Reservar ahora
+        {t.booking.bookNow}
       </ButtonPrimary>
     </div>
   )

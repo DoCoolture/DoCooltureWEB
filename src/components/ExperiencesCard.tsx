@@ -5,6 +5,7 @@ import GallerySlider from '@/components/GallerySlider'
 import SaleOffBadge from '@/components/SaleOffBadge'
 import StartRating from '@/components/StartRating'
 import { useCurrency } from '@/context/CurrencyContext'
+import { useLanguage } from '@/context/LanguageContext'
 import { TExperienceListing } from '@/data/listings'
 import { Badge } from '@/shared/Badge'
 import Link from 'next/link'
@@ -39,6 +40,7 @@ const ExperiencesCard: FC<Props> = ({
 
   // ✅ Conversión de moneda real
   const { convertPrice } = useCurrency()
+  const { t } = useLanguage()
   const precioNum = Number(price.replace('$', '').replace(',', ''))
   const precioConvertido = convertPrice(precioNum)
 
@@ -79,7 +81,7 @@ const ExperiencesCard: FC<Props> = ({
                   /
                 </span>
                 <span className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
-                  explorer
+                  {t.booking.explorer}
                 </span>
               </>
             )}

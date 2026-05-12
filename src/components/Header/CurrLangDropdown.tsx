@@ -81,6 +81,7 @@ const Languages = ({
     Spanish: 'es',
     English: 'en',
     French: 'fr',
+    Italian: 'it',
   }
 
   return (

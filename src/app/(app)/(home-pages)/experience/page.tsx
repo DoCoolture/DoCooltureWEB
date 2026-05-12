@@ -4,14 +4,13 @@ import ExperiencesCard from '@/components/ExperiencesCard'
 import HeroSectionWithSearchForm1 from '@/components/hero-sections/HeroSectionWithSearchForm1'
 import HeroSearchForm from '@/components/HeroSearchForm/HeroSearchForm'
 import SectionClientSay from '@/components/SectionClientSay'
-// import SectionGridAuthorBox from '@/components/SectionGridAuthorBox' // OCULTO - Become a host
 import SectionGridCategoryBox from '@/components/SectionGridCategoryBox'
 import SectionHowItWork from '@/components/SectionHowItWork'
 import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
-// import SectionSubscribe2 from '@/components/SectionSubscribe2'
-// import { getAuthors } from '@/data/authors'  // OCULTO - No se usa sin Become a host
 import { getExperienceCategories } from '@/data/categories'
 import { getExperienceListings } from '@/data/listings'
+import { getPublicTestimonials } from '@/data/reviews'
+import { getServerT } from '@/lib/locale-server'
 import heroImage from '@/images/hero-right-experience.png'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { Divider } from '@/shared/divider'
@@ -20,44 +19,50 @@ import { ArrowRight02Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-  title: 'Experiencias',
-  description:
-    'Descubre la República Dominicana que no aparece en los resorts. Experiencias culturales auténticas, diseñadas para entender el país desde su historia, su gente y su identidad.',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getServerT()
+  return {
+    title: t.homePage.sectionHero.title.slice(0, 60),
+    description: t.homePage.sectionHero.description,
+  }
 }
 
 async function Home() {
-  const categories = await getExperienceCategories()
-  const experienceListings = await getExperienceListings()
-  // const authors = await getAuthors() // OCULTO - No se usa sin Become a host
+  const [categories, experienceListings, testimonials, t] = await Promise.all([
+    getExperienceCategories(),
+    getExperienceListings(),
+    getPublicTestimonials(),
+    getServerT(),
+  ])
+  const hp = t.homePage
 
   return (
     <main className="relative overflow-hidden">
       <BgGlassmorphism />
       <div className="relative container mb-24 flex flex-col gap-y-24 lg:mb-28 lg:gap-y-32">
 
-        {/* ===== HERO ===== */}
+        {/* HERO */}
         <HeroSectionWithSearchForm1
-          heading="Descubre la República Dominicana que no aparece en los resorts."
+          heading={hp.sectionHero.title}
           image={heroImage}
           imageAlt="Experiencias auténticas en la República Dominicana"
           searchForm={<HeroSearchForm initTab="Experiences" />}
           description={
             <>
               <p className="max-w-xl text-base text-neutral-500 sm:text-xl dark:text-neutral-400">
-                Experiencias culturales auténticas, diseñadas para entender el país desde su historia, su gente y su identidad.
+                {hp.sectionHero.description}
               </p>
-              <ButtonPrimary href={'/experience-categories/all'} className="sm:text-base/normal">
-                Explorar experiencias
+              <ButtonPrimary href="/experience-categories/all" className="sm:text-base/normal">
+                {hp.sectionHero.button}
               </ButtonPrimary>
             </>
           }
         />
 
-        {/* ===== SECCIÓN: Explora por categorías (slider) ===== */}
+        {/* Explora por categorías */}
         <div>
-          <HeadingWithSub subheading="Elige tu destino en la República Dominicana">
-            Explora por categorías
+          <HeadingWithSub subheading={hp.exploreByCategorySubheading}>
+            {hp.exploreByCategory}
           </HeadingWithSub>
           <SectionSliderNewCategories
             itemClassName="w-[17rem] lg:w-1/3 xl:w-1/4"
@@ -66,11 +71,11 @@ async function Home() {
           />
         </div>
 
-        {/* ===== SECCIÓN: Experiencias destacadas ===== */}
+        {/* Experiencias destacadas */}
         <div className="relative py-20">
           <BackgroundSection />
-          <HeadingWithSub isCenter subheading="Seleccionadas especialmente para ti.">
-            Experiencias destacadas
+          <HeadingWithSub isCenter subheading={hp.featuredSubheading}>
+            {hp.featuredExperiences}
           </HeadingWithSub>
           <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 md:gap-x-8 md:gap-y-12 lg:mt-10 lg:grid-cols-3 xl:grid-cols-4">
             {experienceListings.map((listing) => (
@@ -79,47 +84,28 @@ async function Home() {
           </div>
           <div className="mt-16 flex justify-center">
             <ButtonPrimary href="/experience-categories/all">
-              <span>Ver todas las experiencias</span>
-              <HugeiconsIcon
-                icon={ArrowRight02Icon}
-                size={20}
-                color="currentColor"
-                strokeWidth={1.5}
-                className="rtl:rotate-180"
-              />
+              <span>{hp.viewAll}</span>
+              <HugeiconsIcon icon={ArrowRight02Icon} size={20} color="currentColor" strokeWidth={1.5} className="rtl:rotate-180" />
             </ButtonPrimary>
           </div>
         </div>
 
-        {/* ===== SECCIÓN: Cómo funciona ===== */}
+        {/* Cómo funciona */}
         <SectionHowItWork />
 
-        {/* OCULTO - Sección "Become a host" / Autores
-        <div className="relative py-20">
-          <BackgroundSection />
-          <HeadingWithSub isCenter subheading="Meet the best our authors.">
-            Become a host
-          </HeadingWithSub>
-          <SectionGridAuthorBox authors={authors} />
-        </div>
-        */}
-
-        {/* ===== SECCIÓN: Explora por destino (grid de ciudades) ===== */}
+        {/* Explora por destino */}
         <div>
-          <HeadingWithSub isCenter subheading="Destinos piloto disponibles en DoCoolture">
-            Explora por destino
+          <HeadingWithSub isCenter subheading={hp.exploreByDestinationSubheading}>
+            {hp.exploreByDestination}
           </HeadingWithSub>
           <SectionGridCategoryBox categories={categories.slice(0, 3)} />
         </div>
 
-        {/* ===== SECCIÓN: Newsletter ===== */}
-        {/* <SectionSubscribe2 /> */}
-
         <Divider />
 
-        {/* ===== SECCIÓN: Testimonios ===== */}
+        {/* Testimonios */}
         <div className="relative py-10">
-          <SectionClientSay />
+          <SectionClientSay testimonials={testimonials.length > 0 ? testimonials : undefined} />
         </div>
 
       </div>

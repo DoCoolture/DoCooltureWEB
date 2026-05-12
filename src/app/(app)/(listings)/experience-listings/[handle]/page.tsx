@@ -1,4 +1,4 @@
-import { getListingReviews } from '@/data/data'
+import { getExperienceReviews } from '@/data/reviews'
 import { getExperienceListingByHandle } from '@/data/listings'
 import { Divider } from '@/shared/divider'
 import { CheckCircleIcon, ClockIcon, LanguageIcon, UsersIcon } from '@heroicons/react/24/outline'
@@ -58,7 +58,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
     languages,
   } = listing
 
-  const reviews = (await getListingReviews(handle)).slice(0, 3)
+  const reviews = await getExperienceReviews(listing.id)
 
   // ✅ Server action — pasa todos los datos de la experiencia al checkout
   const handleSubmitForm = async (formData: FormData) => {
@@ -213,10 +213,11 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
               reviewCount={reviewCount}
               reviewStart={reviewStart}
               reviews={reviews}
+              experienceId={listing.id}
             />
           </div>
         </div>
-        <SectionMap />
+        <SectionMap lat={map?.lat} lng={map?.lng} address={address} />
       </div>
     </div>
   )

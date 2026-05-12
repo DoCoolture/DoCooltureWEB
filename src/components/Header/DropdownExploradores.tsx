@@ -1,31 +1,35 @@
 'use client'
 
+import { useLanguage } from '@/context/LanguageContext'
 import { CloseButton, Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/24/solid'
 import { HotAirBalloonFreeIcons, UserGroupIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import Link from 'next/link'
 
-const opciones = [
-  {
-    name: 'Experiencias',
-    description: 'Descubre experiencias culturales auténticas en la República Dominicana',
-    href: '/experience',
-    icon: HotAirBalloonFreeIcons,
-  },
-  {
-    name: 'Talento',
-    description: 'Fotógrafos, chefs, artesanos, guías, pintores y más',
-    href: '/talento',
-    icon: UserGroupIcon,
-  },
-]
-
 export default function DropdownExploradores() {
+  const { t } = useLanguage()
+  const nav = t.navigation
+
+  const opciones = [
+    {
+      name: nav.experiences,
+      description: nav.experiencesDesc,
+      href: '/experience',
+      icon: HotAirBalloonFreeIcons,
+    },
+    {
+      name: nav.talent,
+      description: nav.talentDesc,
+      href: '/talento',
+      icon: UserGroupIcon,
+    },
+  ]
+
   return (
     <Popover className="group">
       <PopoverButton className="-m-2.5 flex items-center p-2.5 text-sm font-medium text-neutral-700 group-hover:text-neutral-950 focus:outline-hidden dark:text-neutral-300 dark:group-hover:text-neutral-100">
-        Exploradores
+        {nav.explorers}
         <ChevronDownIcon className="ms-1 size-4 group-data-open:rotate-180" aria-hidden="true" />
       </PopoverButton>
 
@@ -64,10 +68,10 @@ export default function DropdownExploradores() {
               className="block space-y-0.5 rounded-md px-2 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-600"
             >
               <span className="flex items-center text-sm font-medium text-neutral-900 dark:text-neutral-100">
-                Comienza tu aventura
+                {nav.startAdventure}
               </span>
               <span className="line-clamp-1 text-xs text-neutral-500 dark:text-neutral-400">
-                Descubre experiencias auténticas en la República Dominicana
+                {nav.startAdventureDesc}
               </span>
             </Link>
           </div>

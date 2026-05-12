@@ -3,13 +3,14 @@
 import { en } from '../../public/locales/en'
 import { es } from '../../public/locales/es'
 import { fr } from '../../public/locales/fr'
+import { it } from '../../public/locales/it'
 import { useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
 
-export type Locale = 'es' | 'en' | 'fr'
+export type Locale = 'es' | 'en' | 'fr' | 'it'
 
-const translations = { es, en, fr }
-const VALID_LOCALES: Locale[] = ['es', 'en', 'fr']
+const translations = { es, en, fr, it }
+const VALID_LOCALES: Locale[] = ['es', 'en', 'fr', 'it']
 
 interface LanguageContextType {
   locale: Locale

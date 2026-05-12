@@ -20,17 +20,26 @@ import useEmblaCarousel from 'embla-carousel-react'
 import Image from 'next/image'
 import { FC } from 'react'
 
+type Testimonial = {
+  id: string | number
+  content: string
+  clientName: string
+}
+
 interface SectionClientSayProps {
   className?: string
   emblaOptions?: EmblaOptionsType
+  testimonials?: Testimonial[]
 }
 
 const SectionClientSay: FC<SectionClientSayProps> = ({
   className,
   emblaOptions = { slidesToScroll: 1, loop: true },
+  testimonials: testimonialsProp,
 }) => {
   const { t } = useLanguage()
-  const { heading, subheading, testimonials } = t.sections.clientSay
+  const { heading, subheading, testimonials: localeTestimonials } = t.sections.clientSay
+  const testimonials = testimonialsProp ?? localeTestimonials
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { ...emblaOptions, direction: process.env.NEXT_PUBLIC_THEME_DIR },

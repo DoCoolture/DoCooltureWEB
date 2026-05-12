@@ -2,7 +2,8 @@
 
 import { Dialog, DialogBody, DialogTitle } from '@/components/dialog'
 import ListingReview from '@/components/ListingReview'
-import { TListingReivew } from '@/data/data'
+import { ExperienceReview } from '@/data/reviews'
+import { supabase } from '@/lib/supabase'
 import ButtonCircle from '@/shared/ButtonCircle'
 import ButtonSecondary from '@/shared/ButtonSecondary'
 import { Divider } from '@/shared/divider'
@@ -15,24 +16,65 @@ import { SectionHeading } from './SectionHeading'
 interface Props {
   reviewCount: number
   reviewStart: number
-  reviews: TListingReivew[]
+  reviews: ExperienceReview[]
+  experienceId: string
 }
 
-const SectionListingReviews = ({ reviews, reviewCount, reviewStart }: Props) => {
-  let [isOpen, setIsOpen] = useState(false)
+const SectionListingReviews = ({ reviews: initialReviews, reviewCount, reviewStart, experienceId }: Props) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const [reviews, setReviews] = useState(initialReviews)
+  const [comment, setComment] = useState('')
+  const [name, setName] = useState('')
+  const [rating, setRating] = useState(5)
+  const [hovered, setHovered] = useState(0)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleSubmit = async () => {
+    if (!comment.trim() || !name.trim()) return
+    setSubmitting(true)
+    setError(null)
+
+    const newReview = {
+      experience_id: experienceId,
+      reviewer_name: name.trim(),
+      comment: comment.trim(),
+      rating,
+      is_visible: true,
+    }
+
+    const { data, error: supabaseError } = await supabase
+      .from('experience_reviews')
+      .insert(newReview)
+      .select()
+      .single()
+
+    if (supabaseError) {
+      setError('No se pudo guardar tu reseña. Intenta de nuevo.')
+    } else if (data) {
+      setReviews((prev) => [data as ExperienceReview, ...prev])
+      setSubmitted(true)
+      setComment('')
+      setName('')
+    }
+    setSubmitting(false)
+  }
+
+  const displayRating = hovered || rating
 
   return (
     <>
       <div className="flex flex-col gap-y-6 pt-8 sm:gap-y-8">
         {/* HEADING */}
         <div>
-          <SectionHeading>Reviews ({reviewCount} reviews) </SectionHeading>
-          <div className="mt-4 flex items-center">
-            {[0, 1, 2, 3, 4].map((number) => (
+          <SectionHeading>Reviews ({reviews.length} reviews)</SectionHeading>
+          <div className="mt-4 flex items-center gap-x-1">
+            {[0, 1, 2, 3, 4].map((n) => (
               <StarIcon
-                key={number}
+                key={n}
                 aria-hidden="true"
-                className={clsx(reviewStart > number ? 'text-yellow-400' : 'text-gray-200', 'size-6 shrink-0')}
+                className={clsx(reviewStart > n ? 'text-yellow-400' : 'text-gray-200', 'size-6 shrink-0')}
               />
             ))}
           </div>
@@ -40,39 +82,93 @@ const SectionListingReviews = ({ reviews, reviewCount, reviewStart }: Props) => 
 
         <Divider className="w-14!" />
 
-        {/* Content */}
-        <div className="relative">
-          <Input
-            sizeClass="h-16 px-6 py-3"
-            fontClass="text-base/6"
-            rounded="rounded-full"
-            placeholder="Share your thoughts ..."
-          />
-          <div className="absolute end-2 top-1/2 -translate-y-1/2">
-            <ButtonCircle className="size-12!">
-              <ArrowRightIcon className="h-5 w-5 rtl:rotate-180" />
-            </ButtonCircle>
+        {/* SUBMIT FORM */}
+        {submitted ? (
+          <p className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
+            ✅ ¡Gracias por tu reseña!
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            <Input
+              placeholder="Tu nombre"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              rounded="rounded-full"
+              sizeClass="h-12 px-5"
+            />
+            {/* Star picker */}
+            <div className="flex items-center gap-x-1 px-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setRating(star)}
+                  onMouseEnter={() => setHovered(star)}
+                  onMouseLeave={() => setHovered(0)}
+                  className="focus:outline-none"
+                >
+                  <StarIcon
+                    className={clsx(
+                      'size-6 transition-colors',
+                      displayRating >= star ? 'text-yellow-400' : 'text-gray-200 hover:text-yellow-300'
+                    )}
+                  />
+                </button>
+              ))}
+              <span className="ml-2 text-sm text-neutral-500">{rating} / 5</span>
+            </div>
+            <div className="relative">
+              <Input
+                sizeClass="h-16 px-6 py-3"
+                fontClass="text-base/6"
+                rounded="rounded-full"
+                placeholder="Comparte tu experiencia..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <div className="absolute end-2 top-1/2 -translate-y-1/2">
+                <ButtonCircle
+                  className="size-12!"
+                  onClick={handleSubmit}
+                  disabled={submitting || !comment.trim() || !name.trim()}
+                >
+                  <ArrowRightIcon className="h-5 w-5 rtl:rotate-180" />
+                </ButtonCircle>
+              </div>
+            </div>
+            {error && (
+              <p className="text-sm text-red-500">{error}</p>
+            )}
           </div>
-        </div>
+        )}
 
-        {/* comment */}
-        <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-          {reviews.slice(0, 3).map((item, index) => (
-            <ListingReview key={index} className="py-7" reivew={item} />
-          ))}
-          <div className="flex w-full justify-center pt-8">
-            <ButtonSecondary onClick={() => setIsOpen(true)}>View more 20 reviews</ButtonSecondary>
+        {/* REVIEWS LIST */}
+        {reviews.length > 0 ? (
+          <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
+            {reviews.slice(0, 3).map((item) => (
+              <ListingReview key={item.id} className="py-7" review={item} />
+            ))}
+            {reviews.length > 3 && (
+              <div className="flex w-full justify-center pt-8">
+                <ButtonSecondary onClick={() => setIsOpen(true)}>
+                  Ver {reviews.length - 3} reseñas más
+                </ButtonSecondary>
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            Aún no hay reseñas. ¡Sé el primero en compartir tu experiencia!
+          </p>
+        )}
       </div>
 
       <Dialog size="2xl" open={isOpen} onClose={setIsOpen}>
-        <DialogTitle>{reviewCount} reviews</DialogTitle>
-
+        <DialogTitle>{reviews.length} reviews</DialogTitle>
         <DialogBody>
           <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
-            {[...reviews, ...reviews].map((item, index) => (
-              <ListingReview key={index} className="py-7" reivew={item} />
+            {reviews.map((item) => (
+              <ListingReview key={item.id} className="py-7" review={item} />
             ))}
           </div>
         </DialogBody>
