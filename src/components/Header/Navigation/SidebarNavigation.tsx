@@ -1,7 +1,6 @@
 'use client'
 
 import { getCurrencies, getLanguages, TNavigationItem } from '@/data/navigation'
-import ButtonPrimary from '@/shared/ButtonPrimary'
 import { Divider } from '@/shared/divider'
 import { Link } from '@/shared/link'
 import SocialsList from '@/shared/SocialsList'
@@ -129,17 +128,7 @@ const SidebarNavigation: React.FC<Props> = ({ data, currencies, languages }) => 
       <ul className="flex flex-col gap-y-1 px-2 py-6">{data?.map(_renderItem)}</ul>
       <Divider className="mb-6" />
 
-      {/* FOR OUR DEMO */}
-
-      <div className="flex items-center justify-between gap-x-2.5 py-6">
-        <ButtonPrimary
-          href="https://themeforest.net/item/docoolture-online-booking-nextjs-template/43399526"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Buy this template
-        </ButtonPrimary>
-
+      <div className="flex items-center justify-end py-6">
         <CurrLangDropdown
           currencies={currencies}
           languages={languages}

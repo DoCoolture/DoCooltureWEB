@@ -34,6 +34,7 @@ type CheckboxFilter = {
   tabUIType: 'checkbox'
   options: {
     name: string
+    value?: string
     description?: string
     defaultChecked?: boolean
   }[]
@@ -69,7 +70,7 @@ const CheckboxPanel = ({
           <CheckboxField key={option.name}>
             <Checkbox
               name={`${filterOption.name}[]`}
-              value={option.name}
+              value={option.value ?? option.name}
               defaultChecked={!!option.defaultChecked}
             />
             <Label>{option.name}</Label>

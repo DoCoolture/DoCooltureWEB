@@ -2,6 +2,7 @@
 
 import ExperiencesCard from '@/components/ExperiencesCard'
 import ListingFilterTabs from '@/components/ListingFilterTabs'
+import { useLanguage } from '@/context/LanguageContext'
 import { TExperienceCategory } from '@/data/categories'
 import { getExperienceListingFilterOptions, TExperienceListing } from '@/data/listings'
 import { Divider } from '@/shared/divider'
@@ -31,13 +32,15 @@ const SectionGridHasMap: FC<Props> = ({
   totalPages,
 }) => {
   const [currentHoverID, setCurrentHoverID] = useState<string>('')
+  const { t } = useLanguage()
+  const ef = t.experienceFilters
 
   return (
     <div className={clsx('relative flex min-h-screen gap-6', className)}>
       <div className="flex w-full flex-1/2 flex-col gap-y-7 pt-8 pb-20">
         <h1 className="text-lg/none font-semibold">
-          {convertNumbThousand(allListingsCount)} experiencia{allListingsCount !== 1 ? 's' : ''}
-          {category.handle !== 'all' ? ` en ${category.name}` : ' en República Dominicana'}
+          {convertNumbThousand(allListingsCount)} {allListingsCount !== 1 ? ef.experiences : ef.experience}{' '}
+          {ef.inLocation} {category.handle !== 'all' ? category.name : ef.inDominicanRepublic}
         </h1>
 
         <ListingFilterTabs filterOptions={filterOptions} />
@@ -57,7 +60,7 @@ const SectionGridHasMap: FC<Props> = ({
 
         {listings.length === 0 && (
           <div className="py-20 text-center text-neutral-500">
-            No hay experiencias disponibles con estos filtros.
+            {ef.noExperiences}
           </div>
         )}
 

@@ -1,5 +1,6 @@
 import { getExperienceCategoryByHandle } from '@/data/categories'
 import { getExperienceListingFilterOptions, getExperienceListings } from '@/data/listings'
+import { getServerT } from '@/lib/locale-server'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import SectionGridHasMap from './SectionGridHasMap'
@@ -7,12 +8,12 @@ import SectionGridHasMap from './SectionGridHasMap'
 const ITEMS_PER_PAGE = 8
 
 const TYPE_TO_CATEGORY: Record<string, string[]> = {
-  'Gastronomía': ['Gastronomía'],
-  'Naturaleza y aventura': ['Aventura y Naturaleza'],
-  'Arte y cultura': ['Arte y Artesanía'],
-  'Tours históricos': ['Tour Cultural'],
-  'Música y baile': ['Música y Baile'],
-  'Bienestar': ['Bienestar'],
+  food_drink: ['Gastronomía'],
+  outdoor: ['Aventura y Naturaleza'],
+  arts_culture: ['Arte y Artesanía'],
+  history: ['Tour Cultural'],
+  music_dance: ['Música y Baile'],
+  wellness: ['Bienestar'],
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ handle?: string[] }> }): Promise<Metadata> {
@@ -38,15 +39,16 @@ const Page = async ({
   const { handle } = await params
   const sp = await searchParams
 
+  const t = await getServerT()
   const category = await getExperienceCategoryByHandle(handle?.[0])
   const allListings = await getExperienceListings()
-  const filterOptions = await getExperienceListingFilterOptions()
+  const filterOptions = await getExperienceListingFilterOptions(t.experienceFilters)
 
   if (!category?.id) {
     return redirect('/experience-categories/all')
   }
 
-  // Parse active filters from URL
+  // Parse active filters from URL (values like 'food_drink', 'outdoor', etc.)
   const activeTypes = (sp.experienceType as string | undefined)?.split(',').filter(Boolean) ?? []
   const page = Math.max(1, Number(sp.page) || 1)
 
@@ -73,7 +75,7 @@ const Page = async ({
       ...fo,
       options: (fo as any).options?.map((opt: any) => ({
         ...opt,
-        defaultChecked: activeTypes.includes(opt.name),
+        defaultChecked: activeTypes.includes(opt.value ?? opt.name),
       })) ?? [],
     }
   })

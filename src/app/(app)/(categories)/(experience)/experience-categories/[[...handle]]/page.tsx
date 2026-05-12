@@ -5,6 +5,7 @@ import ListingFilterTabs from '@/components/ListingFilterTabs'
 import SectionSliderCards from '@/components/SectionSliderCards'
 import { getExperienceCategoryByHandle } from '@/data/categories'
 import { getExperienceListingFilterOptions, getExperienceListings } from '@/data/listings'
+import { getServerT } from '@/lib/locale-server'
 import { Button } from '@/shared/Button'
 import { Divider } from '@/shared/divider'
 import { Heading } from '@/shared/Heading'
@@ -17,14 +18,13 @@ import { redirect } from 'next/navigation'
 
 const ITEMS_PER_PAGE = 8
 
-// Category-label → listingCategory values mapping
 const TYPE_TO_CATEGORY: Record<string, string[]> = {
-  'Gastronomía': ['Gastronomía'],
-  'Naturaleza y aventura': ['Aventura y Naturaleza'],
-  'Arte y cultura': ['Arte y Artesanía'],
-  'Tours históricos': ['Tour Cultural'],
-  'Música y baile': ['Música y Baile'],
-  'Bienestar': ['Bienestar'],
+  food_drink: ['Gastronomía'],
+  outdoor: ['Aventura y Naturaleza'],
+  arts_culture: ['Arte y Artesanía'],
+  history: ['Tour Cultural'],
+  music_dance: ['Música y Baile'],
+  wellness: ['Bienestar'],
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ handle?: string[] }> }): Promise<Metadata> {
@@ -50,15 +50,16 @@ const Page = async ({
   const { handle } = await params
   const sp = await searchParams
 
+  const t = await getServerT()
   const category = await getExperienceCategoryByHandle(handle?.[0])
   const allListings = await getExperienceListings()
-  const filterOptions = await getExperienceListingFilterOptions()
+  const filterOptions = await getExperienceListingFilterOptions(t.experienceFilters)
 
   if (!category?.id) {
     return redirect('/experience-categories/all')
   }
 
-  // Parse active filters from URL
+  // Parse active filters from URL (values like 'food_drink', 'outdoor', etc.)
   const activeTypes = (sp.experienceType as string | undefined)?.split(',').filter(Boolean) ?? []
   const page = Math.max(1, Number(sp.page) || 1)
 
@@ -85,7 +86,7 @@ const Page = async ({
       ...fo,
       options: (fo as any).options?.map((opt: any) => ({
         ...opt,
-        defaultChecked: activeTypes.includes(opt.name),
+        defaultChecked: activeTypes.includes(opt.value ?? opt.name),
       })) ?? [],
     }
   })
@@ -105,7 +106,7 @@ const Page = async ({
               <span className="ms-2.5">{category.region} </span>
               <span className="mx-5"></span>
               <HugeiconsIcon icon={HotAirBalloonIcon} size={20} color="currentColor" strokeWidth={1.5} />
-              <span className="ms-2.5">{convertNumbThousand(allListings.length)} experiences</span>
+              <span className="ms-2.5">{convertNumbThousand(allListings.length)} {allListings.length !== 1 ? t.experienceFilters.experiences : t.experienceFilters.experience}</span>
             </div>
           }
         />
@@ -116,12 +117,12 @@ const Page = async ({
         <div className="flex flex-wrap items-end justify-between gap-x-2.5 gap-y-5">
           <h2 id="heading" className="scroll-mt-20 text-lg font-semibold sm:text-xl">
             {activeTypes.length > 0
-              ? `${totalListings} experience${totalListings !== 1 ? 's' : ''} found`
-              : `${convertNumbThousand(totalListings)} experience${totalListings !== 1 ? 's' : ''}${category.handle !== 'all' ? ` in ${category.name}` : ''}`
+              ? `${totalListings} ${totalListings !== 1 ? t.experienceFilters.experiencesFound : t.experienceFilters.experienceFound}`
+              : `${convertNumbThousand(totalListings)} ${totalListings !== 1 ? t.experienceFilters.experiences : t.experienceFilters.experience}${category.handle !== 'all' ? ` ${t.experienceFilters.inLocation} ${category.name}` : ''}`
             }
           </h2>
           <Button color="white" className="ms-auto" href={'/experience-categories-map/' + category.handle}>
-            <span className="me-1">Show map</span>
+            <span className="me-1">{t.experienceFilters.showMap}</span>
             <HugeiconsIcon icon={MapsLocation01Icon} size={20} color="currentColor" strokeWidth={1.5} />
           </Button>
         </div>
@@ -137,7 +138,7 @@ const Page = async ({
           </div>
         ) : (
           <div className="mt-16 py-20 text-center text-neutral-500">
-            No hay experiencias disponibles con estos filtros.
+            {t.experienceFilters.noExperiences}
           </div>
         )}
 

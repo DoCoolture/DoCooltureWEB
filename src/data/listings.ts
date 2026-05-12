@@ -1088,48 +1088,74 @@ export async function getStayListingFilterOptions() {
   ]
 }
 
-// ✅ DOCOOLTURE — Filtros de experiencias en español
-export async function getExperienceListingFilterOptions() {
+export async function getExperienceListingFilterOptions(ef?: {
+  experienceType: string; priceRange: string; duration: string; timeOfDay: string
+  gastronomy: string; gastronomy_desc: string; outdoor: string; outdoor_desc: string
+  artsCulture: string; artsCulture_desc: string; historicalTours: string; historicalTours_desc: string
+  musicDance: string; musicDance_desc: string; wellness: string; wellness_desc: string
+  lessThan1Hour: string; lessThan1Hour_desc: string; hours1to2: string; hours1to2_desc: string
+  hours2to4: string; hours2to4_desc: string; moreThan4Hours: string; moreThan4Hours_desc: string
+  morning: string; morning_desc: string; afternoon: string; afternoon_desc: string
+  evening: string; evening_desc: string
+  [key: string]: string
+}) {
+  const f = ef ?? {
+    experienceType: 'Tipo de experiencia', priceRange: 'Rango de precio',
+    duration: 'Duración', timeOfDay: 'Momento del día',
+    gastronomy: 'Gastronomía', gastronomy_desc: 'Clases de cocina, mercados, degustaciones y más.',
+    outdoor: 'Naturaleza y aventura', outdoor_desc: 'Cascadas, senderismo y actividades al aire libre.',
+    artsCulture: 'Arte y cultura', artsCulture_desc: 'Historia, artesanía, música y tradiciones dominicanas.',
+    historicalTours: 'Tours históricos', historicalTours_desc: 'Recorre los lugares que forjaron la identidad dominicana.',
+    musicDance: 'Música y baile', musicDance_desc: 'Merengue, bachata y ritmos del Caribe.',
+    wellness: 'Bienestar', wellness_desc: 'Retiros, yoga y experiencias de relajación.',
+    lessThan1Hour: 'Menos de 1 hora', lessThan1Hour_desc: 'Experiencias cortas e intensas.',
+    hours1to2: '1 a 2 horas', hours1to2_desc: 'Perfectas para una mañana o tarde.',
+    hours2to4: '2 a 4 horas', hours2to4_desc: 'Experiencias completas con tiempo para disfrutar.',
+    moreThan4Hours: 'Más de 4 horas', moreThan4Hours_desc: 'Días completos de aventura y exploración.',
+    morning: 'Mañana', morning_desc: 'Comienza el día con energía.',
+    afternoon: 'Tarde', afternoon_desc: 'Ideal para después del almuerzo.',
+    evening: 'Noche', evening_desc: 'Experiencias nocturnas y vida cultural.',
+  }
   return [
     {
-      label: 'Tipo de experiencia',
+      label: f.experienceType,
       name: 'experienceType',
       tabUIType: 'checkbox',
       options: [
-        { name: 'Gastronomía', value: 'food_drink', description: 'Clases de cocina, mercados, degustaciones y más.', defaultChecked: false },
-        { name: 'Naturaleza y aventura', value: 'outdoor', description: 'Cascadas, senderismo y actividades al aire libre.', defaultChecked: false },
-        { name: 'Arte y cultura', value: 'arts_culture', description: 'Historia, artesanía, música y tradiciones dominicanas.', defaultChecked: false },
-        { name: 'Tours históricos', value: 'history', description: 'Recorre los lugares que forjaron la identidad dominicana.', defaultChecked: false },
-        { name: 'Música y baile', value: 'music_dance', description: 'Merengue, bachata y ritmos del Caribe.', defaultChecked: false },
-        { name: 'Bienestar', value: 'wellness', description: 'Retiros, yoga y experiencias de relajación.', defaultChecked: false },
+        { name: f.gastronomy, value: 'food_drink', description: f.gastronomy_desc, defaultChecked: false },
+        { name: f.outdoor, value: 'outdoor', description: f.outdoor_desc, defaultChecked: false },
+        { name: f.artsCulture, value: 'arts_culture', description: f.artsCulture_desc, defaultChecked: false },
+        { name: f.historicalTours, value: 'history', description: f.historicalTours_desc, defaultChecked: false },
+        { name: f.musicDance, value: 'music_dance', description: f.musicDance_desc, defaultChecked: false },
+        { name: f.wellness, value: 'wellness', description: f.wellness_desc, defaultChecked: false },
       ],
     },
     {
-      label: 'Rango de precio',
+      label: f.priceRange,
       name: 'priceRange',
       tabUIType: 'price-range',
       min: 0,
       max: 1000,
     },
     {
-      label: 'Duración',
+      label: f.duration,
       name: 'duration',
       tabUIType: 'checkbox',
       options: [
-        { name: 'Menos de 1 hora', value: 'less_than_1_hour', description: 'Experiencias cortas e intensas.', defaultChecked: false },
-        { name: '1 a 2 horas', value: '1_2_hours', description: 'Perfectas para una mañana o tarde.', defaultChecked: false },
-        { name: '2 a 4 horas', value: '2_4_hours', description: 'Experiencias completas con tiempo para disfrutar.', defaultChecked: false },
-        { name: 'Más de 4 horas', value: 'more_than_4_hours', description: 'Días completos de aventura y exploración.', defaultChecked: false },
+        { name: f.lessThan1Hour, value: 'less_than_1_hour', description: f.lessThan1Hour_desc, defaultChecked: false },
+        { name: f.hours1to2, value: '1_2_hours', description: f.hours1to2_desc, defaultChecked: false },
+        { name: f.hours2to4, value: '2_4_hours', description: f.hours2to4_desc, defaultChecked: false },
+        { name: f.moreThan4Hours, value: 'more_than_4_hours', description: f.moreThan4Hours_desc, defaultChecked: false },
       ],
     },
     {
-      label: 'Momento del día',
+      label: f.timeOfDay,
       name: 'timeOfDay',
       tabUIType: 'checkbox',
       options: [
-        { name: 'Mañana', value: 'morning', description: 'Comienza el día con energía.', defaultChecked: false },
-        { name: 'Tarde', value: 'afternoon', description: 'Ideal para después del almuerzo.', defaultChecked: false },
-        { name: 'Noche', value: 'evening', description: 'Experiencias nocturnas y vida cultural.', defaultChecked: false },
+        { name: f.morning, value: 'morning', description: f.morning_desc, defaultChecked: false },
+        { name: f.afternoon, value: 'afternoon', description: f.afternoon_desc, defaultChecked: false },
+        { name: f.evening, value: 'evening', description: f.evening_desc, defaultChecked: false },
       ],
     },
   ]
