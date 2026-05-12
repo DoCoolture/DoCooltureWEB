@@ -1,8 +1,8 @@
 'use client'
 
 import NcInputNumber from '@/components/NcInputNumber'
+import { useLanguage } from '@/context/LanguageContext'
 import { GuestsObject } from '@/type'
-import T from '@/utils/getT'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { UserPlusIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
@@ -38,7 +38,8 @@ export const GuestNumberField: FC<Props> = ({
   className = 'flex-1',
   clearDataButtonClassName,
 }) => {
-  // ✅ FIX: 1 adulto por defecto, 0 niños, 0 bebés
+  const { t } = useLanguage()
+  const hs = t.HeroSearchForm
   const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(1)
   const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(0)
   const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(0)
@@ -96,8 +97,8 @@ export const GuestNumberField: FC<Props> = ({
               onChange={(value) => handleChangeData(value, 'guestAdults')}
               max={10}
               min={1}
-              label="Adultos"
-              description="13 años o más"
+              label={hs['Adults']}
+              description={hs['Ages 13 or above']}
               inputName="guestAdults"
             />
             <NcInputNumber
@@ -106,8 +107,8 @@ export const GuestNumberField: FC<Props> = ({
               onChange={(value) => handleChangeData(value, 'guestChildren')}
               max={4}
               min={0}
-              label="Niños"
-              description="2 a 12 años"
+              label={hs['Children']}
+              description={hs['Ages 2–12']}
               inputName="guestChildren"
             />
             <NcInputNumber
@@ -116,8 +117,8 @@ export const GuestNumberField: FC<Props> = ({
               onChange={(value) => handleChangeData(value, 'guestInfants')}
               max={4}
               min={0}
-              label="Bebés"
-              description="0 a 2 años"
+              label={hs['Infants']}
+              description={hs['Ages 0–2']}
               inputName="guestInfants"
             />
           </PopoverPanel>

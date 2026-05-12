@@ -3,6 +3,7 @@
 import DatePickerCustomDay from '@/components/DatePickerCustomDay'
 import DatePickerCustomHeaderTwoMonth from '@/components/DatePickerCustomHeaderTwoMonth'
 import { excludeDateIntervals } from '@/contains/contants'
+import { useLanguage } from '@/context/LanguageContext'
 import { Divider } from '@/shared/divider'
 import { addDays } from 'date-fns'
 import { useState } from 'react'
@@ -10,6 +11,8 @@ import DatePicker from 'react-datepicker'
 import { SectionHeading, SectionSubheading } from './SectionHeading'
 
 const SectionDateRange = () => {
+  const { t } = useLanguage()
+  const el = t.experienceListing
   const [startDate, setStartDate] = useState<Date | null>(new Date())
   const [endDate, setEndDate] = useState<Date | null>(addDays(new Date(), 3))
 
@@ -22,8 +25,8 @@ const SectionDateRange = () => {
   return (
     <div className="listingSection__wrap">
       <div>
-        <SectionHeading>Availability</SectionHeading>
-        <SectionSubheading> Prices may increase on weekends or holidays</SectionSubheading>
+        <SectionHeading>{el.availability}</SectionHeading>
+        <SectionSubheading>{el.pricesMayIncrease}</SectionSubheading>
       </div>
       <Divider className="w-14!" />
 

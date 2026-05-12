@@ -3,7 +3,7 @@
 import DatePickerCustomDay from '@/components/DatePickerCustomDay'
 import DatePickerCustomHeaderTwoMonth from '@/components/DatePickerCustomHeaderTwoMonth'
 import { excludeDateIntervals } from '@/contains/contants'
-import T from '@/utils/getT'
+import { useLanguage } from '@/context/LanguageContext'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { CalendarIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
@@ -20,8 +20,10 @@ interface Props {
 const DatesRangeInputPopover: FC<Props> = ({
   className = 'flex-1',
   buttonClassName,
-  inputDescription = `${T['HeroSearchForm']['CheckIn']} - ${T['HeroSearchForm']['CheckOut']}`,
+  inputDescription,
 }) => {
+  const { t } = useLanguage()
+  const resolvedDescription = inputDescription ?? `${t.HeroSearchForm['CheckIn']} - ${t.HeroSearchForm['CheckOut']}`
   const [startDate, setStartDate] = useState<Date | null>(new Date())
   const [endDate, setEndDate] = useState<Date | null>(addDays(new Date(), 3))
 
@@ -53,7 +55,7 @@ const DatesRangeInputPopover: FC<Props> = ({
                 })
               : ''}
           </span>
-          <span className="mt-1 block text-sm leading-none font-light text-neutral-400">{inputDescription}</span>
+          <span className="mt-1 block text-sm leading-none font-light text-neutral-400">{resolvedDescription}</span>
         </div>
       </>
     )

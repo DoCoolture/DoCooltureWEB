@@ -1,4 +1,5 @@
 import { getCurrencies, getLanguages } from '@/data/navigation'
+import { getServerT } from '@/lib/locale-server'
 import { Button } from '@/shared/Button'
 import Logo from '@/shared/Logo'
 import clsx from 'clsx'
@@ -17,6 +18,7 @@ interface HeaderProps {
 const Header: FC<HeaderProps> = async ({ hasBorderBottom = true, className }) => {
   const currencies = await getCurrencies()
   const languages = await getLanguages()
+  const t = await getServerT()
 
   return (
     <div className={clsx('relative', className)}>
@@ -48,7 +50,7 @@ const Header: FC<HeaderProps> = async ({ hasBorderBottom = true, className }) =>
               className="hidden md:block"
             />
             <Button className="-mx-1 py-1.75! whitespace-nowrap" color="light" href="/become-host">
-               Convertirme en anfitrión
+              {t.common['Become a host']}
             </Button>
             <NotifyDropdown />
             <AvatarDropdown />

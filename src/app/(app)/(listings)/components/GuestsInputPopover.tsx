@@ -1,8 +1,8 @@
 'use client'
 
 import NcInputNumber from '@/components/NcInputNumber'
+import { useLanguage } from '@/context/LanguageContext'
 import { GuestsObject } from '@/type'
-import T from '@/utils/getT'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { UserPlusIcon } from '@heroicons/react/24/outline'
 import { FC, useEffect, useState } from 'react'
@@ -13,6 +13,8 @@ interface Props {
 }
 
 const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', onChangeTotalGuests }) => {
+  const { t } = useLanguage()
+  const hs = t.HeroSearchForm
   const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(1)
   const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(0)
   const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(0)
@@ -65,8 +67,8 @@ const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', onChangeTotalGues
               inputName="guestAdults"
               max={10}
               min={1}
-              label="Adultos"
-              description="13 años o más"
+              label={hs['Adults']}
+              description={hs['Ages 13 or above']}
             />
             <NcInputNumber
               className="mt-6 w-full"
@@ -75,8 +77,8 @@ const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', onChangeTotalGues
               inputName="guestChildren"
               max={4}
               min={0}
-              label="Niños"
-              description="2 a 12 años"
+              label={hs['Children']}
+              description={hs['Ages 2–12']}
             />
             <NcInputNumber
               className="mt-6 w-full"
@@ -85,8 +87,8 @@ const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', onChangeTotalGues
               inputName="guestInfants"
               max={4}
               min={0}
-              label="Bebés"
-              description="0 a 2 años"
+              label={hs['Infants']}
+              description={hs['Ages 0–2']}
             />
 
             {/* Hidden inputs para el form */}

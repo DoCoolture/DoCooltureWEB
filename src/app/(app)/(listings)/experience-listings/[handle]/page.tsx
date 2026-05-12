@@ -1,5 +1,6 @@
 import { getExperienceReviews } from '@/data/reviews'
 import { getExperienceListingByHandle } from '@/data/listings'
+import { getServerT } from '@/lib/locale-server'
 import { Divider } from '@/shared/divider'
 import { CheckCircleIcon, ClockIcon, LanguageIcon, UsersIcon } from '@heroicons/react/24/outline'
 import { Metadata } from 'next'
@@ -32,7 +33,8 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
 
 const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const { handle } = await params
-  const listing = await getExperienceListingByHandle(handle)
+  const [listing, t] = await Promise.all([getExperienceListingByHandle(handle), getServerT()])
+  const el = t.experienceListing
   if (!listing?.id) {
     return redirect('/experience-categories/all')
   }
@@ -105,11 +107,11 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
         </div>
         <div className="flex flex-col items-center space-y-3 text-center sm:flex-row sm:space-y-0 sm:gap-x-3 sm:text-start">
           <UsersIcon className="h-6 w-6" />
-          <span>Hasta {maxGuests} personas</span>
+          <span>{el.upToGuests.replace('{n}', String(maxGuests))}</span>
         </div>
         <div className="flex flex-col items-center space-y-3 text-center sm:flex-row sm:space-y-0 sm:gap-x-3 sm:text-start">
           <LanguageIcon className="h-6 w-6" />
-          <span>{languages.length > 0 ? languages.join(', ') : 'Idioma no especificado'}</span>
+          <span>{languages.length > 0 ? languages.join(', ') : el.languageNotSpecified}</span>
         </div>
       </SectionHeader>
     )
@@ -118,7 +120,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const renderSectionInfo = () => {
     return (
       <div className="listingSection__wrap">
-        <SectionHeading>Descripción de la experiencia</SectionHeading>
+        <SectionHeading>{el.experienceDescription}</SectionHeading>
         <Divider className="w-14!" />
         <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed">
           {description}
@@ -128,41 +130,31 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   }
 
   const renderSectionIncludes = () => {
-    // ✅ Incluidos reales de DoCoolture
-    const includes = [
-      { name: 'Guía cultural bilingüe (español / inglés)' },
-      { name: 'Todas las degustaciones' },
-      { name: 'Bebidas tradicionales' },
-      { name: 'Impuestos locales' },
-    ]
-
-    const notIncludes = [
-      { name: 'Transporte hacia/desde el punto de encuentro' },
-      { name: 'Consumos adicionales no especificados' },
-    ]
+    const includes = [el.include1, el.include2, el.include3, el.include4]
+    const notIncludes = [el.notInclude1, el.notInclude2]
 
     return (
       <div className="listingSection__wrap">
-        <SectionHeading>¿Qué incluye?</SectionHeading>
+        <SectionHeading>{el.whatIncluded}</SectionHeading>
         <Divider className="w-14!" />
         <div className="grid grid-cols-1 gap-6 text-sm text-neutral-700 lg:grid-cols-2 dark:text-neutral-300">
           {includes.map((item) => (
-            <div key={item.name} className="flex items-center gap-x-3">
+            <div key={item} className="flex items-center gap-x-3">
               <CheckCircleIcon className="mt-px h-6 w-6 shrink-0 text-green-500" />
-              <span>{item.name}</span>
+              <span>{item}</span>
             </div>
           ))}
         </div>
 
         <div className="mt-6">
           <p className="mb-3 text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            No incluye:
+            {el.notIncluded}
           </p>
           <div className="grid grid-cols-1 gap-3 text-sm text-neutral-500 dark:text-neutral-400">
             {notIncludes.map((item) => (
-              <div key={item.name} className="flex items-center gap-x-3">
+              <div key={item} className="flex items-center gap-x-3">
                 <span className="text-neutral-400">✕</span>
-                <span>{item.name}</span>
+                <span>{item}</span>
               </div>
             ))}
           </div>
