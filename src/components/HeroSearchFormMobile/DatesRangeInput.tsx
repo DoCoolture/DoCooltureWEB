@@ -3,7 +3,7 @@
 import DatePickerCustomDay from '@/components/DatePickerCustomDay'
 import DatePickerCustomHeaderTwoMonth from '@/components/DatePickerCustomHeaderTwoMonth'
 import { excludeDateIntervals } from '@/contains/contants'
-import T from '@/utils/getT'
+import { useLanguage } from '@/context/LanguageContext'
 import clsx from 'clsx'
 import { addDays } from 'date-fns'
 import { FC, useState } from 'react'
@@ -17,6 +17,7 @@ interface Props {
 }
 
 const StayDatesRangeInput: FC<Props> = ({ className, defaultEndDate, defaultStartDate, onChange }) => {
+  const { t } = useLanguage()
   const [startDate, setStartDate] = useState<Date | null>(defaultStartDate || new Date())
   const [endDate, setEndDate] = useState<Date | null>(defaultEndDate || addDays(new Date(), 3))
 
@@ -33,7 +34,7 @@ const StayDatesRangeInput: FC<Props> = ({ className, defaultEndDate, defaultStar
     <>
       <div className={clsx(className)}>
         <h3 className="block text-center text-xl font-semibold sm:text-2xl">
-          {T['HeroSearchForm']["When's your trip?"]}
+          {t.HeroSearchForm["When's your trip?"]}
         </h3>
         <div className="relative z-10 flex shrink-0 justify-center py-5">
           <DatePicker

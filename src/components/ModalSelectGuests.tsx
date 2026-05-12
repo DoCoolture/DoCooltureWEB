@@ -5,21 +5,38 @@ import ButtonClose from '@/shared/ButtonClose'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import T from '@/utils/getT'
 import { CloseButton, Dialog, DialogPanel } from '@headlessui/react'
-import React, { FC, useState } from 'react'
+import React, { FC, useEffect, useState } from 'react'
 import GuestsInput from './HeroSearchFormMobile/GuestsInput'
+
+interface GuestsValue {
+  guestAdults: number
+  guestChildren: number
+  guestInfants: number
+}
 
 interface Props {
   triggerButton?: (p: { openModal: () => void }) => React.ReactNode
-  onChangeGuests?: (guests: { guestAdults: number; guestChildren: number; guestInfants: number }) => void
+  onChangeGuests?: (guests: GuestsValue) => void
+  defaultValue?: GuestsValue
 }
 
-const ModalSelectGuests: FC<Props> = ({ triggerButton, onChangeGuests }) => {
+const ModalSelectGuests: FC<Props> = ({ triggerButton, onChangeGuests, defaultValue }) => {
   const [showModal, setShowModal] = useState(false)
-  const [guests, setGuests] = useState({
-    guestAdults: 2,
-    guestChildren: 1,
-    guestInfants: 1,
+  const [guests, setGuests] = useState<GuestsValue>({
+    guestAdults: defaultValue?.guestAdults ?? 1,
+    guestChildren: defaultValue?.guestChildren ?? 0,
+    guestInfants: defaultValue?.guestInfants ?? 0,
   })
+
+  useEffect(() => {
+    if (defaultValue) {
+      setGuests({
+        guestAdults: defaultValue.guestAdults,
+        guestChildren: defaultValue.guestChildren,
+        guestInfants: defaultValue.guestInfants,
+      })
+    }
+  }, [defaultValue?.guestAdults, defaultValue?.guestChildren, defaultValue?.guestInfants])
 
   function closeModal() {
     setShowModal(false)

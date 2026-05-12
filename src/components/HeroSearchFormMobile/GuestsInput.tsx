@@ -1,8 +1,8 @@
 'use client'
 
 import NcInputNumber from '@/components/NcInputNumber'
+import { useLanguage } from '@/context/LanguageContext'
 import { GuestsObject } from '@/type'
-import T from '@/utils/getT'
 import clsx from 'clsx'
 import { FC, useEffect, useState } from 'react'
 
@@ -13,6 +13,7 @@ interface Props {
 }
 
 const GuestsInput: FC<Props> = ({ defaultValue, onChange, className }) => {
+  const { t } = useLanguage()
   const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(defaultValue?.guestAdults || 0)
   const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(defaultValue?.guestChildren || 0)
   const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(defaultValue?.guestInfants || 0)
@@ -50,14 +51,14 @@ const GuestsInput: FC<Props> = ({ defaultValue, onChange, className }) => {
 
   return (
     <div className={clsx(`relative flex flex-col`, className)}>
-      <h3 className="mb-5 block text-xl font-semibold sm:text-2xl">{T['HeroSearchForm']["Who's coming?"]}</h3>
+      <h3 className="mb-5 block text-xl font-semibold sm:text-2xl">{t.HeroSearchForm["Who's coming?"]}</h3>
       <NcInputNumber
         className="w-full"
         defaultValue={guestAdultsInputValue}
         onChange={(value) => handleChangeData(value, 'guestAdults')}
         max={20}
-        label={T['HeroSearchForm']['Adults']}
-        description={T['HeroSearchForm']['Ages 13 or above']}
+        label={t.HeroSearchForm['Adults']}
+        description={t.HeroSearchForm['Ages 13 or above']}
         inputName="guestAdults"
       />
       <NcInputNumber
@@ -65,18 +66,17 @@ const GuestsInput: FC<Props> = ({ defaultValue, onChange, className }) => {
         defaultValue={guestChildrenInputValue}
         onChange={(value) => handleChangeData(value, 'guestChildren')}
         max={20}
-        label={T['HeroSearchForm']['Children']}
-        description={T['HeroSearchForm']['Ages 2–12']}
+        label={t.HeroSearchForm['Children']}
+        description={t.HeroSearchForm['Ages 2–12']}
         inputName="guestChildren"
       />
-
       <NcInputNumber
         className="mt-6 w-full"
         defaultValue={guestInfantsInputValue}
         onChange={(value) => handleChangeData(value, 'guestInfants')}
         max={20}
-        label={T['HeroSearchForm']['Infants']}
-        description={T['HeroSearchForm']['Ages 0–2']}
+        label={t.HeroSearchForm['Infants']}
+        description={t.HeroSearchForm['Ages 0–2']}
         inputName="guestInfants"
       />
     </div>

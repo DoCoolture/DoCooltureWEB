@@ -1,29 +1,19 @@
 'use client'
 
+import { useLanguage } from '@/context/LanguageContext'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const navigation = [
-  {
-    title: 'Account',
-    href: '/account',
-  },
-  {
-    title: 'Saved listings',
-    href: '/account-savelists',
-  },
-  {
-    title: 'Password',
-    href: '/account-password',
-  },
-  {
-    title: 'Payments & payouts',
-    href: '/account-billing',
-  },
-]
-
 export const PageNavigation = () => {
   const pathname = usePathname()
+  const { t } = useLanguage()
+
+  const navigation = [
+    { title: t.accountPage.Account, href: '/account' },
+    { title: t.accountPage['Saved listings'], href: '/account-savelists' },
+    { title: t.accountPage.Password, href: '/account-password' },
+    { title: t.accountPage['Payments & payouts'], href: '/account-billing' },
+  ]
 
   return (
     <div className="container">
@@ -32,7 +22,7 @@ export const PageNavigation = () => {
           const isActive = pathname === item.href
           return (
             <Link
-              key={item.title}
+              key={item.href}
               href={item.href}
               className={`block shrink-0 border-b-2 py-5 capitalize md:py-8 ${
                 isActive ? 'border-primary-500 font-medium' : 'border-transparent'

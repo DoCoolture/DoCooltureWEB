@@ -1,7 +1,7 @@
 'use client'
 
 import { Search01Icon } from '@/components/Icons'
-import T from '@/utils/getT'
+import { useLanguage } from '@/context/LanguageContext'
 import { MapPinIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
 import { FC, useEffect, useRef, useState } from 'react'
@@ -19,12 +19,15 @@ const LocationInput: FC<Props> = ({
   onChange,
   className,
   defaultValue = 'United States',
-  headingText = T['HeroSearchForm']['Where to?'],
+  headingText,
   imputName = 'location',
 }) => {
+  const { t } = useLanguage()
   const [value, setValue] = useState('')
   const containerRef = useRef(null)
   const inputRef = useRef(null)
+
+  const heading = headingText ?? t.HeroSearchForm['Where to?']
 
   useEffect(() => {
     setValue(defaultValue)
@@ -41,7 +44,7 @@ const LocationInput: FC<Props> = ({
   const renderSearchValues = ({ heading, items }: { heading: string; items: string[] }) => {
     return (
       <>
-        <p className="block text-base font-semibold">{heading || T['HeroSearchForm']['Destinations']}</p>
+        <p className="block text-base font-semibold">{heading || t.HeroSearchForm['Destinations']}</p>
         <div className="mt-3">
           {items.map((item) => {
             return (
@@ -62,11 +65,11 @@ const LocationInput: FC<Props> = ({
 
   return (
     <div className={clsx(className)} ref={containerRef}>
-      <h3 className="text-xl font-semibold sm:text-2xl">{headingText}</h3>
+      <h3 className="text-xl font-semibold sm:text-2xl">{heading}</h3>
       <div className="relative mt-5">
         <input
           className="block w-full truncate rounded-xl border border-neutral-300 bg-transparent px-4 py-3 pe-12 leading-none font-normal placeholder-neutral-500 placeholder:truncate focus:border-primary-300 focus:ring-3 focus:ring-primary-200/50 sm:text-sm dark:border-neutral-700 dark:bg-neutral-900 dark:placeholder-neutral-300 dark:focus:ring-primary-600/25"
-          placeholder={T['HeroSearchForm']['Search destinations']}
+          placeholder={t.HeroSearchForm['Search destinations']}
           value={value}
           onChange={(e) => setValue(e.currentTarget.value)}
           ref={inputRef}
@@ -81,14 +84,12 @@ const LocationInput: FC<Props> = ({
       </div>
       <div className="mt-7">
         {value
-          ? // if input value is not empty, show suggestions based on input
-            renderSearchValues({
-              heading: T['HeroSearchForm']['Locations'],
+          ? renderSearchValues({
+              heading: t.HeroSearchForm['Locations'],
               items: ['Afghanistan', 'Albania', 'Algeria', 'American Samao', 'Andorra'],
             })
-          : // if input value is empty, show popular destinations suggestions
-            renderSearchValues({
-              heading: T['HeroSearchForm']['Popular destinations'],
+          : renderSearchValues({
+              heading: t.HeroSearchForm['Popular destinations'],
               items: ['Australia', 'Canada', 'Germany', 'United Kingdom', 'United Arab Emirates'],
             })}
       </div>

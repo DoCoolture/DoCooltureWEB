@@ -3,7 +3,7 @@
 import DatePickerCustomDay from '@/components/DatePickerCustomDay'
 import DatePickerCustomHeaderTwoMonth from '@/components/DatePickerCustomHeaderTwoMonth'
 import { excludeDateIntervals } from '@/contains/contants'
-import T from '@/utils/getT'
+import { useLanguage } from '@/context/LanguageContext'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { CalendarIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
@@ -43,10 +43,12 @@ export const DateRangeField: FC<Props> = ({
   className = 'flex-1',
   fieldStyle = 'default',
   clearDataButtonClassName,
-  description = `${T['HeroSearchForm']['CheckIn']} - ${T['HeroSearchForm']['CheckOut']}`,
+  description,
   panelClassName,
   isOnlySingleDate = false,
 }) => {
+  const { t } = useLanguage()
+  const resolvedDescription = description ?? `${t.HeroSearchForm['CheckIn']} - ${t.HeroSearchForm['CheckOut']}`
   const [startDate, setStartDate] = useState<Date | null>(new Date())
   const [endDate, setEndDate] = useState<Date | null>(addDays(new Date(), 3))
 
@@ -67,7 +69,7 @@ export const DateRangeField: FC<Props> = ({
                   {startDate?.toLocaleDateString('en-US', {
                     month: 'short',
                     day: '2-digit',
-                  }) || T['HeroSearchForm']['Add dates']}
+                  }) || t.HeroSearchForm['Add dates']}
                   {endDate && !isOnlySingleDate
                     ? ' - ' +
                       endDate?.toLocaleDateString('en-US', {
@@ -77,7 +79,7 @@ export const DateRangeField: FC<Props> = ({
                     : ''}
                 </span>
                 <span className="mt-1 block text-sm leading-none font-light text-neutral-400">
-                  {description || T['HeroSearchForm']['Add dates']}
+                  {resolvedDescription || t.HeroSearchForm['Add dates']}
                 </span>
               </div>
             </PopoverButton>

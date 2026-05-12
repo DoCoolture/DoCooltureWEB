@@ -57,6 +57,11 @@ const YourTrip = ({ initialExplorers = 1, initialStartDate = null, onGuestsChang
         />
 
         <ModalSelectGuests
+          defaultValue={{
+            guestAdults: guests.guestAdults ?? 0,
+            guestChildren: guests.guestChildren ?? 0,
+            guestInfants: guests.guestInfants ?? 0,
+          }}
           onChangeGuests={setGuests}
           triggerButton={({ openModal }) => (
             <button
