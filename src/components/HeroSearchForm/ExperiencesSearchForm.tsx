@@ -1,6 +1,6 @@
 'use client'
 
-import T from '@/utils/getT'
+import { useLanguage } from '@/context/LanguageContext'
 import clsx from 'clsx'
 import Form from 'next/form'
 import { useRouter } from 'next/navigation'
@@ -14,6 +14,7 @@ interface Props {
 
 export const ExperiencesSearchForm = ({ className, formStyle = 'default' }: Props) => {
   const router = useRouter()
+  const { t } = useLanguage()
 
   // Prefetch the stay categories page to improve performance
   useEffect(() => {
@@ -53,7 +54,7 @@ export const ExperiencesSearchForm = ({ className, formStyle = 'default' }: Prop
       <DateRangeField
         className="hero-search-form__field-before hero-search-form__field-after flex-4/12"
         fieldStyle={formStyle}
-        description={T['HeroSearchForm']['Date range']}
+        description={t.HeroSearchForm['Date range']}
       />
       <VerticalDividerLine />
       <GuestNumberField

@@ -62,6 +62,13 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
 
   const reviews = await getExperienceReviews(listing.id)
 
+  // For the hardcoded experience, use translated description and host bio
+  const isHardcoded = handle === 'taste-of-dominican-culture'
+  const resolvedDescription = isHardcoded ? el.tasteDescription : description
+  const resolvedHost = isHardcoded
+    ? { ...host, description: el.hostBio, responseTime: el.hostResponseTime, joinedDate: el.hostJoinedDate }
+    : host
+
   // ✅ Server action — pasa todos los datos de la experiencia al checkout
   const handleSubmitForm = async (formData: FormData) => {
     'use server'
@@ -123,7 +130,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
         <SectionHeading>{el.experienceDescription}</SectionHeading>
         <Divider className="w-14!" />
         <p className="text-neutral-600 dark:text-neutral-300 leading-relaxed">
-          {description}
+          {resolvedDescription}
         </p>
       </div>
     )
@@ -198,7 +205,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
       <div className="flex flex-col gap-y-10">
         <div className="flex flex-col gap-8 lg:flex-row lg:gap-10">
           <div className="w-full lg:w-4/9 xl:w-1/3">
-            <SectionHost {...host} />
+            <SectionHost {...resolvedHost} />
           </div>
           <div className="w-full lg:w-2/3">
             <SectionListingReviews

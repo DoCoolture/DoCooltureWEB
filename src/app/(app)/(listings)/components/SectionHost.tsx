@@ -1,5 +1,8 @@
+'use client'
+
 import { Calendar01Icon, Comment01Icon, Timer02Icon } from '@/components/Icons'
 import StartRating from '@/components/StartRating'
+import { useLanguage } from '@/context/LanguageContext'
 import ButtonSecondary from '@/shared/ButtonSecondary'
 import { Divider } from '@/shared/divider'
 import { Link } from '@/shared/link'
@@ -35,6 +38,9 @@ const SectionHost = ({
   reviewsCount,
   listingsCount,
 }: Props) => {
+  const { t } = useLanguage()
+  const sh = t.sectionHost
+
   return (
     <div className="listingSection__wrap">
       {/* host */}
@@ -47,7 +53,7 @@ const SectionHost = ({
           <div className="mt-1.5 flex items-center text-sm text-neutral-500 dark:text-neutral-400">
             <StartRating point={rating} reviewCount={reviewsCount} />
             <span className="mx-2">·</span>
-            <span>{listingsCount} listings</span>
+            <span>{listingsCount} {sh.listings}</span>
           </div>
         </div>
       </div>
@@ -55,12 +61,12 @@ const SectionHost = ({
       <div className="flex flex-wrap gap-4">
         <div className="flex items-center gap-x-1.5">
           <HugeiconsIcon icon={Medal01Icon} size={20} color="currentColor" strokeWidth={1.5} />
-          Supperhost
+          {sh.superhost}
         </div>
         <div className="w-px bg-neutral-200 dark:bg-neutral-700"></div>
         <div className="flex items-center gap-x-1.5">
           <HugeiconsIcon icon={Award04Icon} size={20} color="currentColor" strokeWidth={1.5} />
-          2+ years
+          {sh.yearsHosting}
         </div>
       </div>
 
@@ -71,31 +77,30 @@ const SectionHost = ({
       <div className="flex flex-col gap-y-2.5 text-neutral-700 dark:text-neutral-300">
         <div className="flex items-center gap-x-3">
           <Calendar01Icon className="h-6 w-6" />
-          <span>Joined in {joinedDate}</span>
+          <span>{sh.joinedIn} {joinedDate}</span>
         </div>
         <div className="flex items-center gap-x-3">
           <Comment01Icon className="h-6 w-6" />
-          <span>Response rate - {responseRate}%</span>
+          <span>{sh.responseRate} - {responseRate}%</span>
         </div>
         <div className="flex items-center gap-x-3">
           <Timer02Icon className="h-6 w-6" />
-
-          <span>Fast response - {responseTime}</span>
+          <span>{sh.fastResponse} - {responseTime}</span>
         </div>
       </div>
 
       {/* == */}
       <div className="flex gap-2">
-        <ButtonSecondary href={'/authors/' + handle}>See host profile</ButtonSecondary>
+        <ButtonSecondary href={'/authors/' + handle}>{sh.seeProfile}</ButtonSecondary>
         <ButtonSecondary outline>
-          Share
+          {sh.share}
           <HugeiconsIcon icon={Navigation03Icon} size={20} color="currentColor" strokeWidth={1.5} className="mb-px" />
         </ButtonSecondary>
       </div>
       <Divider />
       <div className="flex items-center gap-x-2 text-sm text-neutral-700 dark:text-neutral-300">
         <HugeiconsIcon icon={Flag03Icon} size={16} color="currentColor" strokeWidth={1.5} />
-        <span>Report this host</span>
+        <span>{sh.reportHost}</span>
       </div>
     </div>
   )

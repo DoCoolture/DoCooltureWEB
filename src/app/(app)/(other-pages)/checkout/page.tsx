@@ -203,11 +203,10 @@ const CheckoutContent = () => {
           {isLoading ? t.booking.savingBooking : t.booking.confirmBooking}
         </ButtonPrimary>
         <p className="mt-3 text-sm text-neutral-500">
-          Al confirmar aceptas los{' '}
+          {t.booking.termsDisclaimer}{' '}
           <a href="/terminos" className="underline">
             {t.booking.termsLink}
-          </a>{' '}
-          de DoCoolture.
+          </a>
         </p>
       </div>
     </form>
