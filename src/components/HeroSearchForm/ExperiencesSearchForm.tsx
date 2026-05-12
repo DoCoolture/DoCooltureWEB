@@ -21,18 +21,21 @@ export const ExperiencesSearchForm = ({ className, formStyle = 'default' }: Prop
   }, [router])
 
   const handleFormSubmit = (formData: FormData) => {
-    const formDataEntries = Object.fromEntries(formData.entries())
-    console.log('Form submitted', formDataEntries)
-    // You can also redirect or perform other actions based on the form data
+    const entries = Object.fromEntries(formData.entries())
+    const location = entries['location'] as string
+    const checkin = entries['checkin'] as string
+    const checkout = entries['checkout'] as string
+    const adults = Number(entries['guestAdults'] || 1)
+    const children = Number(entries['guestChildren'] || 0)
+    const guests = adults + children
 
-    // example: add location to the URL
-    const location = formDataEntries['location'] as string
-    let url = '/experience-categories-map/all'
+    const params = new URLSearchParams()
+    if (location) params.set('location', location)
+    if (checkin) params.set('checkin', checkin)
+    if (checkout) params.set('checkout', checkout)
+    params.set('guests', String(guests))
 
-    if (location) {
-      url = url + `?location=${encodeURIComponent(location)}`
-    }
-    router.push(url)
+    router.push(`/experience-categories-map/all?${params.toString()}`)
   }
 
   return (

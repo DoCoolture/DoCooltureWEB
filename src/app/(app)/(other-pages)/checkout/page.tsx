@@ -25,6 +25,9 @@ const CheckoutContent = () => {
 
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [currentExplorers, setCurrentExplorers] = useState(() =>
+    Math.max(1, Number(searchParams.get('explorers') || 1))
+  )
 
   React.useEffect(() => {
     document.documentElement.scrollTo({ top: 0, behavior: 'instant' })
@@ -46,11 +49,10 @@ const CheckoutContent = () => {
   }
 
   const precioNum = Number(experiencia.precio.replace('$', '').replace(',', ''))
-  const subtotal = precioNum * experiencia.explorers
+  const subtotal = precioNum * currentExplorers
   const cargoProcesamiento = 2.5
   const total = subtotal + cargoProcesamiento
 
-  // ✅ Precios convertidos a la moneda seleccionada
   const subtotalConvertido = convertPrice(subtotal)
   const cargoConvertido = convertPrice(cargoProcesamiento)
   const totalConvertido = convertPrice(total)
@@ -76,10 +78,10 @@ const CheckoutContent = () => {
       customer_phone: '',
       tour_name: experiencia.titulo,
       booking_date: bookingDate,
-      guests: experiencia.explorers,
+      guests: currentExplorers,
       status: 'pending',
       notes: notes,
-      total_amount: total,
+      total_amount: precioNum * currentExplorers + cargoProcesamiento,
       payment_method: 'paypal',
     })
 
@@ -138,7 +140,7 @@ const CheckoutContent = () => {
       {/* ✅ Desglose con moneda convertida */}
       <DescriptionList>
         <DescriptionTerm>
-          {precioUnitConvertido} × {experiencia.explorers} {experiencia.explorers > 1 ? t.booking.explorers : t.booking.explorer}
+          {precioUnitConvertido} × {currentExplorers} {currentExplorers > 1 ? t.booking.explorers : t.booking.explorer}
         </DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
           {subtotalConvertido}
@@ -182,6 +184,7 @@ const CheckoutContent = () => {
       <YourTrip
         initialExplorers={experiencia.explorers}
         initialStartDate={searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : null}
+        onGuestsChange={setCurrentExplorers}
       />
       <PayWith />
 

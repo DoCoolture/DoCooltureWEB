@@ -9,7 +9,7 @@ import * as Headless from '@headlessui/react'
 import { Search01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import clsx from 'clsx'
-import { usePathname } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import HeroSearchFormSmall from '../HeroSearchForm/HeroSearchFormSmall'
 import AvatarDropdown from './AvatarDropdown'
@@ -22,18 +22,33 @@ interface Header3Props {
   initSearchFormTab: ListingType
 }
 
+const formatShortDate = (dateStr: string) => {
+  try {
+    return new Date(dateStr + 'T12:00:00').toLocaleDateString('es-DO', { month: 'short', day: 'numeric' })
+  } catch {
+    return dateStr
+  }
+}
+
 const Header3: FC<Header3Props> = ({ className, hasBorderBottom = true, initSearchFormTab = 'Stays' }) => {
   const headerInnerRef = useRef<HTMLDivElement>(null)
   const [showHeroSearch, setShowHeroSearch] = useState<boolean>(false)
   const lastScrollY = useRef<number>(0)
   const rafId = useRef<number | null>(null)
+  const searchParams = useSearchParams()
 
-  // pathname
-  const pathname = usePathname()
+  const location = searchParams.get('location')
+  const checkin = searchParams.get('checkin')
+  const checkout = searchParams.get('checkout')
+  const guests = searchParams.get('guests')
 
-  let locationText = 'República Dominicana'
-  let dateText = 'Cualquier semana'
-  let guestsText = 'Agregar explorers'
+  const locationText = location || 'República Dominicana'
+  const dateText = checkin
+    ? formatShortDate(checkin) + (checkout ? ' – ' + formatShortDate(checkout) : '')
+    : 'Cualquier semana'
+  const guestsText = guests
+    ? `${guests} Explorer${Number(guests) !== 1 ? 's' : ''}`
+    : 'Agregar explorers'
 
   // for memoization of the close function
   const closeHeroSearch = useCallback(() => {

@@ -6,14 +6,15 @@ import { useLanguage } from '@/context/LanguageContext'
 import { GuestsObject } from '@/type'
 import converSelectedDateToString from '@/utils/converSelectedDateToString'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface YourTripProps {
   initialExplorers?: number
   initialStartDate?: Date | null
+  onGuestsChange?: (total: number) => void
 }
 
-const YourTrip = ({ initialExplorers = 1, initialStartDate = null }: YourTripProps) => {
+const YourTrip = ({ initialExplorers = 1, initialStartDate = null, onGuestsChange }: YourTripProps) => {
   const { t } = useLanguage()
   const [startDate, setStartDate] = useState<Date | null>(initialStartDate ?? new Date())
   const [endDate, setEndDate] = useState<Date | null>(null)
@@ -22,6 +23,11 @@ const YourTrip = ({ initialExplorers = 1, initialStartDate = null }: YourTripPro
     guestChildren: 0,
     guestInfants: 0,
   })
+
+  const totalGuests = (guests.guestAdults || 0) + (guests.guestChildren || 0)
+  useEffect(() => {
+    onGuestsChange?.(totalGuests)
+  }, [totalGuests]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div>
@@ -62,7 +68,7 @@ const YourTrip = ({ initialExplorers = 1, initialStartDate = null }: YourTripPro
                 <span className="text-sm text-neutral-400">{t.yourTrip.guests}</span>
                 <span className="mt-1.5 text-lg font-semibold">
                   <span className="line-clamp-1">
-                    {`${(guests.guestAdults || 0) + (guests.guestChildren || 0)} ${t.yourTrip.guests}`}
+                    {`${totalGuests} ${t.yourTrip.guests}`}
                     {guests.guestInfants ? `, ${guests.guestInfants} ${t.yourTrip.infants}` : ''}
                   </span>
                 </span>
