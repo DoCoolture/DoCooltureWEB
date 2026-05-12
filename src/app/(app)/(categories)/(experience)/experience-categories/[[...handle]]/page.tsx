@@ -8,12 +8,24 @@ import { getExperienceListingFilterOptions, getExperienceListings } from '@/data
 import { Button } from '@/shared/Button'
 import { Divider } from '@/shared/divider'
 import { Heading } from '@/shared/Heading'
-import Pagination from '@/shared/Pagination'
+import PaginationComponent from '@/shared/Pagination'
 import convertNumbThousand from '@/utils/convertNumbThousand'
 import { HotAirBalloonIcon, MapPinpoint02Icon, MapsLocation01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+
+const ITEMS_PER_PAGE = 8
+
+// Category-label → listingCategory values mapping
+const TYPE_TO_CATEGORY: Record<string, string[]> = {
+  'Gastronomía': ['Gastronomía'],
+  'Naturaleza y aventura': ['Aventura y Naturaleza'],
+  'Arte y cultura': ['Arte y Artesanía'],
+  'Tours históricos': ['Tour Cultural'],
+  'Música y baile': ['Música y Baile'],
+  'Bienestar': ['Bienestar'],
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ handle?: string[] }> }): Promise<Metadata> {
   const { handle } = await params
@@ -28,16 +40,55 @@ export async function generateMetadata({ params }: { params: Promise<{ handle?: 
   return { title: name, description }
 }
 
-const Page = async ({ params }: { params: Promise<{ handle?: string[] }> }) => {
+const Page = async ({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ handle?: string[] }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) => {
   const { handle } = await params
+  const sp = await searchParams
 
   const category = await getExperienceCategoryByHandle(handle?.[0])
-  const listings = await getExperienceListings()
+  const allListings = await getExperienceListings()
   const filterOptions = await getExperienceListingFilterOptions()
 
   if (!category?.id) {
     return redirect('/experience-categories/all')
   }
+
+  // Parse active filters from URL
+  const activeTypes = (sp.experienceType as string | undefined)?.split(',').filter(Boolean) ?? []
+  const page = Math.max(1, Number(sp.page) || 1)
+
+  // Filter listings
+  let filteredListings = allListings
+  if (activeTypes.length > 0) {
+    filteredListings = allListings.filter((listing) =>
+      activeTypes.some((type) => (TYPE_TO_CATEGORY[type] ?? []).includes(listing.listingCategory))
+    )
+  }
+
+  const totalListings = filteredListings.length
+  const totalPages = Math.max(1, Math.ceil(totalListings / ITEMS_PER_PAGE))
+  const currentPage = Math.min(page, totalPages)
+  const paginatedListings = filteredListings.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE
+  )
+
+  // Augment filterOptions so checkboxes reflect current URL state
+  const augmentedFilterOptions: any[] = filterOptions.map((fo) => {
+    if (!fo || fo.tabUIType !== 'checkbox' || fo.name !== 'experienceType') return fo
+    return {
+      ...fo,
+      options: (fo as any).options?.map((opt: any) => ({
+        ...opt,
+        defaultChecked: activeTypes.includes(opt.name),
+      })) ?? [],
+    }
+  })
 
   return (
     <div className="pb-28">
@@ -54,7 +105,7 @@ const Page = async ({ params }: { params: Promise<{ handle?: string[] }> }) => {
               <span className="ms-2.5">{category.region} </span>
               <span className="mx-5"></span>
               <HugeiconsIcon icon={HotAirBalloonIcon} size={20} color="currentColor" strokeWidth={1.5} />
-              <span className="ms-2.5">{convertNumbThousand(category.count)} experiences</span>
+              <span className="ms-2.5">{convertNumbThousand(allListings.length)} experiences</span>
             </div>
           }
         />
@@ -64,8 +115,10 @@ const Page = async ({ params }: { params: Promise<{ handle?: string[] }> }) => {
         {/* start heading */}
         <div className="flex flex-wrap items-end justify-between gap-x-2.5 gap-y-5">
           <h2 id="heading" className="scroll-mt-20 text-lg font-semibold sm:text-xl">
-            Over {convertNumbThousand(category.count)} experiences
-            {category.handle !== 'all' ? ` in ${category.name}` : null}
+            {activeTypes.length > 0
+              ? `${totalListings} experience${totalListings !== 1 ? 's' : ''} found`
+              : `${convertNumbThousand(totalListings)} experience${totalListings !== 1 ? 's' : ''}${category.handle !== 'all' ? ` in ${category.name}` : ''}`
+            }
           </h2>
           <Button color="white" className="ms-auto" href={'/experience-categories-map/' + category.handle}>
             <span className="me-1">Show map</span>
@@ -74,20 +127,27 @@ const Page = async ({ params }: { params: Promise<{ handle?: string[] }> }) => {
         </div>
         <Divider className="my-8 md:mb-12" />
         {/* end heading */}
-        <ListingFilterTabs filterOptions={filterOptions} />
+        <ListingFilterTabs filterOptions={augmentedFilterOptions} />
 
-        <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 md:gap-x-8 md:gap-y-12 lg:mt-10 lg:grid-cols-3 xl:grid-cols-4">
-          {listings.map((listing) => (
-            <ExperiencesCard key={listing.id} data={listing} />
-          ))}
-        </div>
+        {paginatedListings.length > 0 ? (
+          <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 md:gap-x-8 md:gap-y-12 lg:mt-10 lg:grid-cols-3 xl:grid-cols-4">
+            {paginatedListings.map((listing) => (
+              <ExperiencesCard key={listing.id} data={listing} />
+            ))}
+          </div>
+        ) : (
+          <div className="mt-16 py-20 text-center text-neutral-500">
+            No hay experiencias disponibles con estos filtros.
+          </div>
+        )}
+
         <div className="mt-16 flex items-center justify-center">
-          <Pagination />
+          <PaginationComponent currentPage={currentPage} totalPages={totalPages} />
         </div>
 
         <Divider className="my-14 lg:my-24" />
         <Heading className="mb-12">Just a few spots left.</Heading>
-        <SectionSliderCards listings={listings.slice(0, 8)} cardType="experience" />
+        <SectionSliderCards listings={allListings.slice(0, 8)} cardType="experience" />
       </div>
     </div>
   )

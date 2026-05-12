@@ -1,10 +1,5 @@
-// OCULTO - Sistema original estático
-// import { en } from '../../public/locales/en'
-// const T = en
-// export default T
-
-// ✅ DOCOOLTURE - Re-exporta el hook para compatibilidad
-// Para componentes CLIENT: usar useLanguage() del LanguageContext
-// Para componentes SERVER: usar el locale por defecto (es)
+// Para componentes SERVER: usar getServerT() de @/lib/locale-server
+// Para componentes CLIENT: usar useLanguage() de @/context/LanguageContext
+// Este archivo exporta el locale por defecto (es) solo para compatibilidad legacy
 import { es } from '../../public/locales/es'
 export default es

@@ -8,7 +8,7 @@ import SectionClientSay from '@/components/SectionClientSay'
 import SectionGridCategoryBox from '@/components/SectionGridCategoryBox'
 import SectionHowItWork from '@/components/SectionHowItWork'
 import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
-import SectionSubscribe2 from '@/components/SectionSubscribe2'
+// import SectionSubscribe2 from '@/components/SectionSubscribe2'
 // import { getAuthors } from '@/data/authors'  // OCULTO - No se usa sin Become a host
 import { getExperienceCategories } from '@/data/categories'
 import { getExperienceListings } from '@/data/listings'
@@ -113,7 +113,7 @@ async function Home() {
         </div>
 
         {/* ===== SECCIÓN: Newsletter ===== */}
-        <SectionSubscribe2 />
+        {/* <SectionSubscribe2 /> */}
 
         <Divider />
 

@@ -7,11 +7,16 @@ import converSelectedDateToString from '@/utils/converSelectedDateToString'
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 
-const YourTrip = () => {
-  const [startDate, setStartDate] = useState<Date | null>(new Date())
+interface YourTripProps {
+  initialExplorers?: number
+  initialStartDate?: Date | null
+}
+
+const YourTrip = ({ initialExplorers = 1, initialStartDate = null }: YourTripProps) => {
+  const [startDate, setStartDate] = useState<Date | null>(initialStartDate ?? new Date())
   const [endDate, setEndDate] = useState<Date | null>(null)
   const [guests, setGuests] = useState<GuestsObject>({
-    guestAdults: 2,
+    guestAdults: initialExplorers,
     guestChildren: 0,
     guestInfants: 0,
   })

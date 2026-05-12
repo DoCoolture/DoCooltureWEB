@@ -24,6 +24,7 @@ const ExperiencesCard: FC<Props> = ({
   ratioClass = 'aspect-w-3 aspect-h-3',
 }) => {
   const {
+    id,
     galleryImgs,
     address,
     title,
@@ -47,7 +48,7 @@ const ExperiencesCard: FC<Props> = ({
     return (
       <div className="relative w-full overflow-hidden rounded-2xl">
         <GallerySlider ratioClass={ratioClass} galleryImgs={galleryImgs} href={listingHref} />
-        <BtnLikeIcon isLiked={like} className="absolute top-3 right-3" />
+        <BtnLikeIcon experienceId={id} isLiked={like} className="absolute top-3 right-3" />
         {saleOff && <SaleOffBadge className="absolute top-3 left-3" />}
       </div>
     )

@@ -5,7 +5,7 @@ import SectionGridAuthorBox from '@/components/SectionGridAuthorBox'
 import SectionGridFeatureProperty from '@/components/SectionGridFeatureProperty'
 import SectionOurFeatures from '@/components/SectionOurFeatures'
 import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
-import SectionSubscribe2 from '@/components/SectionSubscribe2'
+// import SectionSubscribe2 from '@/components/SectionSubscribe2'
 import { getAuthors } from '@/data/authors'
 import { getRealEstateCategories } from '@/data/categories'
 import { getRealEstateListings } from '@/data/listings'
@@ -26,8 +26,8 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 
 export const metadata: Metadata = {
-  title: 'Home Real Estate',
-  description: 'Booking online & rental online Next.js Template',
+  title: 'Propiedades',
+  description: 'Encuentra propiedades en venta y alquiler en la República Dominicana. Casas, apartamentos y villas con los mejores anfitriones locales.',
 }
 
 const SectionHero = () => {
@@ -48,8 +48,8 @@ const SectionHero = () => {
           <div className="absolute inset-y-0 end-20 w-screen bg-primary-500 md:end-40"></div>
           <div className="relative max-w-2xl py-10 text-white sm:py-20 xl:py-24">
             <h2 className="text-4xl/[1.1] font-semibold text-pretty md:text-6xl/[1.1] xl:text-7xl/[1.1]">
-              Discover Your <br />
-              Perfect Property
+              Encuentra tu <br />
+              propiedad ideal
             </h2>
           </div>
         </div>
@@ -115,21 +115,21 @@ async function Home() {
         <SectionGridFeatureProperty listing={listings} />
         <div className="relative py-20">
           <BackgroundSection className="bg-neutral-100 dark:bg-black/20" />
-          <HeadingWithSub isCenter subheading="Discover the stories behind our listings.">
-            Meet our authors
+          <HeadingWithSub isCenter subheading="Conoce a los anfitriones que hacen posible DoCoolture">
+            Nuestros anfitriones
           </HeadingWithSub>
           <SectionGridAuthorBox boxCard="box2" authors={authors} />
         </div>
         <SectionLogoCloud />
         <SectionDowloadApp />
         <div>
-          <HeadingWithSub subheading="Explore the best places to stay in the world.">
-            Let&apos;s go on an adventure
+          <HeadingWithSub subheading="Explora los mejores lugares para alojarte en la República Dominicana">
+            Empieza tu aventura
           </HeadingWithSub>
           <SectionSliderNewCategories categoryCardType="card4" categories={categories.slice(0, 7)} />
         </div>
 
-        <SectionSubscribe2 />
+        {/* <SectionSubscribe2 /> */}
       </div>
     </main>
   )

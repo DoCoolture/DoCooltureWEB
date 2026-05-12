@@ -177,7 +177,10 @@ const CheckoutContent = () => {
     >
       <h1 className="text-3xl font-semibold lg:text-4xl">Confirmar y pagar</h1>
       <Divider />
-      <YourTrip />
+      <YourTrip
+        initialExplorers={experiencia.explorers}
+        initialStartDate={searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : null}
+      />
       <PayWith />
 
       {errorMsg && (

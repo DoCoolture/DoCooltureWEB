@@ -230,6 +230,13 @@ export const es = {
       'Start your search': 'Explorar experiencias',
       button: 'Explorar experiencias',
     },
+    exploreByCategory: 'Explora por categorías',
+    exploreByCategorySubheading: 'Elige tu destino en la República Dominicana',
+    featuredExperiences: 'Experiencias destacadas',
+    featuredSubheading: 'Seleccionadas especialmente para ti.',
+    viewAll: 'Ver todas las experiencias',
+    exploreByDestination: 'Explora por destino',
+    exploreByDestinationSubheading: 'Destinos piloto disponibles en DoCoolture',
   },
   accountPage: {
     'Account information': 'Información de cuenta',
@@ -273,4 +280,143 @@ export const es = {
     'Sign in': 'Ingresar',
   },
   subscriptionPage: { Subscription: 'Suscripción', popular: 'POPULAR' },
+  contact: {
+    title: 'Contacto',
+    heading: 'Contáctanos',
+    address: { label: '🗺 DIRECCIÓN', value: 'Santo Domingo, República Dominicana' },
+    email: { label: '💌 EMAIL', value: 'hola@docoolture.com' },
+    phone: { label: '☎ TELÉFONO', value: '+1 (809) 555-0100' },
+    socials: '🌏 REDES SOCIALES',
+    form: {
+      name: 'Nombre completo',
+      namePlaceholder: 'Juan Pérez',
+      email: 'Correo electrónico',
+      emailPlaceholder: 'tu@correo.com',
+      message: 'Mensaje',
+      submit: 'Enviar mensaje',
+    },
+  },
+  about: {
+    heading: 'Sobre DoCoolture.',
+    subheading: 'Somos una plataforma dedicada a conectar viajeros con experiencias auténticas e inolvidables. Creemos que los mejores recuerdos no se compran, se viven.',
+    team: {
+      heading: 'Nuestro equipo',
+      subheading: 'El equipo detrás de la plataforma que conecta viajeros con experiencias auténticas dominicanas',
+    },
+    stats: {
+      heading: 'DoCoolture en cifras',
+      subheading: 'DoCoolture en números — una plataforma que crece junto a la cultura dominicana',
+      experiences: { value: '50+', label: 'Experiencias únicas disponibles en la República Dominicana' },
+      hosts: { value: '30+', label: 'Guías y anfitriones locales verificados' },
+      cities: { value: '5', label: 'Ciudades piloto activas: Santo Domingo, Santiago, Punta Cana, Puerto Plata y Samaná' },
+    },
+  },
+  categories: {
+    experience: {
+      sectionHeading: 'Explora por categoría',
+      sectionSubheading: 'Descubre más categorías de experiencias en la República Dominicana',
+      authorsHeading: 'Exploradores destacados',
+      authorsSubheading: 'Conoce a los exploradores más activos de DoCoolture',
+    },
+    car: {
+      sectionHeading: 'Explora por tipo de vehículo',
+      sectionSubheading: 'Encuentra el vehículo ideal para tu próxima aventura',
+    },
+    stay: {
+      sectionHeading: 'Explora por tipo de alojamiento',
+      sectionSubheading: 'Encuentra el alojamiento perfecto en la República Dominicana',
+      authorsHeading: 'Exploradores destacados',
+      authorsSubheading: 'Conoce a los exploradores más activos de DoCoolture',
+    },
+    flight: {
+      sectionHeading: 'Explora destinos aéreos',
+      sectionSubheading: 'Encuentra vuelos hacia y dentro de la República Dominicana',
+      authorsHeading: 'Exploradores destacados',
+      authorsSubheading: 'Conoce a los exploradores más activos de DoCoolture',
+    },
+    realEstate: {
+      sectionHeading: 'Explora por tipo de propiedad',
+      sectionSubheading: 'Explora propiedades disponibles en la República Dominicana',
+      authorsHeading: 'Exploradores destacados',
+      authorsSubheading: 'Conoce a los exploradores más activos de DoCoolture',
+    },
+  },
+  realEstatePage: {
+    title: 'Propiedades',
+    description: 'Encuentra propiedades en venta y alquiler en la República Dominicana. Casas, apartamentos y villas con los mejores anfitriones locales.',
+    hero: 'Encuentra tu\npropiedad ideal',
+    ourHostsHeading: 'Nuestros anfitriones',
+    ourHostsSubheading: 'Conoce a los anfitriones que hacen posible DoCoolture',
+    adventureHeading: 'Empieza tu aventura',
+    adventureSubheading: 'Explora los mejores lugares para alojarte en la República Dominicana',
+  },
+  sections: {
+    howItWorks: {
+      heading: 'Cómo funciona',
+      subheading: 'Simple, rápido y seguro',
+      steps: [
+        {
+          title: 'Encuentra tu experiencia',
+          desc: 'Explora cientos de experiencias únicas cerca de ti o en cualquier parte del mundo.',
+        },
+        {
+          title: 'Reserva fácil y seguro',
+          desc: 'Selecciona la fecha, el número de personas y confirma tu reserva en minutos.',
+        },
+        {
+          title: 'Vive el momento',
+          desc: 'Disfruta experiencias inolvidables guiadas por expertos locales.',
+        },
+      ],
+    },
+    ourFeatures: {
+      subheading: 'Ventajas',
+      heading: '¿Por qué publicar con nosotros?',
+      items: [
+        {
+          badge: 'Visibilidad',
+          title: 'Llega a más viajeros sin costo inicial',
+          description: 'Con una publicación gratuita, tu experiencia estará visible para miles de viajeros en la República Dominicana.',
+          badgeColor: undefined,
+        },
+        {
+          badge: 'Alcance',
+          badgeColor: 'green' as const,
+          title: 'Conéctate con viajeros auténticos',
+          description: 'Cientos de personas buscan experiencias únicas y locales. DoCoolture te conecta directamente con ellos.',
+        },
+        {
+          badge: 'Seguro',
+          badgeColor: 'red' as const,
+          title: 'Pagos y reservas seguros',
+          description: 'Gestiona tus reservas y cobros de forma simple y segura desde tu perfil de anfitrión en DoCoolture.',
+        },
+      ],
+    },
+    downloadApp: {
+      heading: 'App DoCoolture',
+      description: 'Descarga la app y lleva las mejores experiencias dominicanas en tu bolsillo. Reserva, explora y vive la cultura donde quieras.',
+    },
+    clientSay: {
+      heading: 'Lo que dicen nuestros viajeros 🥇',
+      subheading: 'Experiencias reales de personas reales',
+      testimonials: [
+        {
+          id: 1,
+          clientName: 'María González',
+          content: 'Una experiencia increíble. El tour gastronómico superó todas mis expectativas. ¡Lo recomiendo totalmente!',
+        },
+        {
+          id: 2,
+          clientName: 'Carlos Rodríguez',
+          content: 'Reservar fue super fácil y la experiencia de aventura fue épica. Definitivamente volveré a usar DoCoolture.',
+        },
+        {
+          id: 3,
+          clientName: 'Ana Martínez',
+          content: 'El taller de cocina local fue una experiencia única. Aprendí muchísimo y me divertí mucho. ¡Gracias DoCoolture!',
+        },
+      ],
+    },
+  },
 }

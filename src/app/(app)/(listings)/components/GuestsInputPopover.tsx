@@ -5,14 +5,14 @@ import { GuestsObject } from '@/type'
 import T from '@/utils/getT'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { UserPlusIcon } from '@heroicons/react/24/outline'
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 
 interface Props {
   className?: string
+  onChangeTotalGuests?: (total: number) => void
 }
 
-const GuestsInputPopover: FC<Props> = ({ className = 'flex-1' }) => {
-  // ✅ FIX: valores por defecto corregidos — empieza con 1 adulto, 0 niños, 0 bebés
+const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', onChangeTotalGuests }) => {
   const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(1)
   const [guestChildrenInputValue, setGuestChildrenInputValue] = useState(0)
   const [guestInfantsInputValue, setGuestInfantsInputValue] = useState(0)
@@ -23,8 +23,11 @@ const GuestsInputPopover: FC<Props> = ({ className = 'flex-1' }) => {
     if (type === 'guestInfants') setGuestInfantsInputValue(value)
   }
 
-  // ✅ FIX: total solo cuenta adultos + niños (bebés no cuentan como explorers)
   const totalGuests = guestAdultsInputValue + guestChildrenInputValue
+
+  useEffect(() => {
+    onChangeTotalGuests?.(totalGuests)
+  }, [totalGuests, onChangeTotalGuests])
 
   return (
     <Popover className={`relative flex ${className}`}>

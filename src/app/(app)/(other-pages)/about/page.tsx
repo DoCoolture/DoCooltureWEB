@@ -1,7 +1,7 @@
 import BackgroundSection from '@/components/BackgroundSection'
 import BgGlassmorphism from '@/components/BgGlassmorphism'
 import SectionClientSay from '@/components/SectionClientSay'
-import SectionSubscribe2 from '@/components/SectionSubscribe2'
+// import SectionSubscribe2 from '@/components/SectionSubscribe2'
 import rightImg from '@/images/about-hero-right.png'
 import { Metadata } from 'next'
 import SectionFounder from './SectionFounder'
@@ -36,7 +36,7 @@ const PageAbout = () => {
 
         <SectionStatistic />
 
-        <SectionSubscribe2 />
+        {/* <SectionSubscribe2 /> */}
       </div>
     </div>
   )

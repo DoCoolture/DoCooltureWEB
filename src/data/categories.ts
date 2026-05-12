@@ -1,134 +1,97 @@
 import experienceCategoryCoverImage from '@/images/hero-right-experience.png'
+import { getExperienceListings } from '@/data/listings'
 
-// ✅ DOCOOLTURE - Ciudades dominicanas como destinos piloto
+const CITY_CATALOG = [
+  {
+    id: 'experience://dr-1',
+    name: 'Punta Cana',
+    handle: 'punta-cana',
+    description: 'Más allá de los resorts, descubre la cultura y naturaleza de Punta Cana.',
+    thumbnail: 'https://images.pexels.com/photos/1174732/pexels-photo-1174732.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  },
+  {
+    id: 'experience://dr-2',
+    name: 'Santo Domingo',
+    handle: 'santo-domingo',
+    description: 'Explora la primera ciudad del Nuevo Mundo y su rica historia colonial.',
+    thumbnail: 'https://images.pexels.com/photos/3889843/pexels-photo-3889843.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  },
+  {
+    id: 'experience://dr-3',
+    name: 'Santiago',
+    handle: 'santiago',
+    description: 'La capital del Cibao, tierra del merengue y la cultura dominicana auténtica.',
+    thumbnail: 'https://images.pexels.com/photos/2422915/pexels-photo-2422915.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  },
+  {
+    id: 'experience://dr-4',
+    name: 'Puerto Plata',
+    handle: 'puerto-plata',
+    description: 'Playas del Atlántico, teleférico y cultura ámbar.',
+    thumbnail: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  },
+  {
+    id: 'experience://dr-5',
+    name: 'Samaná',
+    handle: 'samana',
+    description: 'Naturaleza salvaje, ballenas jorobadas y cascadas escondidas.',
+    thumbnail: 'https://images.pexels.com/photos/1320684/pexels-photo-1320684.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  },
+  {
+    id: 'experience://dr-6',
+    name: 'La Romana',
+    handle: 'la-romana',
+    description: 'Arte, artesanía y la famosa Altos de Chavón.',
+    thumbnail: 'https://images.pexels.com/photos/3601425/pexels-photo-3601425.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  },
+  {
+    id: 'experience://dr-7',
+    name: 'Jarabacoa',
+    handle: 'jarabacoa',
+    description: 'Aventura en la montaña, rafting y el frescor del Cibao.',
+    thumbnail: 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  },
+  {
+    id: 'experience://dr-8',
+    name: 'Constanza',
+    handle: 'constanza',
+    description: 'El Valle Encantado, naturaleza única y gastronomía de altura.',
+    thumbnail: 'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600',
+  },
+]
+
+const coverImage = {
+  src: experienceCategoryCoverImage.src,
+  width: experienceCategoryCoverImage.width,
+  height: experienceCategoryCoverImage.height,
+}
+
+// ✅ DOCOOLTURE - Ciudades con conteo real desde los listings
 export async function getExperienceCategories() {
-  return [
-    {
-      id: 'experience://dr-1',
-      name: 'Punta Cana',
-      handle: 'punta-cana',
-      region: 'República Dominicana',
-      href: '/experience-categories/punta-cana',
-      description: 'Más allá de los resorts, descubre la cultura y naturaleza de Punta Cana.',
-      count: 48,
-      thumbnail: 'https://images.pexels.com/photos/1174732/pexels-photo-1174732.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      coverImage: {
-        src: experienceCategoryCoverImage.src,
-        width: experienceCategoryCoverImage.width,
-        height: experienceCategoryCoverImage.height,
-      },
-    },
-    {
-      id: 'experience://dr-2',
-      name: 'Santo Domingo',
-      handle: 'santo-domingo',
-      region: 'República Dominicana',
-      href: '/experience-categories/santo-domingo',
-      description: 'Explora la primera ciudad del Nuevo Mundo y su rica historia colonial.',
-      count: 65,
-      thumbnail: 'https://images.pexels.com/photos/3889843/pexels-photo-3889843.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      coverImage: {
-        src: experienceCategoryCoverImage.src,
-        width: experienceCategoryCoverImage.width,
-        height: experienceCategoryCoverImage.height,
-      },
-    },
-    {
-      id: 'experience://dr-3',
-      name: 'Santiago',
-      handle: 'santiago',
-      region: 'República Dominicana',
-      href: '/experience-categories/santiago',
-      description: 'La capital del Cibao, tierra del merengue y la cultura dominicana auténtica.',
-      count: 32,
-      thumbnail: 'https://images.pexels.com/photos/2422915/pexels-photo-2422915.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      coverImage: {
-        src: experienceCategoryCoverImage.src,
-        width: experienceCategoryCoverImage.width,
-        height: experienceCategoryCoverImage.height,
-      },
-    },
-    {
-      id: 'experience://dr-4',
-      name: 'Puerto Plata',
-      handle: 'puerto-plata',
-      region: 'República Dominicana',
-      href: '/experience-categories/puerto-plata',
-      description: 'Playas del Atlántico, teleférico y cultura ámbar.',
-      count: 27,
-      thumbnail: 'https://images.pexels.com/photos/1450353/pexels-photo-1450353.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      coverImage: {
-        src: experienceCategoryCoverImage.src,
-        width: experienceCategoryCoverImage.width,
-        height: experienceCategoryCoverImage.height,
-      },
-    },
-    {
-      id: 'experience://dr-5',
-      name: 'Samaná',
-      handle: 'samana',
-      region: 'República Dominicana',
-      href: '/experience-categories/samana',
-      description: 'Naturaleza salvaje, ballenas jorobadas y cascadas escondidas.',
-      count: 21,
-      thumbnail: 'https://images.pexels.com/photos/1320684/pexels-photo-1320684.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      coverImage: {
-        src: experienceCategoryCoverImage.src,
-        width: experienceCategoryCoverImage.width,
-        height: experienceCategoryCoverImage.height,
-      },
-    },
-    {
-      id: 'experience://dr-6',
-      name: 'La Romana',
-      handle: 'la-romana',
-      region: 'República Dominicana',
-      href: '/experience-categories/la-romana',
-      description: 'Arte, artesanía y la famosa Altos de Chavón.',
-      count: 19,
-      thumbnail: 'https://images.pexels.com/photos/3601425/pexels-photo-3601425.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      coverImage: {
-        src: experienceCategoryCoverImage.src,
-        width: experienceCategoryCoverImage.width,
-        height: experienceCategoryCoverImage.height,
-      },
-    },
-    {
-      id: 'experience://dr-7',
-      name: 'Jarabacoa',
-      handle: 'jarabacoa',
-      region: 'República Dominicana',
-      href: '/experience-categories/jarabacoa',
-      description: 'Aventura en la montaña, rafting y el frescor del Cibao.',
-      count: 15,
-      thumbnail: 'https://images.pexels.com/photos/1666021/pexels-photo-1666021.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      coverImage: {
-        src: experienceCategoryCoverImage.src,
-        width: experienceCategoryCoverImage.width,
-        height: experienceCategoryCoverImage.height,
-      },
-    },
-    {
-      id: 'experience://dr-8',
-      name: 'Constanza',
-      handle: 'constanza',
-      region: 'República Dominicana',
-      href: '/experience-categories/constanza',
-      description: 'El Valle Encantado, naturaleza única y gastronomía de altura.',
-      count: 12,
-      thumbnail: 'https://images.pexels.com/photos/417173/pexels-photo-417173.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      coverImage: {
-        src: experienceCategoryCoverImage.src,
-        width: experienceCategoryCoverImage.width,
-        height: experienceCategoryCoverImage.height,
-      },
-    },
-  ]
+  const listings = await getExperienceListings()
+
+  return CITY_CATALOG
+    .map((city) => {
+      const nameNormalized = city.name.toLowerCase()
+      const count = listings.filter((l) =>
+        l.address.toLowerCase().includes(nameNormalized)
+      ).length
+      return {
+        ...city,
+        region: 'República Dominicana',
+        href: `/experience-categories/${city.handle}`,
+        count,
+        coverImage,
+      }
+    })
+    .filter((city) => city.count > 0)
 }
 
 export async function getExperienceCategoryByHandle(handle?: string) {
   handle = handle?.toLowerCase()
   if (!handle || handle === 'all') {
+    const categories = await getExperienceCategories()
+    const totalCount = categories.reduce((sum, c) => sum + c.count, 0)
     return {
       id: 'experience://all',
       name: 'Todas las experiencias',
@@ -136,13 +99,9 @@ export async function getExperienceCategoryByHandle(handle?: string) {
       region: 'República Dominicana',
       href: '/experience-categories/all',
       description: 'Descubre experiencias auténticas en toda la República Dominicana.',
-      count: 239,
+      count: totalCount,
       thumbnail: 'https://images.pexels.com/photos/1174732/pexels-photo-1174732.jpeg?auto=compress&cs=tinysrgb&w=1600',
-      coverImage: {
-        src: experienceCategoryCoverImage.src,
-        width: experienceCategoryCoverImage.width,
-        height: experienceCategoryCoverImage.height,
-      },
+      coverImage,
     }
   }
   const categories = await getExperienceCategories()

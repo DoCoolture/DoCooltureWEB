@@ -1,3 +1,6 @@
+'use client'
+
+import { useLanguage } from '@/context/LanguageContext'
 import HIW1img from '@/images/HIW1.png'
 import HIW2img from '@/images/HIW2.png'
 import HIW3img from '@/images/HIW3.png'
@@ -8,66 +11,27 @@ import { FC } from 'react'
 
 export interface SectionHowItWorkProps {
   className?: string
-  data?: {
-    id: number
-    title: string
-    desc: string
-    img: StaticImageData
-    imgDark?: StaticImageData
-  }[]
-  title?: string
 }
 
-// ✅ DOCOOLTURE - Textos adaptados a experiencias
-const DEMO_DATA: SectionHowItWorkProps['data'] = [
-  {
-    id: 1,
-    img: HIW1img,
-    title: 'Encuentra tu experiencia',
-    desc: 'Explora cientos de experiencias únicas cerca de ti o en cualquier parte del mundo.',
-  },
-  {
-    id: 2,
-    img: HIW2img,
-    title: 'Reserva fácil y seguro',
-    desc: 'Selecciona la fecha, el número de personas y confirma tu reserva en minutos.',
-  },
-  {
-    id: 3,
-    img: HIW3img,
-    title: 'Vive el momento',
-    desc: 'Disfruta experiencias inolvidables guiadas por expertos locales.',
-  },
-]
+const STEP_IMAGES: StaticImageData[] = [HIW1img, HIW2img, HIW3img]
 
-// OCULTO - Textos originales de Chisfis
-// const DEMO_DATA = [
-//   { id: 1, img: HIW1img, title: 'Book & relax', desc: 'Let each trip be an inspirational journey, each room a peaceful space' },
-//   { id: 2, img: HIW2img, title: 'Smart checklist', desc: 'Let each trip be an inspirational journey, each room a peaceful space' },
-//   { id: 3, img: HIW3img, title: 'Save more', desc: 'Let each trip be an inspirational journey, each room a peaceful space' },
-// ]
+const SectionHowItWork: FC<SectionHowItWorkProps> = ({ className = '' }) => {
+  const { t } = useLanguage()
+  const { heading, subheading, steps } = t.sections.howItWorks
 
-const SectionHowItWork: FC<SectionHowItWorkProps> = ({ className = '', data = DEMO_DATA, title = 'Cómo funciona' }) => {
   return (
     <div className={`nc-SectionHowItWork ${className}`} data-nc-id="SectionHowItWork">
-      <Heading isCenter subheading="Simple, rápido y seguro">
-        {title}
+      <Heading isCenter subheading={subheading}>
+        {heading}
       </Heading>
       <div className="relative mt-20 grid gap-20 md:grid-cols-3">
         <Image className="absolute inset-x-0 top-10 hidden md:block" src={VectorImg} alt="vector" />
-        {data.map((item) => (
-          <div key={item.id} className="relative mx-auto flex max-w-xs flex-col items-center">
-            {item.imgDark ? (
-              <>
-                <Image className="mx-auto mb-8 block max-w-[180px] dark:hidden" src={item.img} alt="how it work" />
-                <Image alt="how it work" className="mx-auto mb-8 hidden max-w-[180px] dark:block" src={item.imgDark} />
-              </>
-            ) : (
-              <Image alt="" className="mx-auto mb-8 max-w-[180px]" src={item.img} />
-            )}
+        {steps.map((step, index) => (
+          <div key={index} className="relative mx-auto flex max-w-xs flex-col items-center">
+            <Image alt="" className="mx-auto mb-8 max-w-[180px]" src={STEP_IMAGES[index]} />
             <div className="mt-auto text-center">
-              <h3 className="text-xl font-semibold">{item.title}</h3>
-              <span className="mt-5 block text-neutral-500 dark:text-neutral-400">{item.desc}</span>
+              <h3 className="text-xl font-semibold">{step.title}</h3>
+              <span className="mt-5 block text-neutral-500 dark:text-neutral-400">{step.desc}</span>
             </div>
           </div>
         ))}

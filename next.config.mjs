@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  turbopack: {
+    root: process.cwd(),
+  },
   images: {
     minimumCacheTTL: 2678400 * 6,
     remotePatterns: [

@@ -41,7 +41,7 @@ const ExperiencesCardH: FC<Props> = ({ className = '', data }) => {
           galleryImgs={galleryImgs}
           href={listingHref}
         />
-        <BtnLikeIcon isLiked={like} className="absolute end-3 top-3" />
+        <BtnLikeIcon experienceId={id} isLiked={like} className="absolute end-3 top-3" />
         {saleOff && <SaleOffBadge className="absolute start-3 top-3" />}
       </div>
     )

@@ -1,36 +1,25 @@
+import { getServerT } from '@/lib/locale-server'
 import Heading from '@/shared/Heading'
 import { FC } from 'react'
-
-const facts = [
-  {
-    id: '1',
-    heading: '10 million',
-    subHeading: 'Articles have been public around the world (as of Sept. 30, 2021)',
-  },
-  {
-    id: '2',
-    heading: '100,000',
-    subHeading: 'Registered users account (as of Sept. 30, 2021)',
-  },
-  {
-    id: '3',
-    heading: '220+',
-    subHeading: 'Countries and regions have our presence (as of Sept. 30, 2021)',
-  },
-]
 
 interface SectionStatisticProps {
   className?: string
 }
 
-const SectionStatistic: FC<SectionStatisticProps> = ({ className = '' }) => {
+const SectionStatistic: FC<SectionStatisticProps> = async ({ className = '' }) => {
+  const t = await getServerT()
+  const { heading, subheading, experiences, hosts, cities } = t.about.stats
+
+  const facts = [
+    { id: '1', heading: experiences.value, subHeading: experiences.label },
+    { id: '2', heading: hosts.value, subHeading: hosts.label },
+    { id: '3', heading: cities.value, subHeading: cities.label },
+  ]
+
   return (
     <div className={`relative ${className}`}>
-      <Heading
-        subheading="We're impartial and independent, and every day we create distinctive,
-          world-class programmes and content"
-      >
-        🚀 Fast Facts
+      <Heading subheading={subheading}>
+        🚀 {heading}
       </Heading>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:gap-8">
         {facts.map((item) => (

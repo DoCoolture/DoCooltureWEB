@@ -5,7 +5,7 @@ import ListingFilterTabs from '@/components/ListingFilterTabs'
 import { TExperienceCategory } from '@/data/categories'
 import { getExperienceListingFilterOptions, TExperienceListing } from '@/data/listings'
 import { Divider } from '@/shared/divider'
-import Pagination from '@/shared/Pagination'
+import PaginationComponent from '@/shared/Pagination'
 import convertNumbThousand from '@/utils/convertNumbThousand'
 import clsx from 'clsx'
 import { FC, useState } from 'react'
@@ -14,19 +14,29 @@ import MapFixedSection from '../../../MapFixedSection'
 interface Props {
   className?: string
   listings: TExperienceListing[]
+  allListingsCount: number
   category: TExperienceCategory
   filterOptions: Awaited<ReturnType<typeof getExperienceListingFilterOptions>>
+  currentPage: number
+  totalPages: number
 }
 
-const SectionGridHasMap: FC<Props> = ({ className, listings, category, filterOptions }) => {
+const SectionGridHasMap: FC<Props> = ({
+  className,
+  listings,
+  allListingsCount,
+  category,
+  filterOptions,
+  currentPage,
+  totalPages,
+}) => {
   const [currentHoverID, setCurrentHoverID] = useState<string>('')
 
   return (
     <div className={clsx('relative flex min-h-screen gap-6', className)}>
       <div className="flex w-full flex-1/2 flex-col gap-y-7 pt-8 pb-20">
-        {/* ✅ Texto en español */}
         <h1 className="text-lg/none font-semibold">
-          {convertNumbThousand(category.count)} experiencias
+          {convertNumbThousand(allListingsCount)} experiencia{allListingsCount !== 1 ? 's' : ''}
           {category.handle !== 'all' ? ` en ${category.name}` : ' en República Dominicana'}
         </h1>
 
@@ -52,7 +62,7 @@ const SectionGridHasMap: FC<Props> = ({ className, listings, category, filterOpt
         )}
 
         <div className="mt-16 flex items-center">
-          <Pagination />
+          <PaginationComponent currentPage={currentPage} totalPages={totalPages} />
         </div>
       </div>
 

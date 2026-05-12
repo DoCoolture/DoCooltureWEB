@@ -1,6 +1,7 @@
 'use client'
 
 import { useCarouselDotButton } from '@/hooks/use-carousel-dot-buttons'
+import { useLanguage } from '@/context/LanguageContext'
 import userImage1 from '@/images/avatars/1.png'
 import userImage2 from '@/images/avatars/2.png'
 import userImage3 from '@/images/avatars/3.png'
@@ -19,48 +20,18 @@ import useEmblaCarousel from 'embla-carousel-react'
 import Image from 'next/image'
 import { FC } from 'react'
 
-// ✅ DOCOOLTURE - Testimonios de viajeros
-const DEMO_DATA = [
-  {
-    id: 1,
-    clientName: 'María González',
-    content: 'Una experiencia increíble. El tour gastronómico superó todas mis expectativas. ¡Lo recomiendo totalmente!',
-  },
-  {
-    id: 2,
-    clientName: 'Carlos Rodríguez',
-    content: 'Reservar fue super fácil y la experiencia de aventura fue épica. Definitivamente volveré a usar DoCoolture.',
-  },
-  {
-    id: 3,
-    clientName: 'Ana Martínez',
-    content: 'El taller de cocina local fue una experiencia única. Aprendí muchísimo y me divertí mucho. ¡Gracias DoCoolture!',
-  },
-]
-
-// OCULTO - Testimonios originales de Chisfis
-// const DEMO_DATA = [
-//   { id: 1, clientName: 'Tiana Abie', content: 'Great quality products, affordable prices, fast and friendly delivery. I very recommend.' },
-//   { id: 2, clientName: 'Lennie Swiffan', content: 'Great quality products, affordable prices, fast and friendly delivery. I very recommend.' },
-//   { id: 3, clientName: 'Berta Emili', content: 'Great quality products, affordable prices, fast and friendly delivery. I very recommend.' },
-// ]
-
 interface SectionClientSayProps {
   className?: string
   emblaOptions?: EmblaOptionsType
-  heading?: string
-  subHeading?: string
 }
 
 const SectionClientSay: FC<SectionClientSayProps> = ({
   className,
   emblaOptions = { slidesToScroll: 1, loop: true },
-  heading = 'Lo que dicen nuestros viajeros 🥇',
-  subHeading = 'Experiencias reales de personas reales',
-  // OCULTO - Textos originales de Chisfis
-  // heading = 'Good news from far away 🥇',
-  // subHeading = "Let's see what people think of Chisfis",
 }) => {
+  const { t } = useLanguage()
+  const { heading, subheading, testimonials } = t.sections.clientSay
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { ...emblaOptions, direction: process.env.NEXT_PUBLIC_THEME_DIR },
     [Autoplay({ playOnInit: true, delay: 2000 })]
@@ -69,7 +40,7 @@ const SectionClientSay: FC<SectionClientSayProps> = ({
 
   return (
     <div className={clsx('relative flow-root', className)}>
-      <HeadingWithSub subheading={subHeading} isCenter>
+      <HeadingWithSub subheading={subheading} isCenter>
         {heading}
       </HeadingWithSub>
       <div className="relative mx-auto max-w-2xl md:mb-16">
@@ -87,7 +58,7 @@ const SectionClientSay: FC<SectionClientSayProps> = ({
           <Image className="absolute top-1 left-full -ml-16 size-12 opacity-50 md:opacity-100 lg:ml-3" src={qrImage} alt="qr" />
           <div className="embla" ref={emblaRef}>
             <ul className="embla__container">
-              {DEMO_DATA.map((item) => (
+              {testimonials.map((item) => (
                 <li key={item.id} className="flex embla__slide basis-full flex-col items-center text-center">
                   <span className="block text-2xl">{item.content}</span>
                   <span className="mt-8 block text-2xl font-semibold">{item.clientName}</span>

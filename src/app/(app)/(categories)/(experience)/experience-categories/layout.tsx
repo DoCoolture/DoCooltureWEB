@@ -3,15 +3,19 @@ import BackgroundSection from '@/components/BackgroundSection'
 import BgGlassmorphism from '@/components/BgGlassmorphism'
 import SectionGridAuthorBox from '@/components/SectionGridAuthorBox'
 import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
-import SectionSubscribe2 from '@/components/SectionSubscribe2'
 import { getAuthors } from '@/data/authors'
 import { getExperienceCategories } from '@/data/categories'
+import { getServerT } from '@/lib/locale-server'
 import Heading from '@/shared/Heading'
 import { ReactNode } from 'react'
 
 const Layout = async ({ children }: { children: ReactNode }) => {
-  const categories = await getExperienceCategories()
-  const authors = await getAuthors()
+  const [categories, authors, t] = await Promise.all([
+    getExperienceCategories(),
+    getAuthors(),
+    getServerT(),
+  ])
+  const c = t.categories.experience
 
   return (
     <ApplicationLayout>
@@ -22,8 +26,8 @@ const Layout = async ({ children }: { children: ReactNode }) => {
       <div className="container">
         <div className="relative py-16 lg:py-20">
           <BackgroundSection />
-          <Heading subheading="Happening today in South East Asia and around the world">
-            Today around the world.
+          <Heading subheading={c.sectionSubheading}>
+            {c.sectionHeading}
           </Heading>
           <SectionSliderNewCategories
             itemClassName="w-[17rem] lg:w-1/3 xl:w-1/4"
@@ -31,11 +35,10 @@ const Layout = async ({ children }: { children: ReactNode }) => {
             categoryCardType="card5"
           />
         </div>
-        <SectionSubscribe2 className="py-24 lg:py-32" />
         <div className="relative mb-24 py-16 lg:mb-28 lg:py-20">
           <BackgroundSection />
-          <Heading isCenter subheading="Meet our top 10 authors of the month">
-            Top 10 author of the month.
+          <Heading isCenter subheading={c.authorsSubheading}>
+            {c.authorsHeading}
           </Heading>
           <SectionGridAuthorBox authors={authors} />
         </div>

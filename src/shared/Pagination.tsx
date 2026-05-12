@@ -94,21 +94,47 @@ export function PaginationGap({
   )
 }
 
-export default function PaginationComponent() {
+export default function PaginationComponent({
+  currentPage = 1,
+  totalPages = 1,
+  className,
+}: {
+  currentPage?: number
+  totalPages?: number
+  className?: string
+}) {
+  if (totalPages <= 1) return null
+
+  const getPageHref = (page: number) => `?page=${page}`
+
+  const pages: (number | 'gap')[] = []
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i)
+  } else {
+    pages.push(1)
+    if (currentPage > 3) pages.push('gap')
+    const start = Math.max(2, currentPage - 1)
+    const end = Math.min(totalPages - 1, currentPage + 1)
+    for (let i = start; i <= end; i++) pages.push(i)
+    if (currentPage < totalPages - 2) pages.push('gap')
+    pages.push(totalPages)
+  }
+
   return (
-    <Pagination>
-      <PaginationPrevious href="?page=2" />
+    <Pagination className={className}>
+      <PaginationPrevious href={currentPage > 1 ? getPageHref(currentPage - 1) : null} />
       <PaginationList>
-        <PaginationPage href="?page=1">1</PaginationPage>
-        <PaginationPage href="?page=2">2</PaginationPage>
-        <PaginationPage href="?page=3" current>
-          3
-        </PaginationPage>
-        <PaginationGap />
-        <PaginationPage href="?page=65">65</PaginationPage>
-        <PaginationPage href="?page=66">66</PaginationPage>
+        {pages.map((page, i) =>
+          page === 'gap' ? (
+            <PaginationGap key={`gap-${i}`} />
+          ) : (
+            <PaginationPage key={page} href={getPageHref(page)} current={page === currentPage}>
+              {page}
+            </PaginationPage>
+          )
+        )}
       </PaginationList>
-      <PaginationNext href="?page=4" />
+      <PaginationNext href={currentPage < totalPages ? getPageHref(currentPage + 1) : null} />
     </Pagination>
   )
 }

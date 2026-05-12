@@ -23,6 +23,7 @@ import { FilterVerticalIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import clsx from 'clsx'
 import Form from 'next/form'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { PriceRangeSlider } from './PriceRangeSlider'
 
@@ -119,12 +120,32 @@ const ListingFilterTabs = ({
 }: {
   filterOptions?: any[]
 }) => {
+  const router = useRouter()
   const [showAllFilter, setShowAllFilter] = useState(false)
 
-  const handleFormSubmit = async (formData: FormData) => {
-    const formDataObject = Object.fromEntries(formData.entries())
-    console.log('Filtros aplicados:', formDataObject)
-    // TODO: implementar filtrado real con estos valores
+  const handleFormSubmit = (formData: FormData) => {
+    const params = new URLSearchParams()
+    // Collect checkbox values grouped by filter name
+    const checkboxMap: Record<string, string[]> = {}
+    for (const [key, value] of formData.entries()) {
+      if (typeof value === 'string') {
+        const cleanKey = key.endsWith('[]') ? key.slice(0, -2) : key
+        if (!checkboxMap[cleanKey]) checkboxMap[cleanKey] = []
+        checkboxMap[cleanKey].push(value)
+      }
+    }
+    // Reset to page 1 on filter change
+    params.set('page', '1')
+    for (const [key, values] of Object.entries(checkboxMap)) {
+      if (values.length > 0) params.set(key, values.join(','))
+    }
+    router.push(`?${params.toString()}`)
+    setShowAllFilter(false)
+  }
+
+  const handleClearAll = () => {
+    router.push('?page=1')
+    setShowAllFilter(false)
   }
 
   // Cuenta filtros activos (con defaultChecked)
@@ -202,10 +223,10 @@ const ListingFilterTabs = ({
               </div>
 
               <div className="flex shrink-0 items-center justify-between bg-neutral-50 p-4 sm:px-8 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
-                <ButtonThird className="-mx-3" onClick={() => setShowAllFilter(false)} type="button">
+                <ButtonThird className="-mx-3" onClick={handleClearAll} type="button">
                   Limpiar todo
                 </ButtonThird>
-                <ButtonPrimary type="submit" onClick={() => setShowAllFilter(false)}>
+                <ButtonPrimary type="submit">
                   Aplicar filtros
                 </ButtonPrimary>
               </div>
@@ -273,7 +294,7 @@ const ListingFilterTabs = ({
                     )}
                   </div>
                   <div className="flex items-center justify-between rounded-b-2xl bg-neutral-50 p-5 dark:border-t dark:border-neutral-800 dark:bg-neutral-900">
-                    <CloseButton className="-mx-3" as={ButtonThird} type="button">
+                    <CloseButton className="-mx-3" as={ButtonThird} type="button" onClick={handleClearAll}>
                       Limpiar
                     </CloseButton>
                     <CloseButton type="submit" as={ButtonPrimary}>

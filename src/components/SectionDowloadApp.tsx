@@ -1,3 +1,6 @@
+'use client'
+
+import { useLanguage } from '@/context/LanguageContext'
 import BackgroundSection from '@/components/BackgroundSection'
 import appRightImg from '@/images/appRightImg.png'
 import appRightImgTree from '@/images/appRightImgTree.png'
@@ -10,6 +13,9 @@ import { Link } from '@/shared/link'
 import Image from 'next/image'
 
 const SectionDowloadApp = () => {
+  const { t } = useLanguage()
+  const { heading, description } = t.sections.downloadApp
+
   return (
     <div className="relative pt-24 pb-0 lg:py-32 xl:py-40 2xl:py-48">
       <BackgroundSection className="bg-neutral-100/80 dark:bg-neutral-100">
@@ -31,16 +37,14 @@ const SectionDowloadApp = () => {
       </BackgroundSection>
 
       <div className="relative inline-block">
-        <h2 className="text-5xl font-bold text-neutral-800 md:text-6xl xl:text-7xl">Mobile Apps</h2>
-        <span className="mt-7 block max-w-md text-neutral-600">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dapibus porttitor nisl, sit amet finibus libero.
-        </span>
+        <h2 className="text-5xl font-bold text-neutral-800 md:text-6xl xl:text-7xl">{heading}</h2>
+        <span className="mt-7 block max-w-md text-neutral-600">{description}</span>
         <div className="mt-10 flex gap-x-2 sm:mt-14 sm:gap-x-4">
           <Link href="#" target="_blank" rel="noopener noreferrer" className="flex max-w-40">
             <Image src={btnIosPng} alt="ios" className="max-w-full" sizes="160px" />
           </Link>
           <Link href="#" target="_blank" rel="noopener noreferrer" className="flex max-w-40">
-            <Image src={btnAndroidPng} alt="androi" className="max-w-full" sizes="160px" />
+            <Image src={btnAndroidPng} alt="android" className="max-w-full" sizes="160px" />
           </Link>
         </div>
 
