@@ -3,11 +3,13 @@
 import { en } from '../../public/locales/en'
 import { es } from '../../public/locales/es'
 import { fr } from '../../public/locales/fr'
+import { useRouter } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 export type Locale = 'es' | 'en' | 'fr'
 
 const translations = { es, en, fr }
+const VALID_LOCALES: Locale[] = ['es', 'en', 'fr']
 
 interface LanguageContextType {
   locale: Locale
@@ -22,6 +24,7 @@ const LanguageContext = createContext<LanguageContextType>({
 })
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter()
   const [locale, setLocaleState] = useState<Locale>('es')
 
   // Al montar, leer la cookie
@@ -31,16 +34,17 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       .find((row) => row.startsWith('dc_locale='))
     if (cookie) {
       const value = cookie.split('=')[1] as Locale
-      if (['es', 'en', 'fr'].includes(value)) {
+      if (VALID_LOCALES.includes(value)) {
         setLocaleState(value)
       }
     }
   }, [])
 
   const setLocale = (newLocale: Locale) => {
-    // Guardar en cookie por 1 año
     document.cookie = `dc_locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`
     setLocaleState(newLocale)
+    // Re-renders server components with the new cookie
+    router.refresh()
   }
 
   return (
