@@ -1,105 +1,124 @@
 'use client'
 
 import { useLanguage } from '@/context/LanguageContext'
-import { Description, Field, Label } from '@/shared/fieldset'
-import Textarea from '@/shared/Textarea'
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
-import { PaypalIcon } from '@hugeicons/core-free-icons'
-import { HugeiconsIcon } from '@hugeicons/react'
+import { supabase } from '@/lib/supabase'
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'
+import { useRouter } from 'next/navigation'
 import React from 'react'
 
-// ============================================================
-// Fase 1: PayPal (activo)
-// Fase 2: CardNet (estructura lista, pendiente integración)
-// ============================================================
-
-const PaypalForm = () => {
-  const { t } = useLanguage()
-  const b = t.booking
-
-  return (
-    <div className="flex flex-col gap-y-5">
-      <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5 dark:border-blue-900 dark:bg-blue-950">
-        <div className="flex items-center gap-x-3">
-          <HugeiconsIcon icon={PaypalIcon} size={32} strokeWidth={1.5} className="text-blue-600" />
-          <div>
-            <p className="font-semibold text-blue-900 dark:text-blue-100">{b.paypalTitle}</p>
-            <p className="text-sm text-blue-700 dark:text-blue-300">{b.paypalRedirect}</p>
-          </div>
-        </div>
-      </div>
-
-      <Field>
-        <Label>{b.paypalEmail}</Label>
-        <input
-          name="paypal-email"
-          type="email"
-          placeholder="tu@email.com"
-          className="mt-1.5 block w-full rounded-xl border border-neutral-200 px-4 py-3 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-neutral-700 dark:bg-neutral-800"
-        />
-      </Field>
-
-      <Field>
-        <Label>{b.messageLabel}</Label>
-        <Textarea name="message" className="mt-1.5" placeholder={b.messagePlaceholder} />
-        <Description>{b.messageDescription}</Description>
-      </Field>
-
-      <div className="rounded-xl bg-neutral-50 p-4 text-sm text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400">
-        {b.paypalSecurity}
-      </div>
-    </div>
-  )
+interface PayWithProps {
+  totalUsd: number
+  tourName: string
+  bookingDate: string
+  guests: number
+  customerId: string | null
+  customerEmail: string
+  customerName: string
+  notes: string | null
 }
 
-const PayWith = () => {
+const PayWith: React.FC<PayWithProps> = ({
+  totalUsd,
+  tourName,
+  bookingDate,
+  guests,
+  customerId,
+  customerEmail,
+  customerName,
+  notes,
+}) => {
   const { t } = useLanguage()
   const b = t.booking
-  const [paymentMethod, setPaymentMethod] = React.useState('paypal')
+  const router = useRouter()
+  const [paypalError, setPaypalError] = React.useState<string | null>(null)
+  const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? ''
+
+  const createOrder = async () => {
+    const res = await fetch('/api/paypal/create-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: totalUsd.toFixed(2), description: tourName }),
+    })
+    const data = await res.json()
+    if (!res.ok || !data.id) throw new Error(data.error ?? 'Failed to create order')
+    return data.id as string
+  }
+
+  const onApprove = async ({ orderID }: { orderID: string }) => {
+    setPaypalError(null)
+    const res = await fetch('/api/paypal/capture-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderID }),
+    })
+    const data = await res.json()
+
+    if (!res.ok || data.status !== 'COMPLETED') {
+      setPaypalError(b.bookingError)
+      return
+    }
+
+    const { error: dbError } = await supabase.from('bookings').insert({
+      customer_name: customerName,
+      customer_email: customerEmail || data.payerEmail,
+      explorer_id: customerId,
+      customer_phone: '',
+      tour_name: tourName,
+      booking_date: bookingDate,
+      guests,
+      notes,
+      status: 'confirmed',
+      payment_method: 'paypal',
+      payment_status: 'paid',
+      payment_reference: data.transactionId,
+      total_amount: totalUsd,
+    })
+
+    if (dbError) {
+      console.error('Booking save error:', dbError)
+      setPaypalError(b.bookingError)
+      return
+    }
+
+    router.push('/pay-done')
+  }
+
+  if (!clientId) {
+    return (
+      <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+        ⚠️ PayPal no configurado. Agrega <code>NEXT_PUBLIC_PAYPAL_CLIENT_ID</code>, <code>PAYPAL_CLIENT_ID</code> y <code>PAYPAL_CLIENT_SECRET</code> a tu <code>.env.local</code>.
+      </div>
+    )
+  }
 
   return (
     <div className="pt-5">
       <h3 className="text-2xl font-semibold">{b.paymentMethod}</h3>
       <div className="my-5 w-14 border-b border-neutral-200 dark:border-neutral-700" />
 
-      <TabGroup
-        className="mt-6"
-        onChange={(index) => {
-          setPaymentMethod(index === 0 ? 'paypal' : 'cardnet')
-        }}
-      >
-        <TabList className="my-5 flex gap-1 text-sm">
-          <Tab className="flex items-center gap-x-2 rounded-full px-4 py-2.5 font-medium leading-none data-hover:bg-black/5 data-[selected]:bg-neutral-900 data-[selected]:text-white sm:px-6 dark:data-[selected]:bg-neutral-100 dark:data-[selected]:text-neutral-900">
-            PayPal
-            <HugeiconsIcon icon={PaypalIcon} size={20} strokeWidth={1.5} />
-          </Tab>
-          {/* CardNet — Fase 2 (deshabilitado temporalmente) */}
-          <Tab
-            disabled
-            className="flex cursor-not-allowed items-center gap-x-2 rounded-full px-4 py-2.5 font-medium leading-none opacity-40 sm:px-6"
-          >
-            CardNet
-            <span className="rounded-full bg-neutral-200 px-2 py-0.5 text-xs text-neutral-600">
-              {b.comingSoon}
-            </span>
-          </Tab>
-        </TabList>
+      <div className="mb-6 rounded-2xl border border-blue-100 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+        <p className="text-sm text-blue-700 dark:text-blue-300">{b.paypalRedirect}</p>
+      </div>
 
-        <TabPanels>
-          <TabPanel className="flex flex-col gap-y-5">
-            <PaypalForm />
-          </TabPanel>
-          {/* Fase 2 — CardNet */}
-          <TabPanel className="flex flex-col gap-y-5">
-            <div className="rounded-xl border border-dashed border-neutral-300 p-6 text-center text-neutral-500">
-              <p className="font-medium">{b.cardnetSoon}</p>
-              <p className="mt-1 text-sm">{b.usePaypal}</p>
-            </div>
-          </TabPanel>
-        </TabPanels>
-      </TabGroup>
+      {paypalError && (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+          ⚠️ {paypalError}
+        </div>
+      )}
 
-      <input type="hidden" name="paymentMethod" value={paymentMethod} />
+      <PayPalScriptProvider options={{ clientId, currency: 'USD' }}>
+        <PayPalButtons
+          style={{ layout: 'vertical', color: 'blue', shape: 'rect', label: 'pay' }}
+          createOrder={createOrder}
+          onApprove={onApprove}
+          onError={(err) => {
+            console.error('PayPal SDK error:', err)
+            setPaypalError(b.bookingError)
+          }}
+        />
+      </PayPalScriptProvider>
+
+      <p className="mt-4 text-center text-xs text-neutral-400">{b.paypalSecurity}</p>
     </div>
   )
 }

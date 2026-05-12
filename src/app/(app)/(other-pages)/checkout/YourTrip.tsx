@@ -12,9 +12,10 @@ interface YourTripProps {
   initialExplorers?: number
   initialStartDate?: Date | null
   onGuestsChange?: (total: number) => void
+  onDateChange?: (date: Date | null) => void
 }
 
-const YourTrip = ({ initialExplorers = 1, initialStartDate = null, onGuestsChange }: YourTripProps) => {
+const YourTrip = ({ initialExplorers = 1, initialStartDate = null, onGuestsChange, onDateChange }: YourTripProps) => {
   const { t } = useLanguage()
   const [startDate, setStartDate] = useState<Date | null>(initialStartDate ?? new Date())
   const [endDate, setEndDate] = useState<Date | null>(null)
@@ -38,6 +39,7 @@ const YourTrip = ({ initialExplorers = 1, initialStartDate = null, onGuestsChang
             const [start, end] = dates
             setStartDate(start)
             setEndDate(end)
+            onDateChange?.(start)
           }}
           triggerButton={({ openModal }) => (
             <button

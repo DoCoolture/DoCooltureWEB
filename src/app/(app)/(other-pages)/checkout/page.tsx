@@ -4,12 +4,13 @@ import StartRating from '@/components/StartRating'
 import { useCurrency } from '@/context/CurrencyContext'
 import { useLanguage } from '@/context/LanguageContext'
 import { supabase } from '@/lib/supabase'
-import ButtonPrimary from '@/shared/ButtonPrimary'
+import { Description, Field, Label } from '@/shared/fieldset'
+import Textarea from '@/shared/Textarea'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
 import { Divider } from '@/shared/divider'
 import { ClockIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import React, { Suspense, useState } from 'react'
 import PayWith from './PayWith'
 import YourTrip from './YourTrip'
@@ -18,16 +19,32 @@ const FALLBACK_IMAGE =
   'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800'
 
 const CheckoutContent = () => {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const { convertPrice } = useCurrency()
   const { t } = useLanguage()
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [currentExplorers, setCurrentExplorers] = useState(() =>
     Math.max(1, Number(searchParams.get('explorers') || 1))
   )
+  const [bookingDate, setBookingDate] = useState<string>(() => new Date().toISOString().split('T')[0])
+  const [notes, setNotes] = useState('')
+  const [currentUser, setCurrentUser] = useState<{ id: string; email: string; fullName: string } | null>(null)
+
+  React.useEffect(() => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single()
+      setCurrentUser({
+        id: user.id,
+        email: user.email ?? '',
+        fullName: (profile as { full_name: string | null } | null)?.full_name ?? user.email ?? '',
+      })
+    })
+  }, [])
 
   React.useEffect(() => {
     document.documentElement.scrollTo({ top: 0, behavior: 'instant' })
@@ -38,13 +55,11 @@ const CheckoutContent = () => {
     ubicacion: searchParams.get('ubicacion') || 'Zona Colonial, Santo Domingo',
     duracion: searchParams.get('duracion') || '3–4 horas',
     precio: searchParams.get('precio') || '$120',
-    // ✅ FIX imagen — usa fallback si la ruta es local o está vacía
     imagen: (() => {
       const img = searchParams.get('imagen') || ''
       return img.startsWith('http') ? img : FALLBACK_IMAGE
     })(),
     anfitrion: searchParams.get('anfitrion') || 'DoCoolture Gastronomy',
-    // ✅ FIX explorers — lee correctamente del URL param
     explorers: Math.max(1, Number(searchParams.get('explorers') || 1)),
   }
 
@@ -58,46 +73,8 @@ const CheckoutContent = () => {
   const totalConvertido = convertPrice(total)
   const precioUnitConvertido = convertPrice(precioNum)
 
-  const handleSubmitForm = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setErrorMsg(null)
-
-    const formData = new FormData(e.currentTarget)
-    const customerEmail = (formData.get('paypal-email') as string) || ''
-    const notes = (formData.get('message') as string) || null
-    const startDateRaw = formData.get('startDate') as string
-
-    const bookingDate = startDateRaw
-      ? new Date(startDateRaw).toISOString().split('T')[0]
-      : new Date().toISOString().split('T')[0]
-
-    const { error } = await supabase.from('bookings').insert({
-      customer_name: 'Pendiente',
-      customer_email: customerEmail,
-      customer_phone: '',
-      tour_name: experiencia.titulo,
-      booking_date: bookingDate,
-      guests: currentExplorers,
-      status: 'pending',
-      notes: notes,
-      total_amount: precioNum * currentExplorers + cargoProcesamiento,
-      payment_method: 'paypal',
-    })
-
-    if (error) {
-      console.error('❌ Error Supabase:', error)
-      setErrorMsg(t.booking.bookingError)
-      setIsLoading(false)
-      return
-    }
-
-    router.push('/pay-done')
-  }
-
   const renderSidebar = () => (
     <div className="flex w-full flex-col gap-y-6 border-neutral-200 px-0 sm:gap-y-8 sm:rounded-4xl sm:p-6 lg:border xl:p-8 dark:border-neutral-700">
-      {/* Imagen + info */}
       <div className="flex flex-col gap-y-4 sm:flex-row sm:items-start">
         <div className="w-full shrink-0 sm:w-44">
           <div className="relative aspect-[4/3] overflow-hidden rounded-2xl">
@@ -107,7 +84,6 @@ const CheckoutContent = () => {
               sizes="200px"
               src={experiencia.imagen}
               className="object-cover"
-              // ✅ FIX: si la imagen falla, muestra el fallback
               onError={(e) => {
                 const target = e.target as HTMLImageElement
                 target.src = FALLBACK_IMAGE
@@ -137,7 +113,6 @@ const CheckoutContent = () => {
 
       <Divider className="block lg:hidden" />
 
-      {/* ✅ Desglose con moneda convertida */}
       <DescriptionList>
         <DescriptionTerm>
           {precioUnitConvertido} × {currentExplorers} {currentExplorers > 1 ? t.booking.explorers : t.booking.explorer}
@@ -159,7 +134,6 @@ const CheckoutContent = () => {
         </DescriptionDetails>
       </DescriptionList>
 
-      {/* Info anfitrión */}
       <div className="rounded-xl bg-neutral-50 p-4 dark:bg-neutral-800">
         <div className="flex items-center gap-x-2 text-sm text-neutral-600 dark:text-neutral-400">
           <UserGroupIcon className="size-4" />
@@ -175,41 +149,41 @@ const CheckoutContent = () => {
   )
 
   const renderMain = () => (
-    <form
-      onSubmit={handleSubmitForm}
-      className="flex w-full flex-col gap-y-8 border-neutral-200 px-0 sm:rounded-4xl sm:border sm:p-6 xl:p-8 dark:border-neutral-700"
-    >
+    <div className="flex w-full flex-col gap-y-8 border-neutral-200 px-0 sm:rounded-4xl sm:border sm:p-6 xl:p-8 dark:border-neutral-700">
       <h1 className="text-3xl font-semibold lg:text-4xl">{t.booking.confirmAndPay}</h1>
       <Divider />
       <YourTrip
         initialExplorers={experiencia.explorers}
         initialStartDate={searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : null}
         onGuestsChange={setCurrentExplorers}
+        onDateChange={(d) =>
+          setBookingDate(d ? d.toISOString().split('T')[0] : new Date().toISOString().split('T')[0])
+        }
       />
-      <PayWith />
 
-      {errorMsg && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
-          ⚠️ {errorMsg}
-        </div>
-      )}
+      <Field>
+        <Label>{t.booking.messageLabel}</Label>
+        <Description>{t.booking.messageDescription}</Description>
+        <Textarea
+          rows={4}
+          placeholder={t.booking.messagePlaceholder}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          className="mt-2"
+        />
+      </Field>
 
-      <div>
-        <ButtonPrimary
-          type="submit"
-          disabled={isLoading}
-          className="mt-10 w-full text-base/6! sm:w-auto disabled:opacity-60"
-        >
-          {isLoading ? t.booking.savingBooking : t.booking.confirmBooking}
-        </ButtonPrimary>
-        <p className="mt-3 text-sm text-neutral-500">
-          {t.booking.termsDisclaimer}{' '}
-          <a href="/terminos" className="underline">
-            {t.booking.termsLink}
-          </a>
-        </p>
-      </div>
-    </form>
+      <PayWith
+        totalUsd={total}
+        tourName={experiencia.titulo}
+        bookingDate={bookingDate}
+        guests={currentExplorers}
+        customerId={currentUser?.id ?? null}
+        customerEmail={currentUser?.email ?? ''}
+        customerName={currentUser?.fullName ?? ''}
+        notes={notes || null}
+      />
+    </div>
   )
 
   return (
