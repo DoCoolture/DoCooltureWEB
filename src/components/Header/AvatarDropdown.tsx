@@ -1,11 +1,13 @@
 'use client'
 
+import { getNavigation, TNavigationItem } from '@/data/navigation'
 import { useLanguage } from '@/context/LanguageContext'
 import { supabase } from '@/lib/supabase'
 import Avatar from '@/shared/Avatar'
-import { CloseButton, Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
+import { CloseButton, Disclosure, DisclosureButton, DisclosurePanel, Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import {
   ArrowRightStartOnRectangleIcon,
+  ChevronDownIcon,
   HeartIcon,
   HomeIcon,
   ShieldCheckIcon,
@@ -20,6 +22,7 @@ export default function AvatarDropdown() {
   const { t } = useLanguage()
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
+  const [navItems, setNavItems] = useState<TNavigationItem[]>([])
 
   useEffect(() => {
     const getUser = async () => {
@@ -34,7 +37,12 @@ export default function AvatarDropdown() {
         setProfile(profileData)
       }
     }
+    const loadNav = async () => {
+      const items = await getNavigation()
+      setNavItems(items)
+    }
     getUser()
+    loadNav()
   }, [])
 
   const handleLogout = async () => {
@@ -86,6 +94,41 @@ export default function AvatarDropdown() {
     return base
   }
 
+  const renderNavItem = (item: TNavigationItem, index: number) => {
+    if (item.children?.length) {
+      return (
+        <Disclosure key={index}>
+          <DisclosureButton className="flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium uppercase tracking-wide text-neutral-700 transition-colors hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700">
+            {item.name}
+            <ChevronDownIcon className="size-4 text-neutral-400 transition-transform data-open:rotate-180" />
+          </DisclosureButton>
+          <DisclosurePanel className="pl-3">
+            {item.children.map((child, i) => (
+              <CloseButton
+                key={i}
+                as={Link}
+                href={child.href || '#'}
+                className="block rounded-xl px-3 py-2 text-sm text-neutral-600 transition-colors hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-700"
+              >
+                {child.name}
+              </CloseButton>
+            ))}
+          </DisclosurePanel>
+        </Disclosure>
+      )
+    }
+    return (
+      <CloseButton
+        key={index}
+        as={Link}
+        href={item.href || '#'}
+        className="block rounded-xl px-3 py-2.5 text-sm font-medium uppercase tracking-wide text-neutral-700 transition-colors hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-700"
+      >
+        {item.name}
+      </CloseButton>
+    )
+  }
+
   return (
     <Popover className="relative">
       <PopoverButton className="flex items-center focus:outline-none">
@@ -128,6 +171,12 @@ export default function AvatarDropdown() {
             )}
           </div>
         </div>
+
+        {navItems.length > 0 && (
+          <div className="border-b border-neutral-200 px-2 py-2 dark:border-neutral-700">
+            {navItems.map(renderNavItem)}
+          </div>
+        )}
 
         <div className="px-2 py-2">
           {getMenuItems().map((item) => (
