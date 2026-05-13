@@ -1,10 +1,9 @@
 import { getCurrencies, getLanguages } from '@/data/navigation'
-import { getServerT } from '@/lib/locale-server'
-import { Button } from '@/shared/Button'
 import Logo from '@/shared/Logo'
 import clsx from 'clsx'
 import { FC } from 'react'
 import AvatarDropdown from './AvatarDropdown'
+import BecomeHostButton from './BecomeHostButton'
 import CurrLangDropdown from './CurrLangDropdown'
 import DropdownExploradores from './DropdownExploradores'
 import HamburgerBtnMenu from './HamburgerBtnMenu'
@@ -18,8 +17,6 @@ interface HeaderProps {
 const Header: FC<HeaderProps> = async ({ hasBorderBottom = true, className }) => {
   const currencies = await getCurrencies()
   const languages = await getLanguages()
-  const t = await getServerT()
-
   return (
     <div className={clsx('relative', className)}>
       <div className="container">
@@ -41,7 +38,7 @@ const Header: FC<HeaderProps> = async ({ hasBorderBottom = true, className }) =>
 
           {/* RIGHT — Idioma/Moneda + CTA + Notificaciones + Avatar */}
           <div className="flex flex-1 items-center justify-end gap-x-2.5 sm:gap-x-6">
-            <div className="block lg:hidden">
+            <div className="block md:hidden">
               <HamburgerBtnMenu />
             </div>
             <CurrLangDropdown
@@ -49,9 +46,7 @@ const Header: FC<HeaderProps> = async ({ hasBorderBottom = true, className }) =>
               languages={languages}
               className="hidden md:block"
             />
-            <Button className="-mx-1 py-1.75! whitespace-nowrap" color="light" href="/become-host">
-              {t.common['Become a host']}
-            </Button>
+            <BecomeHostButton />
             <NotifyDropdown />
             <AvatarDropdown />
           </div>
