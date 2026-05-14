@@ -1,8 +1,8 @@
+import BecomeHostCta from '@/components/BecomeHostCta'
 import CardAuthorBox from '@/components/CardAuthorBox'
 import CardAuthorBox2 from '@/components/CardAuthorBox2'
 import { TAuthor } from '@/data/authors'
 import { Button } from '@/shared/Button'
-import ButtonPrimary from '@/shared/ButtonPrimary'
 import { FC } from 'react'
 
 interface Props {
@@ -37,7 +37,7 @@ const SectionGridAuthorBox: FC<Props> = ({
       </div>
       <div className="mt-16 flex flex-col justify-center gap-y-3 sm:flex-row sm:gap-x-5 sm:gap-y-0">
         <Button color="light">{showMoreLabel}</Button>
-        <ButtonPrimary href="/become-host">{becomeHostLabel}</ButtonPrimary>
+        <BecomeHostCta label={becomeHostLabel} />
       </div>
     </div>
   )

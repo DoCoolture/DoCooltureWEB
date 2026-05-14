@@ -4,7 +4,7 @@ import CardTalent from '@/components/CardTalent'
 import TalentFilterChips from '@/components/TalentFilterChips'
 import { getTalents } from '@/data/hosts'
 import { getServerT } from '@/lib/locale-server'
-import ButtonPrimary from '@/shared/ButtonPrimary'
+import BecomeHostCta from '@/components/BecomeHostCta'
 import Heading from '@/shared/Heading'
 import { HOST_SPECIALTIES } from '@/types'
 import { Metadata } from 'next'
@@ -77,9 +77,7 @@ const TalentoPage = async ({
             <Heading isCenter subheading={tp.becomeHostSubheading}>
               {tp.becomeHostHeading}
             </Heading>
-            <ButtonPrimary href="/become-host" className="mt-6">
-              {tp.becomeHostButton}
-            </ButtonPrimary>
+            <BecomeHostCta label={tp.becomeHostButton} className="mt-6" />
           </div>
         </div>
 
