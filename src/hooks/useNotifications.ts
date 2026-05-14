@@ -7,10 +7,12 @@ export function useNotifications() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
+  const [userLoading, setUserLoading] = useState(true)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUserId(data.user?.id ?? null)
+      setUserLoading(false)
     })
   }, [])
 
@@ -70,5 +72,5 @@ export function useNotifications() {
 
   const unreadCount = notifications.filter((n) => !n.is_read).length
 
-  return { notifications, unreadCount, loading, markAsRead, markAllAsRead }
+  return { notifications, unreadCount, loading, userLoading, userId, markAsRead, markAllAsRead }
 }

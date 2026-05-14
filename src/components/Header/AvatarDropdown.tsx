@@ -23,6 +23,7 @@ export default function AvatarDropdown() {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [navItems, setNavItems] = useState<TNavigationItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const getUser = async () => {
@@ -36,6 +37,7 @@ export default function AvatarDropdown() {
           .single()
         setProfile(profileData)
       }
+      setLoading(false)
     }
     const loadNav = async () => {
       const items = await getNavigation()
@@ -126,6 +128,29 @@ export default function AvatarDropdown() {
       >
         {item.name}
       </CloseButton>
+    )
+  }
+
+  if (loading) {
+    return <div className="size-9 animate-pulse rounded-full bg-neutral-200 dark:bg-neutral-700" />
+  }
+
+  if (!user) {
+    return (
+      <div className="flex items-center gap-x-2">
+        <Link
+          href="/login"
+          className="hidden rounded-full px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800 sm:block"
+        >
+          {t.login.Login}
+        </Link>
+        <Link
+          href="/signup"
+          className="rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+        >
+          {t.Header['Sign up']}
+        </Link>
+      </div>
     )
   }
 

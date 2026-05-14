@@ -23,7 +23,9 @@ interface Props {
 
 const NotifyDropdown: FC<Props> = ({ className = '' }) => {
   const { t } = useLanguage()
-  const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications()
+  const { notifications, unreadCount, loading, userLoading, userId, markAsRead, markAllAsRead } = useNotifications()
+
+  if (userLoading || !userId) return null
 
   return (
     <Popover className={className}>
