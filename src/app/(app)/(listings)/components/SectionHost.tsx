@@ -6,7 +6,9 @@ import { useLanguage } from '@/context/LanguageContext'
 import ButtonSecondary from '@/shared/ButtonSecondary'
 import { Divider } from '@/shared/divider'
 import { Link } from '@/shared/link'
-import { Award04Icon, Flag03Icon, Medal01Icon, Navigation03Icon } from '@hugeicons/core-free-icons'
+import HostAdminActions from '@/components/HostAdminActions'
+import ReportHostDialog from '@/components/ReportHostDialog'
+import { Award04Icon, Medal01Icon, Navigation03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import HostAvatar from './HostAvatar'
 import { SectionHeading } from './SectionHeading'
@@ -98,10 +100,8 @@ const SectionHost = ({
         </ButtonSecondary>
       </div>
       <Divider />
-      <div className="flex items-center gap-x-2 text-sm text-neutral-700 dark:text-neutral-300">
-        <HugeiconsIcon icon={Flag03Icon} size={16} color="currentColor" strokeWidth={1.5} />
-        <span>{sh.reportHost}</span>
-      </div>
+      <HostAdminActions hostId={handle} hostName={displayName} />
+      <ReportHostDialog hostId={handle} hostName={displayName} />
     </div>
   )
 }

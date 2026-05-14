@@ -12,9 +12,9 @@ import { ChevronLeftIcon } from '@heroicons/react/24/outline'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import HostAdminActions from './HostAdminActions'
+import HostAdminActions from '@/components/HostAdminActions'
+import ReportHostDialog from '@/components/ReportHostDialog'
 import ListingTabs from './ListingTabs'
-import ReportHostDialog from './ReportHostDialog'
 
 export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
   const { handle } = await params

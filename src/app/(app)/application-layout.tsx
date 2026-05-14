@@ -1,3 +1,4 @@
+import AdminBar from '@/components/AdminBar'
 import Footer2 from '@/components/Footer2'
 import FooterQuickNavigation from '@/components/FooterQuickNavigation'
 import Header from '@/components/Header/Header'
@@ -23,7 +24,7 @@ const ApplicationLayout: React.FC<Props> = ({ children, header }) => {
           <HeroSearchFormMobile />
         </div>
       </div>
-      {/*  */}
+      <AdminBar />
       {children}
       {/*  */}
       {/* FooterQuickNavigation - Displays on mobile devices and is fixed at the bottom of the screen */}

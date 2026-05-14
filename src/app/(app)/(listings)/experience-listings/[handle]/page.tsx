@@ -5,6 +5,7 @@ import { Divider } from '@/shared/divider'
 import { CheckCircleIcon, ClockIcon, LanguageIcon, UsersIcon } from '@heroicons/react/24/outline'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import ExperienceAdminActions from '../../components/ExperienceAdminActions'
 import HeaderGallery from '../../components/HeaderGallery'
 import SectionDateRange from '../../components/SectionDateRange'
 import SectionHeader from '../../components/SectionHeader'
@@ -188,6 +189,11 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
 
   return (
     <div>
+      {/* ADMIN ACTIONS */}
+      <div className="container mt-4">
+        <ExperienceAdminActions experienceId={listing.id} experienceTitle={title} />
+      </div>
+
       {/* GALERÍA */}
       <HeaderGallery gridType="grid4" images={galleryImgs} />
 
