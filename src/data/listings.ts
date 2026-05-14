@@ -509,7 +509,7 @@ export type TCarListing = Awaited<ReturnType<typeof getCarListings>>[number]
 // ============================================================
 
 const TASTE_OF_DOMINICAN = {
-  id: 'experience-listing://1',
+  id: '11111111-1111-1111-1111-111111111111',
   title: 'Taste of Dominican Culture',
   handle: 'taste-of-dominican-culture',
   host: {

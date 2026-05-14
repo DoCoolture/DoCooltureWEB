@@ -29,6 +29,9 @@ export default function AdminPage() {
     totalRevenue: 0,
   })
 
+  const [seedStatus, setSeedStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
+  const [seedMessage, setSeedMessage] = useState('')
+
   useEffect(() => {
     checkAdmin()
   }, [])
@@ -220,6 +223,26 @@ export default function AdminPage() {
     loadStats()
   }
 
+  const handleSeedExperience = async () => {
+    setSeedStatus('loading')
+    setSeedMessage('')
+    try {
+      const res = await fetch('/api/admin/seed-experience', { method: 'POST' })
+      const json = await res.json()
+      if (res.ok) {
+        setSeedStatus('ok')
+        setSeedMessage(json.message)
+        loadStats()
+      } else {
+        setSeedStatus('error')
+        setSeedMessage(json.error)
+      }
+    } catch {
+      setSeedStatus('error')
+      setSeedMessage('Error de red al ejecutar el seeding.')
+    }
+  }
+
   const handleSuspendHost = async (host: Host) => {
     const newStatus = host.status === 'active' ? 'suspended' : 'active'
     await supabase
@@ -262,13 +285,31 @@ export default function AdminPage() {
     <main className="container max-w-6xl mx-auto py-10 px-4 mb-24">
 
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-          Panel Admin — DoCoolture
-        </h1>
-        <p className="text-neutral-500 mt-1">
-          Gestiona experiencias, anfitriones y reservas.
-        </p>
+      <div className="mb-8 flex flex-col gap-y-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+            Panel Admin — DoCoolture
+          </h1>
+          <p className="text-neutral-500 mt-1">
+            Gestiona experiencias, anfitriones y reservas.
+          </p>
+        </div>
+
+        {/* Seed button */}
+        <div className="flex flex-col items-start gap-y-1">
+          <button
+            onClick={handleSeedExperience}
+            disabled={seedStatus === 'loading'}
+            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
+          >
+            {seedStatus === 'loading' ? 'Guardando...' : '📥 Guardar experiencia base en Supabase'}
+          </button>
+          {seedMessage && (
+            <p className={`text-xs ${seedStatus === 'ok' ? 'text-green-600' : 'text-red-600'}`}>
+              {seedMessage}
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
