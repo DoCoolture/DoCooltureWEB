@@ -11,22 +11,6 @@ export async function getNavigation(): Promise<TNavigationItem[]> {
     { id: '6', href: '/about', name: 'About' },
     { id: '7', href: '/contact', name: 'Contact' },
 
-    // ✅ DOCOOLTURE - Dropdown "Exploradores" (reemplaza "Travelers")
-    {
-      id: '8',
-      href: '/experience',
-      name: 'Exploradores',
-      type: 'dropdown',
-      children: [
-        { id: '8-1', href: '/experience', name: 'Experiencias' },
-        { id: '8-2', href: '/talento', name: 'Talento' },
-        // OCULTO - opciones originales
-        // { id: '1', href: '/', name: 'Stays' },
-        // { id: '2', href: '/real-estate', name: 'Real Estate' },
-        // { id: '4', href: '/car', name: 'Car rentals' },
-        // { id: '5', href: '/flight-categories/all', name: 'Flights' },
-      ],
-    },
   ]
 }
 
