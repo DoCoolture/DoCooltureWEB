@@ -697,6 +697,9 @@ export const es = {
     share: 'Compartir',
     reportHost: 'Reportar este anfitrión',
     listings: 'experiencias',
+    listingsDesc: 'Descubre las experiencias auténticas que ofrece este anfitrión.',
+    reviewsHeading: 'Lo que dicen los viajeros',
+    noHostReviews: 'Aún no hay reseñas para este anfitrión.',
   },
   talentPage: {
     heading: 'Nuestro Talento',

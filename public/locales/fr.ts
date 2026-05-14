@@ -697,6 +697,9 @@ export const fr = {
     share: 'Partager',
     reportHost: 'Signaler cet hôte',
     listings: 'expériences',
+    listingsDesc: 'Découvrez les expériences authentiques proposées par cet hôte.',
+    reviewsHeading: 'Ce que disent les voyageurs',
+    noHostReviews: "Pas encore d'avis pour cet hôte.",
   },
   talentPage: {
     heading: 'Notre Talent',

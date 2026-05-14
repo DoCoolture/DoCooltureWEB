@@ -697,6 +697,9 @@ export const it = {
     share: 'Condividi',
     reportHost: 'Segnala questo host',
     listings: 'esperienze',
+    listingsDesc: 'Scopri le esperienze autentiche offerte da questo host.',
+    reviewsHeading: 'Cosa dicono i viaggiatori',
+    noHostReviews: 'Ancora nessuna recensione per questo host.',
   },
   talentPage: {
     heading: 'Il Nostro Talento',

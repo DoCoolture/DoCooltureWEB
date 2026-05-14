@@ -696,7 +696,10 @@ export const en = {
     seeProfile: 'See host profile',
     share: 'Share',
     reportHost: 'Report this host',
-    listings: 'listings',
+    listings: 'experiences',
+    listingsDesc: 'Discover authentic experiences offered by this host.',
+    reviewsHeading: 'What travelers are saying',
+    noHostReviews: 'No reviews yet for this host.',
   },
   talentPage: {
     heading: 'Our Talent',
