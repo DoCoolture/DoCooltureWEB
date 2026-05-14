@@ -236,7 +236,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
           <HostAvatar avatarUrl={host.avatarUrl} />
           <div>
             <SectionHeading>
-              <Link href={'/authors/' + host.handle}>{host.displayName}</Link>
+              <Link href={'/talento/' + host.handle}>{host.displayName}</Link>
             </SectionHeading>
             <div className="mt-1.5 flex items-center text-sm text-neutral-500 dark:text-neutral-400">
               <StartRating point={host.rating} reviewCount={host.reviewsCount} />
@@ -272,7 +272,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
 
         {/* == */}
         <div className="flex gap-2">
-          <Button href={'/authors/' + handle}>Get in touch</Button>
+          <Button href={'/talento/' + handle}>Get in touch</Button>
           <ButtonSecondary outline>
             Sent email
             <HugeiconsIcon icon={Navigation03Icon} size={20} color="currentColor" strokeWidth={1.5} className="mb-px" />
