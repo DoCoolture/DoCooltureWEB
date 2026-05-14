@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { getAuthors } from './authors'
 
 export type TTalent = {
   id: string
@@ -32,64 +33,73 @@ const SPECIALTY_BG_IMAGES: Record<string, string> = {
 
 const DEFAULT_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500'
 
-const DOCOOLTURE_TALENT: TTalent = {
-  id: 'docoolture',
-  displayName: 'DoCoolture',
-  handle: 'docoolture',
-  avatarUrl: '',
-  bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
-  specialties: ['Gastronomía', 'Historia y Cultura'],
-  city: 'Santo Domingo',
-  averageRating: 5.0,
-  totalReviews: 12,
-  totalListings: 1,
-  bio: 'Somos un equipo apasionado por mostrar la República Dominicana auténtica.',
-  isSuperhost: true,
-  isVerified: true,
-  yearsExperience: 3,
+async function getAuthorTalents(): Promise<TTalent[]> {
+  const authors = await getAuthors()
+  return authors.map((a) => ({
+    id: String(a.id),
+    displayName: a.displayName,
+    handle: a.handle,
+    avatarUrl: a.avatarUrl,
+    bgImage: a.bgImage,
+    specialties: ['Historia y Cultura', 'Gastronomía'],
+    city: 'Santo Domingo',
+    averageRating: a.starRating,
+    totalReviews: a.reviews,
+    totalListings: a.count,
+    bio: a.description,
+    isSuperhost: true,
+    isVerified: true,
+    yearsExperience: 3,
+  }))
 }
 
 export async function getTalents(): Promise<TTalent[]> {
-  const { data: hosts } = await supabase
-    .from('hosts')
-    .select('*')
-    .eq('status', 'active')
-    .order('average_rating', { ascending: false })
+  try {
+    const { data: hosts } = await supabase
+      .from('hosts')
+      .select('*')
+      .eq('status', 'active')
+      .order('average_rating', { ascending: false })
 
-  if (!hosts || hosts.length === 0) {
-    return [DOCOOLTURE_TALENT]
+    const base = await getAuthorTalents()
+
+    if (!hosts || hosts.length === 0) {
+      return base
+    }
+
+    const results: TTalent[] = [...base]
+
+    for (const host of hosts) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('avatar_url, city')
+        .eq('id', host.profile_id)
+        .single()
+
+      const specialties = (host.specialties as string[] | null) ?? []
+      const primarySpecialty = specialties[0] ?? ''
+      const bgImage = SPECIALTY_BG_IMAGES[primarySpecialty] ?? DEFAULT_BG
+
+      results.push({
+        id: host.id,
+        displayName: host.display_name,
+        handle: host.id,
+        avatarUrl: profile?.avatar_url ?? '',
+        bgImage,
+        specialties,
+        city: host.city ?? profile?.city ?? null,
+        averageRating: host.average_rating ?? 0,
+        totalReviews: host.total_reviews ?? 0,
+        totalListings: host.total_listings ?? 0,
+        bio: host.bio ?? null,
+        isSuperhost: host.is_superhost ?? false,
+        isVerified: host.is_verified ?? false,
+        yearsExperience: host.years_experience ?? 0,
+      })
+    }
+
+    return results
+  } catch {
+    return getAuthorTalents()
   }
-
-  const results: TTalent[] = [DOCOOLTURE_TALENT]
-
-  for (const host of hosts) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('avatar_url, city')
-      .eq('id', host.profile_id)
-      .single()
-
-    const specialties = (host.specialties as string[] | null) ?? []
-    const primarySpecialty = specialties[0] ?? ''
-    const bgImage = SPECIALTY_BG_IMAGES[primarySpecialty] ?? DEFAULT_BG
-
-    results.push({
-      id: host.id,
-      displayName: host.display_name,
-      handle: host.id,
-      avatarUrl: profile?.avatar_url ?? '',
-      bgImage,
-      specialties,
-      city: host.city ?? profile?.city ?? null,
-      averageRating: host.average_rating ?? 0,
-      totalReviews: host.total_reviews ?? 0,
-      totalListings: host.total_listings ?? 0,
-      bio: host.bio ?? null,
-      isSuperhost: host.is_superhost ?? false,
-      isVerified: host.is_verified ?? false,
-      yearsExperience: host.years_experience ?? 0,
-    })
-  }
-
-  return results
 }
