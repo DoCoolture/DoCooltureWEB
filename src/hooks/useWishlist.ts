@@ -1,44 +1,65 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
-
-const STORAGE_KEY = 'docoolture_wishlist'
-
-function readStorage(): Set<string> {
-  if (typeof window === 'undefined') return new Set()
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    return raw ? new Set(JSON.parse(raw) as string[]) : new Set()
-  } catch {
-    return new Set()
-  }
-}
-
-function writeStorage(ids: Set<string>) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...ids]))
-}
+import { supabase } from '@/lib/supabase'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 export function useWishlist() {
   const [liked, setLiked] = useState<Set<string>>(new Set())
+  const profileIdRef = useRef<string | null>(null)
 
   useEffect(() => {
-    setLiked(readStorage())
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) return
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single()
+
+      if (!profile) return
+      profileIdRef.current = profile.id
+
+      const { data: rows } = await supabase
+        .from('wishlists')
+        .select('experience_id')
+        .eq('profile_id', profile.id)
+
+      if (rows) setLiked(new Set(rows.map((r) => r.experience_id as string)))
+    }
+
+    load()
   }, [])
 
   const isLiked = useCallback((id: string) => liked.has(id), [liked])
 
-  const toggle = useCallback((id: string) => {
+  const toggle = useCallback(async (id: string) => {
+    const profileId = profileIdRef.current
+    const isCurrentlyLiked = liked.has(id)
+
+    // Optimistic update
     setLiked((prev) => {
       const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
-      }
-      writeStorage(next)
+      isCurrentlyLiked ? next.delete(id) : next.add(id)
       return next
     })
-  }, [])
+
+    if (!profileId) return
+
+    if (isCurrentlyLiked) {
+      await supabase
+        .from('wishlists')
+        .delete()
+        .eq('profile_id', profileId)
+        .eq('experience_id', id)
+    } else {
+      await supabase
+        .from('wishlists')
+        .insert({ profile_id: profileId, experience_id: id })
+    }
+  }, [liked])
 
   return { isLiked, toggle }
 }
