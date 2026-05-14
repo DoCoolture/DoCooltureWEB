@@ -1,9 +1,9 @@
 'use client'
 
+import { HARDCODED_EXPERIENCES } from '@/data/listings'
 import { supabase } from '@/lib/supabase'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
-const HARDCODED_PREFIX = 'experience-listing://'
 const LOCAL_KEY = 'docoolture_wishlist_hardcoded'
 
 function getHardcodedLiked(): Set<string> {
@@ -82,7 +82,8 @@ export function useWishlist() {
       return next
     })
 
-    if (id.startsWith(HARDCODED_PREFIX)) {
+    // Experiencias hardcodeadas (no tienen registro real en Supabase todavía)
+    if (id in HARDCODED_EXPERIENCES) {
       const current = getHardcodedLiked()
       isCurrentlyLiked ? current.delete(id) : current.add(id)
       saveHardcodedLiked(current)
