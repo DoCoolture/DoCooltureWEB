@@ -543,6 +543,10 @@ const TASTE_OF_DOMINICAN = {
   map: { lat: 18.4733, lng: -69.8833 },
 }
 
+export const HARDCODED_EXPERIENCES: Record<string, typeof TASTE_OF_DOMINICAN> = {
+  [TASTE_OF_DOMINICAN.id]: TASTE_OF_DOMINICAN,
+}
+
 export async function getExperienceListings() {
   const { data } = await supabase
     .from('experiences')

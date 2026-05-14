@@ -3,13 +3,36 @@
 import { supabase } from '@/lib/supabase'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+const HARDCODED_PREFIX = 'experience-listing://'
+const LOCAL_KEY = 'docoolture_wishlist_hardcoded'
+
+function getHardcodedLiked(): Set<string> {
+  try {
+    const raw = localStorage.getItem(LOCAL_KEY)
+    return new Set(raw ? (JSON.parse(raw) as string[]) : [])
+  } catch {
+    return new Set()
+  }
+}
+
+function saveHardcodedLiked(ids: Set<string>) {
+  try {
+    localStorage.setItem(LOCAL_KEY, JSON.stringify([...ids]))
+  } catch {}
+}
+
 export function useWishlist() {
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const profileIdRef = useRef<string | null>(null)
 
   const loadFromDb = useCallback(async () => {
+    const hardcodedLiked = getHardcodedLiked()
+
     const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) return
+    if (!session?.user) {
+      setLiked(hardcodedLiked)
+      return
+    }
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -17,7 +40,10 @@ export function useWishlist() {
       .eq('user_id', session.user.id)
       .single()
 
-    if (!profile) return
+    if (!profile) {
+      setLiked(hardcodedLiked)
+      return
+    }
     profileIdRef.current = profile.id
 
     const { data: rows, error } = await supabase
@@ -26,7 +52,9 @@ export function useWishlist() {
       .eq('profile_id', profile.id)
 
     if (error) console.error('[useWishlist] load error:', error)
-    if (rows) setLiked(new Set(rows.map((r) => r.experience_id as string)))
+
+    const supabaseLiked = new Set(rows?.map((r) => r.experience_id as string) ?? [])
+    setLiked(new Set([...supabaseLiked, ...hardcodedLiked]))
   }, [])
 
   useEffect(() => {
@@ -36,7 +64,7 @@ export function useWishlist() {
       if (event === 'SIGNED_IN') loadFromDb()
       if (event === 'SIGNED_OUT') {
         profileIdRef.current = null
-        setLiked(new Set())
+        setLiked(getHardcodedLiked())
       }
     })
 
@@ -46,16 +74,22 @@ export function useWishlist() {
   const isLiked = useCallback((id: string) => liked.has(id), [liked])
 
   const toggle = useCallback(async (id: string) => {
-    const profileId = profileIdRef.current
     const isCurrentlyLiked = liked.has(id)
 
-    // Optimistic UI update
     setLiked((prev) => {
       const next = new Set(prev)
       isCurrentlyLiked ? next.delete(id) : next.add(id)
       return next
     })
 
+    if (id.startsWith(HARDCODED_PREFIX)) {
+      const current = getHardcodedLiked()
+      isCurrentlyLiked ? current.delete(id) : current.add(id)
+      saveHardcodedLiked(current)
+      return
+    }
+
+    const profileId = profileIdRef.current
     if (!profileId) {
       console.warn('[useWishlist] No profileId — usuario no autenticado')
       return
