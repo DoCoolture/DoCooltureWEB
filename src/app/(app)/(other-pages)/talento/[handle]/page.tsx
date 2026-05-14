@@ -7,12 +7,14 @@ import { Divider } from '@/shared/divider'
 import { Link } from '@/shared/link'
 import SocialsList from '@/shared/SocialsList'
 import { HomeIcon } from '@heroicons/react/24/outline'
-import { Award04Icon, Flag03Icon, Medal01Icon } from '@hugeicons/core-free-icons'
+import { Award04Icon, Medal01Icon } from '@hugeicons/core-free-icons'
 import { ChevronLeftIcon } from '@heroicons/react/24/outline'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import HostAdminActions from './HostAdminActions'
 import ListingTabs from './ListingTabs'
+import ReportHostDialog from './ReportHostDialog'
 
 export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
   const { handle } = await params
@@ -34,7 +36,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
 
   if (!author?.id) return notFound()
 
-  const { displayName, avatarUrl, count, starRating, reviewsCount } = author
+  const { id: hostId, displayName, avatarUrl, count, starRating, reviewsCount } = author
 
   const description = t.experienceListing.hostBio
   const address = sh.hostAddress
@@ -103,10 +105,8 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
               </div>
 
               <Divider />
-              <Link href="#" className="flex items-center gap-x-2 text-sm text-neutral-700 dark:text-neutral-300">
-                <HugeiconsIcon icon={Flag03Icon} size={16} color="currentColor" strokeWidth={1.5} />
-                <span>{sh.reportHost}</span>
-              </Link>
+              <HostAdminActions hostId={hostId} hostName={displayName} />
+              <ReportHostDialog hostId={hostId} hostName={displayName} />
             </div>
           </div>
         </div>
