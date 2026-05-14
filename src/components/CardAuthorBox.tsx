@@ -15,7 +15,7 @@ const CardAuthorBox: FC<CardAuthorBoxProps> = ({ className = '', author, index }
   const { displayName, handle = '/', avatarUrl, starRating, location, reviews } = author
   return (
     <Link
-      href={`/authors/${handle}`}
+      href={`/talento/${handle}`}
       className={`card-author-box group/card relative flex flex-col items-center justify-center nc-box-has-hover px-3 py-5 text-center sm:px-6 sm:py-7 ${className}`}
     >
       {index && (

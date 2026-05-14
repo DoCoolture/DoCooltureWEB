@@ -48,7 +48,7 @@ const SectionHost = ({
         <HostAvatar avatarUrl={avatarUrl} />
         <div>
           <SectionHeading>
-            <Link href={'/authors/' + handle}>{displayName}</Link>
+            <Link href={'/talento/' + handle}>{displayName}</Link>
           </SectionHeading>
           <div className="mt-1.5 flex items-center text-sm text-neutral-500 dark:text-neutral-400">
             <StartRating point={rating} reviewCount={reviewsCount} />
@@ -91,7 +91,7 @@ const SectionHost = ({
 
       {/* == */}
       <div className="flex gap-2">
-        <ButtonSecondary href={'/authors/' + handle}>{sh.seeProfile}</ButtonSecondary>
+        <ButtonSecondary href={'/talento/' + handle}>{sh.seeProfile}</ButtonSecondary>
         <ButtonSecondary outline>
           {sh.share}
           <HugeiconsIcon icon={Navigation03Icon} size={20} color="currentColor" strokeWidth={1.5} className="mb-px" />

@@ -17,7 +17,7 @@ const CardAuthorBox2: FC<CardAuthorBox2Props> = ({ className = '', author, jobNa
   const displayJobName = jobNameLabel ?? jobName
   return (
     <Link
-      href={'/authors/' + handle}
+      href={'/talento/' + handle}
       className={`flex flex-col overflow-hidden rounded-3xl bg-white transition-shadow hover:shadow-xl dark:bg-neutral-900 ${className}`}
     >
       <div className="relative shrink-0">
