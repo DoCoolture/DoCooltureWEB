@@ -24,7 +24,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import { useLanguage } from '@/context/LanguageContext'
 import clsx from 'clsx'
 import Form from 'next/form'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { PriceRangeSlider } from './PriceRangeSlider'
 
@@ -123,31 +123,59 @@ const ListingFilterTabs = ({
   filterOptions?: any[]
 }) => {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { t } = useLanguage()
   const [showAllFilter, setShowAllFilter] = useState(false)
 
+  // Derive the URL param names owned by the current filter set
+  const getFilterParamNames = (): string[] => {
+    const names: string[] = []
+    for (const fo of filterOptions) {
+      if (!fo) continue
+      if (fo.tabUIType === 'checkbox') names.push(fo.name)
+      if (fo.tabUIType === 'price-range') names.push('price_min', 'price_max')
+      if (fo.tabUIType === 'select-number') {
+        for (const opt of fo.options ?? []) names.push(opt.name)
+      }
+    }
+    return names
+  }
+
   const handleFormSubmit = (formData: FormData) => {
-    const params = new URLSearchParams()
-    // Collect checkbox values grouped by filter name
-    const checkboxMap: Record<string, string[]> = {}
+    // Preserve non-filter params (checkin, checkout, guests, location…)
+    const params = new URLSearchParams(searchParams.toString())
+
+    // Collect submitted values
+    const formMap: Record<string, string[]> = {}
     for (const [key, value] of formData.entries()) {
       if (typeof value === 'string') {
         const cleanKey = key.endsWith('[]') ? key.slice(0, -2) : key
-        if (!checkboxMap[cleanKey]) checkboxMap[cleanKey] = []
-        checkboxMap[cleanKey].push(value)
+        if (!formMap[cleanKey]) formMap[cleanKey] = []
+        formMap[cleanKey].push(value)
       }
     }
+
+    // Clear all filter-owned params first (handles unchecked state)
+    for (const name of getFilterParamNames()) params.delete(name)
+
     // Reset to page 1 on filter change
     params.set('page', '1')
-    for (const [key, values] of Object.entries(checkboxMap)) {
+
+    // Re-add only what was submitted
+    for (const [key, values] of Object.entries(formMap)) {
       if (values.length > 0) params.set(key, values.join(','))
     }
+
     router.push(`?${params.toString()}`)
     setShowAllFilter(false)
   }
 
   const handleClearAll = () => {
-    router.push('?page=1')
+    // Keep non-filter params when clearing
+    const params = new URLSearchParams(searchParams.toString())
+    for (const name of getFilterParamNames()) params.delete(name)
+    params.set('page', '1')
+    router.push(`?${params.toString()}`)
     setShowAllFilter(false)
   }
 
