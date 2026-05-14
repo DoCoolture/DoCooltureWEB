@@ -66,6 +66,8 @@ const CheckoutContent = () => {
     explorers: Math.max(1, Number(searchParams.get('explorers') || 1)),
     rating: Number(searchParams.get('rating') || 0),
     reviewCount: Number(searchParams.get('reviewCount') || 0),
+    experienceId: searchParams.get('experienceId') || null,
+    hostId: searchParams.get('hostId') || null,
   }
 
   const precioNum = Number(experiencia.precio.replace('$', '').replace(',', ''))
@@ -194,6 +196,8 @@ const CheckoutContent = () => {
           customerEmail={currentUser.email}
           customerName={currentUser.fullName}
           notes={notes || null}
+          experienceId={experiencia.experienceId}
+          hostId={experiencia.hostId}
         />
       )}
     </div>

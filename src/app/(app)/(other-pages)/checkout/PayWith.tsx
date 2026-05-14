@@ -15,6 +15,8 @@ interface PayWithProps {
   customerEmail: string
   customerName: string
   notes: string | null
+  experienceId: string | null
+  hostId: string | null
 }
 
 const PayWith: React.FC<PayWithProps> = ({
@@ -26,6 +28,8 @@ const PayWith: React.FC<PayWithProps> = ({
   customerEmail,
   customerName,
   notes,
+  experienceId,
+  hostId,
 }) => {
   const { t } = useLanguage()
   const b = t.booking
@@ -63,6 +67,8 @@ const PayWith: React.FC<PayWithProps> = ({
     }
 
     const { error: dbError } = await supabase.from('bookings').insert({
+      experience_id: experienceId,
+      host_id: hostId,
       customer_name: customerName,
       customer_email: customerEmail || data.payerEmail,
       explorer_id: customerId,

@@ -107,6 +107,8 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
       endDate: endDate || '',
       rating: String(reviewStart ?? 0),
       reviewCount: String(reviewCount ?? 0),
+      experienceId: listing.id,
+      hostId: host.handle,
     })
 
     redirect(`/checkout?${params.toString()}`)
