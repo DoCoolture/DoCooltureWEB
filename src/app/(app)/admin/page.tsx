@@ -34,6 +34,10 @@ export default function AdminPage() {
   const [seedMessage, setSeedMessage] = useState('')
   const [editingExp, setEditingExp] = useState<Experience | null>(null)
   const [deletingExpId, setDeletingExpId] = useState<string | null>(null)
+  const [hidingExpId, setHidingExpId] = useState<string | null>(null)
+  const [hideReason, setHideReason] = useState('')
+  const [rejectingVerificationId, setRejectingVerificationId] = useState<string | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
 
   useEffect(() => {
     checkAdmin()
@@ -422,26 +426,26 @@ export default function AdminPage() {
                   {/* Actions */}
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => setEditingExp(exp)}
+                      onClick={() => { setEditingExp(exp); setHidingExpId(null) }}
                       className="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400"
                     >
                       ✏️ Editar
                     </button>
-                    <button
-                      onClick={() => {
-                        if (exp.is_hidden) {
-                          handleHideExperience(exp, '')
-                        } else {
-                          const r = prompt('¿Por qué quieres ocultar esta experiencia?')
-                          if (r) handleHideExperience(exp, r)
-                        }
-                      }}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
-                        exp.is_hidden ? 'border-green-200 text-green-700 hover:bg-green-50' : 'border-amber-200 text-amber-700 hover:bg-amber-50'
-                      }`}
-                    >
-                      {exp.is_hidden ? '👁️ Mostrar' : '🚫 Ocultar'}
-                    </button>
+                    {exp.is_hidden ? (
+                      <button
+                        onClick={() => handleHideExperience(exp, '')}
+                        className="rounded-lg px-3 py-1.5 text-xs font-medium border border-green-200 text-green-700 hover:bg-green-50"
+                      >
+                        👁️ Mostrar
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => { setHidingExpId(exp.id); setHideReason('') }}
+                        className="rounded-lg px-3 py-1.5 text-xs font-medium border border-amber-200 text-amber-700 hover:bg-amber-50"
+                      >
+                        🚫 Ocultar
+                      </button>
+                    )}
                     {deletingExpId === exp.id ? (
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-red-600">¿Confirmar eliminación?</span>
@@ -467,6 +471,33 @@ export default function AdminPage() {
                       </button>
                     )}
                   </div>
+
+                  {/* Inline hide reason */}
+                  {hidingExpId === exp.id && (
+                    <div className="flex items-center gap-2 mt-1">
+                      <input
+                        type="text"
+                        value={hideReason}
+                        onChange={(e) => setHideReason(e.target.value)}
+                        placeholder="Razón para ocultar..."
+                        autoFocus
+                        className="flex-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-400"
+                      />
+                      <button
+                        onClick={() => { if (hideReason.trim()) { handleHideExperience(exp, hideReason); setHidingExpId(null); setHideReason('') } }}
+                        disabled={!hideReason.trim()}
+                        className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700 disabled:opacity-40"
+                      >
+                        Confirmar
+                      </button>
+                      <button
+                        onClick={() => { setHidingExpId(null); setHideReason('') }}
+                        className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  )}
                 </div>
               ))}
               {experiences.length === 0 && (
@@ -663,37 +694,46 @@ export default function AdminPage() {
 
                   {/* Acciones solo si está pendiente */}
                   {ver.status === 'pending' && (
-                    <div className="flex gap-x-3 mt-4 pt-4 border-t border-amber-200 dark:border-amber-800">
-                      <button
-                        onClick={() =>
-                          handleUpdateVerification(
-                            ver.id,
-                            ver.host_id,
-                            'approved'
-                          )
-                        }
-                        className="rounded-xl bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition-colors"
-                      >
-                        ✅ Aprobar
-                      </button>
-                      <button
-                        onClick={() => {
-                          const reason = prompt(
-                            '¿Por qué rechazas esta verificación?'
-                          )
-                          if (reason) {
-                            handleUpdateVerification(
-                              ver.id,
-                              ver.host_id,
-                              'rejected',
-                              reason
-                            )
-                          }
-                        }}
-                        className="rounded-xl border border-red-200 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-50 transition-colors"
-                      >
-                        ❌ Rechazar
-                      </button>
+                    <div className="mt-4 pt-4 border-t border-amber-200 dark:border-amber-800 space-y-3">
+                      <div className="flex gap-x-3">
+                        <button
+                          onClick={() => handleUpdateVerification(ver.id, ver.host_id, 'approved')}
+                          className="rounded-xl bg-green-600 text-white px-4 py-2 text-sm font-medium hover:bg-green-700 transition-colors"
+                        >
+                          ✅ Aprobar
+                        </button>
+                        <button
+                          onClick={() => { setRejectingVerificationId(ver.id); setRejectReason('') }}
+                          className="rounded-xl border border-red-200 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-50 transition-colors"
+                        >
+                          ❌ Rechazar
+                        </button>
+                      </div>
+                      {rejectingVerificationId === ver.id && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            placeholder="Razón del rechazo..."
+                            autoFocus
+                            className="flex-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+                          />
+                          <button
+                            onClick={() => { if (rejectReason.trim()) { handleUpdateVerification(ver.id, ver.host_id, 'rejected', rejectReason); setRejectingVerificationId(null); setRejectReason('') } }}
+                            disabled={!rejectReason.trim()}
+                            className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-40"
+                          >
+                            Confirmar
+                          </button>
+                          <button
+                            onClick={() => { setRejectingVerificationId(null); setRejectReason('') }}
+                            className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-sm"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

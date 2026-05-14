@@ -16,7 +16,6 @@ interface Props {
 const PropertyCard: FC<Props> = ({ className = '', data }) => {
   const {
     galleryImgs,
-    listingCategory,
     address,
     title,
     handle: listingHandle,

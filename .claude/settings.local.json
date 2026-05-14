@@ -8,7 +8,12 @@
       "PowerShell(git push origin main)",
       "PowerShell(git add \"public/locales/en.ts\" \"public/locales/es.ts\" \"public/locales/fr.ts\" \"public/locales/it.ts\" \"src/components/Header/Header.tsx\" \"src/app/\\(app\\)/\\(listings\\)/components/DatesRangeInputPopover.tsx\" \"src/app/\\(app\\)/\\(listings\\)/components/SectionDateRange.tsx\" \"src/app/\\(app\\)/\\(listings\\)/experience-listings/[handle]/page.tsx\" \"src/components/HeroSearchForm/ui/GuestNumberField.tsx\" \"src/app/\\(app\\)/\\(listings\\)/components/GuestsInputPopover.tsx\")",
       "PowerShell(git commit -m \"Fix i18n: header button, date range, experience page, adults age 18+\" -m \"- Header: translate Become a host button via getServerT\\(\\)\" -m \"- DatesRangeInputPopover: fix CheckIn/CheckOut labels using useLanguage\\(\\)\" -m \"- SectionDateRange: translate Availability and pricing note\" -m \"- Experience listing page: translate guest count, language, description, includes\" -m \"- GuestNumberField + GuestsInputPopover: adults age changed to 18+ via useLanguage\\(\\)\" -m \"- All 4 locales: updated Ages 13 to Ages 18, added experienceListing section\" -m \"\" -m \"Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>\")",
-      "PowerShell(git commit -m $msg)"
+      "PowerShell(git commit -m $msg)",
+      "Bash(dir /s /b src\\\\app\\\\*login* src\\\\app\\\\*signup* src\\\\app\\\\*register*)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\\\\supabase\\\\migrations\")"
     ]
   }
 }
