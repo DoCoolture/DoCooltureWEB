@@ -1,8 +1,8 @@
 'use client'
 
+import { useLanguage } from '@/context/LanguageContext'
 import { Button } from '@/shared/Button'
 import ButtonClose from '@/shared/ButtonClose'
-import T from '@/utils/getT'
 import { CloseButton, Dialog, DialogBackdrop, DialogPanel } from '@headlessui/react'
 import { Squares2X2Icon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
@@ -100,8 +100,11 @@ interface Props {
   gridType?: 'grid1' | 'grid2' | 'grid3' | 'grid4'
 }
 const HeaderGallery = ({ images, gridType = 'grid1' }: Props) => {
+  const { t } = useLanguage()
   let [isOpen, setIsOpen] = useState(false)
   let [startIndex, setStartIndex] = useState(0)
+
+  const showAllPhotosLabel = t.common['Show all photos']
 
   const handleOpenDialog = (index = 0) => {
     setStartIndex(index)
@@ -110,10 +113,10 @@ const HeaderGallery = ({ images, gridType = 'grid1' }: Props) => {
 
   return (
     <>
-      {gridType === 'grid1' && <HeaderGalleryGrid1 images={images} handleOpenDialog={handleOpenDialog} />}
-      {gridType === 'grid2' && <HeaderGalleryGrid2 images={images} handleOpenDialog={handleOpenDialog} />}
-      {gridType === 'grid3' && <HeaderGalleryGrid3 images={images} handleOpenDialog={handleOpenDialog} />}
-      {gridType === 'grid4' && <HeaderGalleryGrid4 images={images} handleOpenDialog={handleOpenDialog} />}
+      {gridType === 'grid1' && <HeaderGalleryGrid1 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} />}
+      {gridType === 'grid2' && <HeaderGalleryGrid2 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} />}
+      {gridType === 'grid3' && <HeaderGalleryGrid3 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} />}
+      {gridType === 'grid4' && <HeaderGalleryGrid4 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} />}
 
       {/* Dialog for full-screen image gallery */}
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
@@ -137,9 +140,11 @@ const HeaderGallery = ({ images, gridType = 'grid1' }: Props) => {
 const HeaderGalleryGrid1 = ({
   images,
   handleOpenDialog,
+  showAllPhotosLabel,
 }: {
   images: string[]
   handleOpenDialog: (index?: number) => void
+  showAllPhotosLabel: string
 }) => {
   return (
     <header className="relative md:grid md:grid-cols-4 md:gap-2">
@@ -173,7 +178,7 @@ const HeaderGalleryGrid1 = ({
       <div className="absolute bottom-3 left-3">
         <Button color="light" onClick={() => handleOpenDialog()}>
           <Squares2X2Icon className="h-5 w-5" />
-          <span>{T['common']['Show all photos']}</span>
+          <span>{showAllPhotosLabel}</span>
         </Button>
       </div>
     </header>
@@ -182,9 +187,11 @@ const HeaderGalleryGrid1 = ({
 const HeaderGalleryGrid2 = ({
   images,
   handleOpenDialog,
+  showAllPhotosLabel,
 }: {
   images: string[]
   handleOpenDialog: (index?: number) => void
+  showAllPhotosLabel: string
 }) => {
   return (
     <header className="relative md:grid md:grid-cols-4">
@@ -219,7 +226,7 @@ const HeaderGalleryGrid2 = ({
       <div className="absolute bottom-3 left-3">
         <Button color="light" onClick={() => handleOpenDialog()}>
           <Squares2X2Icon className="h-5 w-5" />
-          <span>{T['common']['Show all photos']}</span>
+          <span>{showAllPhotosLabel}</span>
         </Button>
       </div>
     </header>
@@ -228,9 +235,11 @@ const HeaderGalleryGrid2 = ({
 const HeaderGalleryGrid3 = ({
   images,
   handleOpenDialog,
+  showAllPhotosLabel,
 }: {
   images: string[]
   handleOpenDialog: (index?: number) => void
+  showAllPhotosLabel: string
 }) => {
   return (
     <header className="relative md:grid md:grid-cols-3 md:gap-x-2">
@@ -290,7 +299,7 @@ const HeaderGalleryGrid3 = ({
       <div className="absolute bottom-3 left-3">
         <Button color="light" onClick={() => handleOpenDialog()}>
           <Squares2X2Icon className="h-5 w-5" />
-          <span>{T['common']['Show all photos']}</span>
+          <span>{showAllPhotosLabel}</span>
         </Button>
       </div>
     </header>
@@ -299,9 +308,11 @@ const HeaderGalleryGrid3 = ({
 const HeaderGalleryGrid4 = ({
   images,
   handleOpenDialog,
+  showAllPhotosLabel,
 }: {
   images: string[]
   handleOpenDialog: (index?: number) => void
+  showAllPhotosLabel: string
 }) => {
   return (
     <header className="relative md:grid md:grid-cols-3 md:gap-x-2">
@@ -361,7 +372,7 @@ const HeaderGalleryGrid4 = ({
       <div className="absolute bottom-3 left-3">
         <Button color="light" onClick={() => handleOpenDialog()}>
           <Squares2X2Icon className="h-5 w-5" />
-          <span>{T['common']['Show all photos']}</span>
+          <span>{showAllPhotosLabel}</span>
         </Button>
       </div>
     </header>

@@ -11,7 +11,6 @@ export const PageNavigation = () => {
   const navigation = [
     { title: t.accountPage.Account, href: '/account' },
     { title: t.accountPage['Saved listings'], href: '/account-savelists' },
-    { title: t.accountPage.Password, href: '/account-password' },
     { title: t.accountPage['Payments & payouts'], href: '/account-billing' },
   ]
 

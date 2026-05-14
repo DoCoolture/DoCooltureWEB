@@ -1,6 +1,7 @@
 'use client'
 
 import { Map, MapControls, MapMarker, MarkerContent } from '@/components/ui/map'
+import { useLanguage } from '@/context/LanguageContext'
 import { Divider } from '@/shared/divider'
 import { MapPinIcon } from '@heroicons/react/24/outline'
 import { SectionHeading, SectionSubheading } from './SectionHeading'
@@ -13,12 +14,13 @@ interface Props {
 }
 
 const SectionMap = ({ className, lat, lng, address }: Props) => {
+  const { t } = useLanguage()
   if (!lat || !lng) return null
 
   return (
     <div className={`listingSection__wrap ${className ?? ''}`}>
       <div>
-        <SectionHeading>Ubicación</SectionHeading>
+        <SectionHeading>{t.experienceListing.location}</SectionHeading>
         {address && <SectionSubheading>{address}</SectionSubheading>}
       </div>
       <Divider className="w-14!" />

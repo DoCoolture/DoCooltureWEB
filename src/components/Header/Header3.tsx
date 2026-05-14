@@ -1,10 +1,10 @@
 'use client'
 
+import { useLanguage } from '@/context/LanguageContext'
 import { useInteractOutside } from '@/hooks/useInteractOutside'
 import { Button } from '@/shared/Button'
 import Logo from '@/shared/Logo'
 import { ListingType } from '@/type'
-import T from '@/utils/getT'
 import * as Headless from '@headlessui/react'
 import { Search01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -31,6 +31,7 @@ const formatShortDate = (dateStr: string) => {
 }
 
 const Header3: FC<Header3Props> = ({ className, hasBorderBottom = true, initSearchFormTab = 'Stays' }) => {
+  const { t } = useLanguage()
   const headerInnerRef = useRef<HTMLDivElement>(null)
   const [showHeroSearch, setShowHeroSearch] = useState<boolean>(false)
   const lastScrollY = useRef<number>(0)
@@ -176,7 +177,7 @@ const Header3: FC<Header3Props> = ({ className, hasBorderBottom = true, initSear
             <div className="relative z-10 flex flex-1/2 items-center justify-end gap-x-2.5 text-neutral-700 sm:gap-x-6 dark:text-neutral-100">
               <div className="hidden xl:block">
                 <Button color="light" className="-mx-1 py-1.75!" href={'/add-listing/1'}>
-                  {T['Header']['List your property']}
+                  {t.Header['List your property']}
                 </Button>
               </div>
 

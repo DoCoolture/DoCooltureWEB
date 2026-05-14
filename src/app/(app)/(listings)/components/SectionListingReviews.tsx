@@ -2,6 +2,7 @@
 
 import { Dialog, DialogBody, DialogTitle } from '@/components/dialog'
 import ListingReview from '@/components/ListingReview'
+import { useLanguage } from '@/context/LanguageContext'
 import { ExperienceReview } from '@/data/reviews'
 import { supabase } from '@/lib/supabase'
 import ButtonCircle from '@/shared/ButtonCircle'
@@ -20,7 +21,9 @@ interface Props {
   experienceId: string
 }
 
-const SectionListingReviews = ({ reviews: initialReviews, reviewCount, reviewStart, experienceId }: Props) => {
+const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienceId }: Props) => {
+  const { t } = useLanguage()
+  const el = t.experienceListing
   const [isOpen, setIsOpen] = useState(false)
   const [reviews, setReviews] = useState(initialReviews)
   const [comment, setComment] = useState('')
@@ -51,7 +54,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewCount, reviewSta
       .single()
 
     if (supabaseError) {
-      setError('No se pudo guardar tu reseña. Intenta de nuevo.')
+      setError(el.reviewError)
     } else if (data) {
       setReviews((prev) => [data as ExperienceReview, ...prev])
       setSubmitted(true)
@@ -68,7 +71,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewCount, reviewSta
       <div className="flex flex-col gap-y-6 pt-8 sm:gap-y-8">
         {/* HEADING */}
         <div>
-          <SectionHeading>Reviews ({reviews.length} reviews)</SectionHeading>
+          <SectionHeading>{el.reviewsHeading} ({el.reviewsCount.replace('{n}', String(reviews.length))})</SectionHeading>
           <div className="mt-4 flex items-center gap-x-1">
             {[0, 1, 2, 3, 4].map((n) => (
               <StarIcon
@@ -85,12 +88,12 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewCount, reviewSta
         {/* SUBMIT FORM */}
         {submitted ? (
           <p className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
-            ✅ ¡Gracias por tu reseña!
+            {el.thanksReview}
           </p>
         ) : (
           <div className="flex flex-col gap-3">
             <Input
-              placeholder="Tu nombre"
+              placeholder={el.yourName}
               value={name}
               onChange={(e) => setName(e.target.value)}
               rounded="rounded-full"
@@ -122,7 +125,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewCount, reviewSta
                 sizeClass="h-16 px-6 py-3"
                 fontClass="text-base/6"
                 rounded="rounded-full"
-                placeholder="Comparte tu experiencia..."
+                placeholder={el.shareExperience}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
               />
@@ -151,20 +154,20 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewCount, reviewSta
             {reviews.length > 3 && (
               <div className="flex w-full justify-center pt-8">
                 <ButtonSecondary onClick={() => setIsOpen(true)}>
-                  Ver {reviews.length - 3} reseñas más
+                  {el.seeMoreReviews.replace('{n}', String(reviews.length - 3))}
                 </ButtonSecondary>
               </div>
             )}
           </div>
         ) : (
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
-            Aún no hay reseñas. ¡Sé el primero en compartir tu experiencia!
+            {el.noReviews}
           </p>
         )}
       </div>
 
       <Dialog size="2xl" open={isOpen} onClose={setIsOpen}>
-        <DialogTitle>{reviews.length} reviews</DialogTitle>
+        <DialogTitle>{el.reviewsCount.replace('{n}', String(reviews.length))}</DialogTitle>
         <DialogBody>
           <div className="divide-y divide-neutral-100 dark:divide-neutral-800">
             {reviews.map((item) => (
