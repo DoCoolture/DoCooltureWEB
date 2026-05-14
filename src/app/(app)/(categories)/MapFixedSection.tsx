@@ -22,6 +22,8 @@ interface Props {
   closeButtonHref: string
 }
 
+const DEFAULT_CENTER = { lat: 18.4861, lng: -69.9312 }
+
 const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings, listingType }: Props) => {
   const { t } = useLanguage()
   const [currentHoverID, setCurrentHoverID] = useState<string>('')
@@ -30,10 +32,12 @@ const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings
     setCurrentHoverID(selectedID)
   }, [selectedID])
 
+  const mapCenter = listings.length > 0 ? listings[0].map : DEFAULT_CENTER
+
   return (
     <div className="fixed inset-0 top-0 z-40 flex-1/2 xl:static xl:z-0">
       <div className="fixed start-0 top-0 size-full overflow-hidden xl:sticky xl:top-0 xl:h-screen">
-        <Map center={listings[0].map} zoom={11}>
+        <Map center={mapCenter} zoom={11}>
           <MapControls position="bottom-right" showZoom showFullscreen />
           {listings.map((listing) => (
             <MapMarker key={listing.id} longitude={listing.map.lng} latitude={listing.map.lat}>
