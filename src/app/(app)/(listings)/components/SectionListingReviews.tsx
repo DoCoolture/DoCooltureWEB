@@ -59,7 +59,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienc
   }, [])
 
   const handleSubmit = async () => {
-    if (!comment.trim() || !name.trim()) return
+    if (!comment.trim() || !userId) return
     setSubmitting(true)
     setError(null)
 
@@ -111,22 +111,16 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienc
         <Divider className="w-14!" />
 
         {/* SUBMIT FORM */}
-        {submitted ? (
+        {!isLoggedIn ? (
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
+            {el.loginToReview}
+          </p>
+        ) : submitted ? (
           <p className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
             {el.thanksReview}
           </p>
         ) : (
           <div className="flex flex-col gap-3">
-            {/* Name: readonly if logged in, editable if anonymous */}
-            <Input
-              placeholder={el.yourName}
-              value={name}
-              onChange={(e) => !isLoggedIn && setName(e.target.value)}
-              readOnly={isLoggedIn}
-              rounded="rounded-full"
-              sizeClass="h-12 px-5"
-              className={isLoggedIn ? 'opacity-70 cursor-default' : ''}
-            />
             {/* Star picker */}
             <div className="flex items-center gap-x-1 px-1">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -161,7 +155,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienc
                 <ButtonCircle
                   className="size-12!"
                   onClick={handleSubmit}
-                  disabled={submitting || !comment.trim() || !name.trim()}
+                  disabled={submitting || !comment.trim() || !userId}
                 >
                   <ArrowRightIcon className="h-5 w-5 rtl:rotate-180" />
                 </ButtonCircle>

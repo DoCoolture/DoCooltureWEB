@@ -11,7 +11,7 @@ interface PayWithProps {
   tourName: string
   bookingDate: string
   guests: number
-  customerId: string | null
+  customerId: string
   customerEmail: string
   customerName: string
   notes: string | null
@@ -45,6 +45,10 @@ const PayWith: React.FC<PayWithProps> = ({
   }
 
   const onApprove = async ({ orderID }: { orderID: string }) => {
+    if (!customerId) {
+      setPaypalError(b.loginRequired)
+      return
+    }
     setPaypalError(null)
     const res = await fetch('/api/paypal/capture-order', {
       method: 'POST',

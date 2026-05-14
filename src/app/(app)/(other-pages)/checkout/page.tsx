@@ -29,20 +29,23 @@ const CheckoutContent = () => {
   const [bookingDate, setBookingDate] = useState<string>(() => new Date().toISOString().split('T')[0])
   const [notes, setNotes] = useState('')
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; fullName: string } | null>(null)
+  const [userLoading, setUserLoading] = useState(true)
 
   React.useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('user_id', user.id)
-        .single()
-      setCurrentUser({
-        id: user.id,
-        email: user.email ?? '',
-        fullName: (profile as { full_name: string | null } | null)?.full_name ?? user.email ?? '',
-      })
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', user.id)
+          .single()
+        setCurrentUser({
+          id: user.id,
+          email: user.email ?? '',
+          fullName: (profile as { full_name: string | null } | null)?.full_name ?? user.email ?? '',
+        })
+      }
+      setUserLoading(false)
     })
   }, [])
 
@@ -173,16 +176,24 @@ const CheckoutContent = () => {
         />
       </Field>
 
-      <PayWith
-        totalUsd={total}
-        tourName={experiencia.titulo}
-        bookingDate={bookingDate}
-        guests={currentExplorers}
-        customerId={currentUser?.id ?? null}
-        customerEmail={currentUser?.email ?? ''}
-        customerName={currentUser?.fullName ?? ''}
-        notes={notes || null}
-      />
+      {userLoading ? (
+        <div className="h-12 animate-pulse rounded-xl bg-neutral-100 dark:bg-neutral-800" />
+      ) : !currentUser ? (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">
+          {t.booking.loginRequired}
+        </p>
+      ) : (
+        <PayWith
+          totalUsd={total}
+          tourName={experiencia.titulo}
+          bookingDate={bookingDate}
+          guests={currentExplorers}
+          customerId={currentUser.id}
+          customerEmail={currentUser.email}
+          customerName={currentUser.fullName}
+          notes={notes || null}
+        />
+      )}
     </div>
   )
 
