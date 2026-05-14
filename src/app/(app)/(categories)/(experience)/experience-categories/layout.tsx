@@ -44,6 +44,7 @@ const Layout = async ({ children }: { children: ReactNode }) => {
             authors={authors}
             showMoreLabel={t.common['Show me more']}
             becomeHostLabel={t.common['Become a host']}
+            jobNameLabel={t.sectionHost.jobName}
           />
         </div>
       </div>

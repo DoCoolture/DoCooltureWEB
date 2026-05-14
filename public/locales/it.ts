@@ -701,6 +701,9 @@ export const it = {
     reviewsHeading: 'Cosa dicono i viaggiatori',
     noHostReviews: 'Ancora nessuna recensione per questo host.',
     noListings: 'Nessun alloggio disponibile al momento.',
+    jobName: 'Guida culturale',
+    hostAddress: 'Santo Domingo, Repubblica Dominicana',
+    hostLanguages: 'Spagnolo, Inglese',
   },
   talentPage: {
     heading: 'Il Nostro Talento',

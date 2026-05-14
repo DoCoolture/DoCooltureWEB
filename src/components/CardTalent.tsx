@@ -16,7 +16,7 @@ const CardTalent: FC<Props> = ({ talent, specialtyLabel, superhostLabel }) => {
 
   return (
     <Link
-      href={`/authors/${handle}`}
+      href={`/talento/${handle}`}
       className="group flex flex-col overflow-hidden rounded-3xl bg-white shadow-sm transition-shadow hover:shadow-xl dark:bg-neutral-900"
     >
       <div className="relative aspect-[4/3]">

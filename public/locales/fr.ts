@@ -701,6 +701,9 @@ export const fr = {
     reviewsHeading: 'Ce que disent les voyageurs',
     noHostReviews: "Pas encore d'avis pour cet hôte.",
     noListings: 'Aucun hébergement disponible pour le moment.',
+    jobName: 'Guide culturel',
+    hostAddress: 'Saint-Domingue, République Dominicaine',
+    hostLanguages: 'Espagnol, Anglais',
   },
   talentPage: {
     heading: 'Notre Talent',

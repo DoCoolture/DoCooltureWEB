@@ -9,10 +9,12 @@ import { FC } from 'react'
 interface CardAuthorBox2Props {
   className?: string
   author: TAuthor
+  jobNameLabel?: string
 }
 
-const CardAuthorBox2: FC<CardAuthorBox2Props> = ({ className = '', author }) => {
+const CardAuthorBox2: FC<CardAuthorBox2Props> = ({ className = '', author, jobNameLabel }) => {
   const { displayName, handle = '/', avatarUrl, jobName, count, bgImage } = author
+  const displayJobName = jobNameLabel ?? jobName
   return (
     <Link
       href={'/authors/' + handle}
@@ -47,7 +49,7 @@ const CardAuthorBox2: FC<CardAuthorBox2Props> = ({ className = '', author }) => 
           <h2 className={`text-base font-medium`}>
             <span className="line-clamp-1">{displayName}</span>
           </h2>
-          <span className={`mt-1 block text-sm text-neutral-500 dark:text-neutral-400`}>{jobName}</span>
+          <span className={`mt-1 block text-sm text-neutral-500 dark:text-neutral-400`}>{displayJobName}</span>
         </div>
       </div>
     </Link>

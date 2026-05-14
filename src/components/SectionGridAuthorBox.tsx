@@ -12,6 +12,7 @@ interface Props {
   gridClassName?: string
   showMoreLabel?: string
   becomeHostLabel?: string
+  jobNameLabel?: string
 }
 
 const SectionGridAuthorBox: FC<Props> = ({
@@ -21,13 +22,14 @@ const SectionGridAuthorBox: FC<Props> = ({
   gridClassName = 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ',
   showMoreLabel = 'Ver más',
   becomeHostLabel = 'Convertirme en anfitrión',
+  jobNameLabel,
 }) => {
   return (
     <div className={`relative ${className}`}>
       <div className={`grid gap-6 md:gap-8 ${gridClassName}`}>
         {authors.map((author, index) =>
           boxCard === 'box2' ? (
-            <CardAuthorBox2 key={author.id} author={author} />
+            <CardAuthorBox2 key={author.id} author={author} jobNameLabel={jobNameLabel} />
           ) : (
             <CardAuthorBox index={index < 3 ? index + 1 : undefined} key={author.id} author={author} />
           )

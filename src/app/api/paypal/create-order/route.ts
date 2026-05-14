@@ -1,3 +1,4 @@
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 const PAYPAL_BASE = process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.paypal.com'
@@ -23,6 +24,10 @@ async function getAccessToken(): Promise<string> {
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createSupabaseServerClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const { amount, currency = 'USD', description } = await request.json()
 
     if (!amount || isNaN(Number(amount))) {

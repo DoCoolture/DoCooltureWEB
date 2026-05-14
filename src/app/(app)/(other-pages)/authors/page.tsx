@@ -1,7 +1,5 @@
 import { redirect } from 'next/navigation'
 
-const Page = () => {
-  return redirect('/authors/kevin-francis')
-}
+const Page = () => redirect('/talento')
 
 export default Page

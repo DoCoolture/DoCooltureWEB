@@ -701,6 +701,9 @@ export const es = {
     reviewsHeading: 'Lo que dicen los viajeros',
     noHostReviews: 'Aún no hay reseñas para este anfitrión.',
     noListings: 'Aún no hay alojamientos disponibles.',
+    jobName: 'Guía Cultural',
+    hostAddress: 'Santo Domingo, República Dominicana',
+    hostLanguages: 'Español, Inglés',
   },
   talentPage: {
     heading: 'Nuestro Talento',
