@@ -64,6 +64,8 @@ const CheckoutContent = () => {
     })(),
     anfitrion: searchParams.get('anfitrion') || 'DoCoolture Gastronomy',
     explorers: Math.max(1, Number(searchParams.get('explorers') || 1)),
+    rating: Number(searchParams.get('rating') || 0),
+    reviewCount: Number(searchParams.get('reviewCount') || 0),
   }
 
   const precioNum = Number(experiencia.precio.replace('$', '').replace(',', ''))
@@ -110,7 +112,7 @@ const CheckoutContent = () => {
             {experiencia.duracion}
           </div>
           <Divider className="w-10!" />
-          <StartRating />
+          <StartRating point={experiencia.rating} reviewCount={experiencia.reviewCount} />
         </div>
       </div>
 

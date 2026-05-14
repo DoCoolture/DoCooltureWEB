@@ -105,6 +105,8 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
       explorers: String(totalExplorers),
       startDate: startDate || '',
       endDate: endDate || '',
+      rating: String(reviewStart ?? 0),
+      reviewCount: String(reviewCount ?? 0),
     })
 
     redirect(`/checkout?${params.toString()}`)
