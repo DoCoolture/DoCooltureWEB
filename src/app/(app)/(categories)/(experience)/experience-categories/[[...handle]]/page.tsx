@@ -91,19 +91,22 @@ const Page = async ({
     }
   })
 
+  const translatedName = category.handle === 'all' ? t.experienceFilters.allExperiences : category.name
+  const translatedRegion = t.experienceFilters.inDominicanRepublic
+
   return (
     <div className="pb-28">
       {/* Hero section */}
       <div className="container">
         <HeroSectionWithSearchForm1
-          heading={category.name}
+          heading={translatedName}
           image={category.coverImage}
-          imageAlt={category.name}
+          imageAlt={translatedName}
           searchForm={<ExperiencesSearchForm formStyle="default" />}
           description={
             <div className="flex items-center sm:text-lg">
               <HugeiconsIcon icon={MapPinpoint02Icon} size={20} color="currentColor" strokeWidth={1.5} />
-              <span className="ms-2.5">{category.region} </span>
+              <span className="ms-2.5">{translatedRegion} </span>
               <span className="mx-5"></span>
               <HugeiconsIcon icon={HotAirBalloonIcon} size={20} color="currentColor" strokeWidth={1.5} />
               <span className="ms-2.5">{convertNumbThousand(allListings.length)} {allListings.length !== 1 ? t.experienceFilters.experiences : t.experienceFilters.experience}</span>
@@ -147,7 +150,7 @@ const Page = async ({
         </div>
 
         <Divider className="my-14 lg:my-24" />
-        <Heading className="mb-12">Just a few spots left.</Heading>
+        <Heading className="mb-12">{t.homePage.featuredExperiences}</Heading>
         <SectionSliderCards listings={allListings.slice(0, 8)} cardType="experience" />
       </div>
     </div>

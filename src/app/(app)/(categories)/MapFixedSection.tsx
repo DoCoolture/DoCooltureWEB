@@ -4,10 +4,10 @@ import PropertyCard from '@/components/PropertyCard'
 import StayCard from '@/components/StayCard'
 import { Map, MapControls, MapMarker, MarkerContent, MarkerPopup } from '@/components/ui/map'
 import { TCarListing, TExperienceListing, TRealEstateListing, TStayListing } from '@/data/listings'
+import { useLanguage } from '@/context/LanguageContext'
 import { Button } from '@/shared/Button'
 import ButtonClose from '@/shared/ButtonClose'
 import { ListingType } from '@/type'
-import T from '@/utils/getT'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import { useEffect, useState } from 'react'
 
@@ -23,6 +23,7 @@ interface Props {
 }
 
 const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings, listingType }: Props) => {
+  const { t } = useLanguage()
   const [currentHoverID, setCurrentHoverID] = useState<string>('')
 
   useEffect(() => {
@@ -74,7 +75,7 @@ const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 shadow-2xl">
           <Button color="white" href={closeButtonHref}>
             <XMarkIcon className="size-6" />
-            <span>{T['common']['Hide map']}</span>
+            <span>{t.common['Hide map']}</span>
           </Button>
         </div>
       </div>

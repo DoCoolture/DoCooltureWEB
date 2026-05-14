@@ -404,6 +404,7 @@ export const fr = {
     experience: 'expérience',
     experiences: 'expériences',
     inDominicanRepublic: 'République Dominicaine',
+    allExperiences: 'Toutes les expériences',
     inLocation: 'en',
     noExperiences: 'Aucune expérience disponible avec ces filtres.',
     showMap: 'Voir la carte',

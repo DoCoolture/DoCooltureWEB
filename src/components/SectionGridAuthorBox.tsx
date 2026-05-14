@@ -3,7 +3,6 @@ import CardAuthorBox2 from '@/components/CardAuthorBox2'
 import { TAuthor } from '@/data/authors'
 import { Button } from '@/shared/Button'
 import ButtonPrimary from '@/shared/ButtonPrimary'
-import T from '@/utils/getT'
 import { FC } from 'react'
 
 interface Props {
@@ -11,6 +10,8 @@ interface Props {
   authors: TAuthor[]
   boxCard?: 'box1' | 'box2'
   gridClassName?: string
+  showMoreLabel?: string
+  becomeHostLabel?: string
 }
 
 const SectionGridAuthorBox: FC<Props> = ({
@@ -18,6 +19,8 @@ const SectionGridAuthorBox: FC<Props> = ({
   authors,
   boxCard = 'box1',
   gridClassName = 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 ',
+  showMoreLabel = 'Ver más',
+  becomeHostLabel = 'Convertirme en anfitrión',
 }) => {
   return (
     <div className={`relative ${className}`}>
@@ -31,8 +34,8 @@ const SectionGridAuthorBox: FC<Props> = ({
         )}
       </div>
       <div className="mt-16 flex flex-col justify-center gap-y-3 sm:flex-row sm:gap-x-5 sm:gap-y-0">
-        <Button color="light">{T['common']['Show me more']}</Button>
-        <ButtonPrimary>{T['common']['Become a host']}</ButtonPrimary>
+        <Button color="light">{showMoreLabel}</Button>
+        <ButtonPrimary href="/become-host">{becomeHostLabel}</ButtonPrimary>
       </div>
     </div>
   )

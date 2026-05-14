@@ -40,7 +40,11 @@ const Layout = async ({ children }: { children: ReactNode }) => {
           <Heading isCenter subheading={c.authorsSubheading}>
             {c.authorsHeading}
           </Heading>
-          <SectionGridAuthorBox authors={authors} />
+          <SectionGridAuthorBox
+            authors={authors}
+            showMoreLabel={t.common['Show me more']}
+            becomeHostLabel={t.common['Become a host']}
+          />
         </div>
       </div>
     </ApplicationLayout>

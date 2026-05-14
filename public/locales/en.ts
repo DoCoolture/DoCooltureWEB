@@ -404,6 +404,7 @@ export const en = {
     experience: 'experience',
     experiences: 'experiences',
     inDominicanRepublic: 'Dominican Republic',
+    allExperiences: 'All experiences',
     inLocation: 'in',
     noExperiences: 'No experiences available with these filters.',
     showMap: 'Show map',

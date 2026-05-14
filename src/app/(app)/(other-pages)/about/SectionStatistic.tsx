@@ -1,4 +1,7 @@
+import { getExperienceListings } from '@/data/listings'
+import { getExperienceCategories } from '@/data/categories'
 import { getServerT } from '@/lib/locale-server'
+import { supabase } from '@/lib/supabase'
 import Heading from '@/shared/Heading'
 import { FC } from 'react'
 
@@ -7,13 +10,28 @@ interface SectionStatisticProps {
 }
 
 const SectionStatistic: FC<SectionStatisticProps> = async ({ className = '' }) => {
-  const t = await getServerT()
-  const { heading, subheading, experiences, hosts, cities } = t.about.stats
+  const [t, experiences, categories] = await Promise.all([
+    getServerT(),
+    getExperienceListings(),
+    getExperienceCategories(),
+  ])
+
+  // Count hosts with role = 'host' in profiles
+  const { count: hostCount } = await supabase
+    .from('profiles')
+    .select('*', { count: 'exact', head: true })
+    .eq('role', 'host')
+
+  const experienceCount = experiences.length
+  const activeCities = categories.filter((c) => c.count > 0).length
+  const hosts = (hostCount ?? 0) + 1 // +1 for DoCoolture's own host account
+
+  const { heading, subheading, experiences: expLabels, hosts: hostLabels, cities: cityLabels } = t.about.stats
 
   const facts = [
-    { id: '1', heading: experiences.value, subHeading: experiences.label },
-    { id: '2', heading: hosts.value, subHeading: hosts.label },
-    { id: '3', heading: cities.value, subHeading: cities.label },
+    { id: '1', heading: String(experienceCount), subHeading: expLabels.label },
+    { id: '2', heading: String(hosts), subHeading: hostLabels.label },
+    { id: '3', heading: String(activeCities), subHeading: cityLabels.label },
   ]
 
   return (
