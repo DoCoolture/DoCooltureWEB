@@ -76,6 +76,11 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   // Translate date for hardcoded listing
   const resolvedDate = date === 'weekendsAvailable' ? el.weekendsAvailable : date
 
+  // Translate duration and languages for hardcoded listing
+  const resolvedDuration = isHardcoded ? el.durationTime : durationTime
+  const languageNames = el.languageNames as Record<string, string>
+  const translatedLanguages = languages.map((l) => languageNames[l] ?? l)
+
   // ✅ Server action — pasa todos los datos de la experiencia al checkout
   const handleSubmitForm = async (formData: FormData) => {
     'use server'
@@ -117,7 +122,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
       >
         <div className="flex flex-col items-center space-y-3 text-center sm:flex-row sm:space-y-0 sm:gap-x-3 sm:text-start">
           <ClockIcon className="h-6 w-6" />
-          <span>{durationTime}</span>
+          <span>{resolvedDuration}</span>
         </div>
         <div className="flex flex-col items-center space-y-3 text-center sm:flex-row sm:space-y-0 sm:gap-x-3 sm:text-start">
           <UsersIcon className="h-6 w-6" />
@@ -125,7 +130,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
         </div>
         <div className="flex flex-col items-center space-y-3 text-center sm:flex-row sm:space-y-0 sm:gap-x-3 sm:text-start">
           <LanguageIcon className="h-6 w-6" />
-          <span>{languages.length > 0 ? languages.join(', ') : el.languageNotSpecified}</span>
+          <span>{translatedLanguages.length > 0 ? translatedLanguages.join(', ') : el.languageNotSpecified}</span>
         </div>
       </SectionHeader>
     )

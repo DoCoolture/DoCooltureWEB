@@ -652,6 +652,18 @@ export const it = {
     hostResponseTime: 'in meno di un\'ora',
     location: 'Posizione',
     weekendsAvailable: 'Disponibile nei fine settimana',
+    durationTime: '3–4 ore',
+    languageNames: {
+      'Español': 'Spagnolo',
+      'English': 'Inglese',
+      'Francés': 'Francese',
+      'Italiano': 'Italiano',
+      'Portugués': 'Portoghese',
+      'Alemán': 'Tedesco',
+      'Chino': 'Cinese',
+      'Japonés': 'Giapponese',
+      'Árabe': 'Arabo',
+    },
     categoryMap: {
       'Gastronomía': 'Gastronomia',
       'Tour Cultural': 'Tour culturale',
