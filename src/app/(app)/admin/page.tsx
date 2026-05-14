@@ -1,5 +1,6 @@
 'use client'
 
+import EditExperienceModal from '@/components/EditExperienceModal'
 import { supabase } from '@/lib/supabase'
 import type { Experience, Host, Booking } from '@/lib/supabase'
 import ButtonPrimary from '@/shared/ButtonPrimary'
@@ -31,6 +32,8 @@ export default function AdminPage() {
 
   const [seedStatus, setSeedStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
   const [seedMessage, setSeedMessage] = useState('')
+  const [editingExp, setEditingExp] = useState<Experience | null>(null)
+  const [deletingExpId, setDeletingExpId] = useState<string | null>(null)
 
   useEffect(() => {
     checkAdmin()
@@ -223,6 +226,17 @@ export default function AdminPage() {
     loadStats()
   }
 
+  const handleDeleteExperience = async (exp: Experience) => {
+    const { error } = await supabase.from('experiences').delete().eq('id', exp.id)
+    if (!error) {
+      setDeletingExpId(null)
+      loadData()
+      loadStats()
+    } else {
+      console.error('Delete error:', error)
+    }
+  }
+
   const handleSeedExperience = async () => {
     setSeedStatus('loading')
     setSeedMessage('')
@@ -379,70 +393,84 @@ export default function AdminPage() {
               {experiences.map((exp) => (
                 <div
                   key={exp.id}
-                  className={`flex flex-col sm:flex-row sm:items-center gap-4 rounded-2xl border p-4 ${
+                  className={`flex flex-col gap-3 rounded-2xl border p-4 ${
                     exp.is_hidden
                       ? 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950'
                       : 'border-neutral-200 dark:border-neutral-700'
                   }`}
                 >
-                  {exp.featured_image_url && (
-                    <div className="relative w-20 h-16 rounded-lg overflow-hidden shrink-0">
-                      <Image
-                        src={exp.featured_image_url}
-                        alt={exp.title}
-                        fill
-                        className="object-cover"
-                        sizes="80px"
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-neutral-900 dark:text-neutral-100 truncate">
-                      {exp.title}
-                    </p>
-                    <p className="text-sm text-neutral-500">
-                      {exp.city} · ${exp.price_usd} USD · {exp.total_bookings} reservas
-                    </p>
-                    {exp.is_hidden && (
-                      <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">
-                        🚫 Oculta — {exp.hidden_reason}
-                      </p>
+                  <div className="flex items-center gap-4">
+                    {exp.featured_image_url && (
+                      <div className="relative w-16 h-12 rounded-lg overflow-hidden shrink-0">
+                        <Image src={exp.featured_image_url} alt={exp.title} fill className="object-cover" sizes="64px" />
+                      </div>
                     )}
-                  </div>
-                  <div className="flex items-center gap-x-2 shrink-0">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      exp.is_hidden
-                        ? 'bg-red-100 text-red-700'
-                        : exp.is_published
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-neutral-100 text-neutral-700'
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-neutral-900 dark:text-neutral-100 truncate">{exp.title}</p>
+                      <p className="text-sm text-neutral-500">{exp.city} · ${exp.price_usd} USD · {exp.total_bookings} reservas</p>
+                      {exp.is_hidden && (
+                        <p className="text-xs text-red-600 dark:text-red-400 mt-0.5">🚫 {exp.hidden_reason}</p>
+                      )}
+                    </div>
+                    <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                      exp.is_hidden ? 'bg-red-100 text-red-700' : exp.is_published ? 'bg-green-100 text-green-700' : 'bg-neutral-100 text-neutral-700'
                     }`}>
                       {exp.is_hidden ? 'Oculta' : exp.is_published ? 'Publicada' : 'Borrador'}
                     </span>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => setEditingExp(exp)}
+                      className="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400"
+                    >
+                      ✏️ Editar
+                    </button>
                     <button
                       onClick={() => {
                         if (exp.is_hidden) {
                           handleHideExperience(exp, '')
                         } else {
-                          const reason = prompt('¿Por qué quieres ocultar esta experiencia?')
-                          if (reason) handleHideExperience(exp, reason)
+                          const r = prompt('¿Por qué quieres ocultar esta experiencia?')
+                          if (r) handleHideExperience(exp, r)
                         }
                       }}
                       className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
-                        exp.is_hidden
-                          ? 'border-green-200 text-green-700 hover:bg-green-50'
-                          : 'border-red-200 text-red-600 hover:bg-red-50'
+                        exp.is_hidden ? 'border-green-200 text-green-700 hover:bg-green-50' : 'border-amber-200 text-amber-700 hover:bg-amber-50'
                       }`}
                     >
                       {exp.is_hidden ? '👁️ Mostrar' : '🚫 Ocultar'}
                     </button>
+                    {deletingExpId === exp.id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-red-600">¿Confirmar eliminación?</span>
+                        <button
+                          onClick={() => handleDeleteExperience(exp)}
+                          className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700"
+                        >
+                          Sí, eliminar
+                        </button>
+                        <button
+                          onClick={() => setDeletingExpId(null)}
+                          className="rounded-lg border border-neutral-200 px-3 py-1.5 text-xs dark:border-neutral-700"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setDeletingExpId(exp.id)}
+                        className="rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                      >
+                        🗑️ Eliminar
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
               {experiences.length === 0 && (
-                <p className="text-center text-neutral-500 py-10">
-                  No hay experiencias registradas.
-                </p>
+                <p className="text-center text-neutral-500 py-10">No hay experiencias registradas.</p>
               )}
             </div>
           )}
@@ -678,6 +706,26 @@ export default function AdminPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Edit experience modal */}
+      {editingExp && (
+        <EditExperienceModal
+          experience={{
+            id: editingExp.id,
+            title: editingExp.title,
+            description: editingExp.description,
+            category: editingExp.category,
+            price_usd: editingExp.price_usd ?? 0,
+            duration_time: editingExp.duration_time,
+            max_guests: editingExp.max_guests,
+            address: editingExp.address,
+            city: editingExp.city,
+            is_published: editingExp.is_published,
+          }}
+          onClose={() => setEditingExp(null)}
+          onSaved={() => { loadData(); loadStats() }}
+        />
       )}
     </main>
   )
