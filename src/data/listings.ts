@@ -518,7 +518,7 @@ const TASTE_OF_DOMINICAN = {
     handle: 'docoolture-gastronomy',
   },
   listingCategory: 'Gastronomía',
-  date: 'Disponible fines de semana',
+  date: 'weekendsAvailable',
   description:
     'Descubre la esencia de la República Dominicana a través de su gastronomía. Un recorrido sensorial que combina historia, tradición y sabor — desde ingredientes taínos hasta influencias africanas y europeas. Cada plato cuenta una historia. Guiado por expertos locales en la Zona Colonial de Santo Domingo.',
   durationTime: '3–4 horas',

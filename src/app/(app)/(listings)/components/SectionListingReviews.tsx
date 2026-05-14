@@ -11,7 +11,7 @@ import { Divider } from '@/shared/divider'
 import Input from '@/shared/Input'
 import { ArrowRightIcon, StarIcon } from '@heroicons/react/24/solid'
 import clsx from 'clsx'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { SectionHeading } from './SectionHeading'
 
 interface Props {
@@ -33,6 +33,30 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienc
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      setUserId(user.id)
+      setIsLoggedIn(true)
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('display_name, full_name, avatar_url')
+        .eq('user_id', user.id)
+        .single()
+
+      if (profile) {
+        setName(profile.display_name || profile.full_name || '')
+        setUserAvatarUrl(profile.avatar_url ?? null)
+      }
+    }
+    loadUser()
+  }, [])
 
   const handleSubmit = async () => {
     if (!comment.trim() || !name.trim()) return
@@ -42,6 +66,8 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienc
     const newReview = {
       experience_id: experienceId,
       reviewer_name: name.trim(),
+      reviewer_avatar_url: userAvatarUrl,
+      explorer_id: userId,
       comment: comment.trim(),
       rating,
       is_visible: true,
@@ -59,7 +85,6 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienc
       setReviews((prev) => [data as ExperienceReview, ...prev])
       setSubmitted(true)
       setComment('')
-      setName('')
     }
     setSubmitting(false)
   }
@@ -92,12 +117,15 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienc
           </p>
         ) : (
           <div className="flex flex-col gap-3">
+            {/* Name: readonly if logged in, editable if anonymous */}
             <Input
               placeholder={el.yourName}
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => !isLoggedIn && setName(e.target.value)}
+              readOnly={isLoggedIn}
               rounded="rounded-full"
               sizeClass="h-12 px-5"
+              className={isLoggedIn ? 'opacity-70 cursor-default' : ''}
             />
             {/* Star picker */}
             <div className="flex items-center gap-x-1 px-1">

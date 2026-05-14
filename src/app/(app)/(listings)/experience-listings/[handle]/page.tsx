@@ -69,6 +69,13 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
     ? { ...host, description: el.hostBio, responseTime: el.hostResponseTime, joinedDate: el.hostJoinedDate }
     : host
 
+  // Translate category using the categoryMap (Spanish DB value → locale label)
+  const categoryMap = el.categoryMap as Record<string, string>
+  const translatedCategory = categoryMap[listingCategory] ?? listingCategory
+
+  // Translate date for hardcoded listing
+  const resolvedDate = date === 'weekendsAvailable' ? el.weekendsAvailable : date
+
   // ✅ Server action — pasa todos los datos de la experiencia al checkout
   const handleSubmitForm = async (formData: FormData) => {
     'use server'
@@ -103,7 +110,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
       <SectionHeader
         address={address}
         host={host}
-        listingCategory={listingCategory}
+        listingCategory={translatedCategory}
         reviewCount={reviewCount}
         reviewStart={reviewStart}
         title={title}
@@ -191,7 +198,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
             <ExperienceBookingSidebar
               price={price}
               maxGuests={maxGuests}
-              date={date}
+              date={resolvedDate}
               reviewStart={reviewStart}
               reviewCount={reviewCount}
               action={handleSubmitForm}
