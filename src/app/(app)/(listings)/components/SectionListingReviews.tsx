@@ -21,11 +21,12 @@ interface Props {
   experienceId: string
 }
 
-const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienceId }: Props) => {
+const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialReviewStart, experienceId }: Props) => {
   const { t } = useLanguage()
   const el = t.experienceListing
   const [isOpen, setIsOpen] = useState(false)
   const [reviews, setReviews] = useState(initialReviews)
+  const [currentReviewStart, setCurrentReviewStart] = useState(initialReviewStart)
   const [comment, setComment] = useState('')
   const [name, setName] = useState('')
   const [rating, setRating] = useState(5)
@@ -82,7 +83,12 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienc
     if (supabaseError) {
       setError(el.reviewError)
     } else if (data) {
-      setReviews((prev) => [data as ExperienceReview, ...prev])
+      setReviews((prev) => {
+        const updated = [data as ExperienceReview, ...prev]
+        const avg = updated.reduce((sum, r) => sum + r.rating, 0) / updated.length
+        setCurrentReviewStart(Math.round(avg * 10) / 10)
+        return updated
+      })
       setSubmitted(true)
       setComment('')
     }
@@ -102,7 +108,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart, experienc
               <StarIcon
                 key={n}
                 aria-hidden="true"
-                className={clsx(reviewStart > n ? 'text-yellow-400' : 'text-gray-200', 'size-6 shrink-0')}
+                className={clsx(currentReviewStart > n ? 'text-yellow-400' : 'text-gray-200', 'size-6 shrink-0')}
               />
             ))}
           </div>
