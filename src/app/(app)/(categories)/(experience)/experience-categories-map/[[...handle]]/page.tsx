@@ -16,6 +16,28 @@ const TYPE_TO_CATEGORY: Record<string, string[]> = {
   wellness: ['Bienestar'],
 }
 
+// Duration filter ranges in hours: [min, max)
+const DURATION_RANGES: Record<string, [number, number]> = {
+  less_than_1_hour: [0, 1],
+  '1_2_hours':      [1, 2],
+  '2_4_hours':      [2, 4],
+  more_than_4_hours:[4, Infinity],
+}
+
+function parseDurationHours(durationTime: string): number {
+  const rangeMatch = durationTime.match(/(\d+(?:[.,]\d+)?)\s*[–\-]\s*(\d+(?:[.,]\d+)?)\s*hora/i)
+  if (rangeMatch) return (parseFloat(rangeMatch[1]) + parseFloat(rangeMatch[2])) / 2
+  const singleHour = durationTime.match(/(\d+(?:[.,]\d+)?)\s*hora/i)
+  if (singleHour) return parseFloat(singleHour[1])
+  const minutes = durationTime.match(/(\d+)\s*minuto/i)
+  if (minutes) return parseFloat(minutes[1]) / 60
+  return 0
+}
+
+function parsePrice(price: string): number {
+  return parseFloat(price.replace(/[^0-9.]/g, '')) || 0
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ handle?: string[] }> }): Promise<Metadata> {
   const { handle } = await params
   const category = await getExperienceCategoryByHandle(handle?.[0])
@@ -48,16 +70,37 @@ const Page = async ({
     return redirect('/experience-categories/all')
   }
 
-  // Parse active filters from URL (values like 'food_drink', 'outdoor', etc.)
-  const activeTypes = (sp.experienceType as string | undefined)?.split(',').filter(Boolean) ?? []
-  const page = Math.max(1, Number(sp.page) || 1)
+  // Parse active filters from URL
+  const activeTypes     = (sp.experienceType as string | undefined)?.split(',').filter(Boolean) ?? []
+  const activeDurations = (sp.duration as string | undefined)?.split(',').filter(Boolean) ?? []
+  const priceMin        = Number(sp.price_min) || 0
+  const priceMax        = Number(sp.price_max) || Infinity
+  const page            = Math.max(1, Number(sp.page) || 1)
 
   // Filter listings
   let filteredListings = allListings
+
   if (activeTypes.length > 0) {
-    filteredListings = allListings.filter((listing) =>
+    filteredListings = filteredListings.filter((listing) =>
       activeTypes.some((type) => (TYPE_TO_CATEGORY[type] ?? []).includes(listing.listingCategory))
     )
+  }
+
+  if (activeDurations.length > 0) {
+    filteredListings = filteredListings.filter((listing) => {
+      const hours = parseDurationHours(listing.durationTime)
+      return activeDurations.some((d) => {
+        const [min, max] = DURATION_RANGES[d] ?? [0, Infinity]
+        return hours >= min && hours < max
+      })
+    })
+  }
+
+  if (priceMin > 0 || priceMax < Infinity) {
+    filteredListings = filteredListings.filter((listing) => {
+      const price = parsePrice(listing.price)
+      return price >= priceMin && price <= priceMax
+    })
   }
 
   const totalListings = filteredListings.length
@@ -68,14 +111,20 @@ const Page = async ({
     currentPage * ITEMS_PER_PAGE
   )
 
-  // Augment filterOptions so checkboxes reflect current URL state
+  // Augment filterOptions so all checkboxes reflect current URL state
+  const activeCheckboxMap: Record<string, string[]> = {
+    experienceType: activeTypes,
+    duration: activeDurations,
+  }
+
   const augmentedFilterOptions: any[] = filterOptions.map((fo) => {
-    if (!fo || fo.tabUIType !== 'checkbox' || fo.name !== 'experienceType') return fo
+    if (!fo || fo.tabUIType !== 'checkbox') return fo
+    const active = activeCheckboxMap[fo.name] ?? []
     return {
       ...fo,
       options: (fo as any).options?.map((opt: any) => ({
         ...opt,
-        defaultChecked: activeTypes.includes(opt.value ?? opt.name),
+        defaultChecked: active.includes(opt.value ?? opt.name),
       })) ?? [],
     }
   })
