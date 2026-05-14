@@ -700,6 +700,7 @@ export const en = {
     listingsDesc: 'Discover authentic experiences offered by this host.',
     reviewsHeading: 'What travelers are saying',
     noHostReviews: 'No reviews yet for this host.',
+    noListings: 'No listings available yet.',
   },
   talentPage: {
     heading: 'Our Talent',

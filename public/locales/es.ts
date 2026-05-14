@@ -700,6 +700,7 @@ export const es = {
     listingsDesc: 'Descubre las experiencias auténticas que ofrece este anfitrión.',
     reviewsHeading: 'Lo que dicen los viajeros',
     noHostReviews: 'Aún no hay reseñas para este anfitrión.',
+    noListings: 'Aún no hay alojamientos disponibles.',
   },
   talentPage: {
     heading: 'Nuestro Talento',

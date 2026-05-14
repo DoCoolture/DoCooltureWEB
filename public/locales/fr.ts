@@ -700,6 +700,7 @@ export const fr = {
     listingsDesc: 'Découvrez les expériences authentiques proposées par cet hôte.',
     reviewsHeading: 'Ce que disent les voyageurs',
     noHostReviews: "Pas encore d'avis pour cet hôte.",
+    noListings: 'Aucun hébergement disponible pour le moment.',
   },
   talentPage: {
     heading: 'Notre Talent',

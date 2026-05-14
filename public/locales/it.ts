@@ -700,6 +700,7 @@ export const it = {
     listingsDesc: 'Scopri le esperienze autentiche offerte da questo host.',
     reviewsHeading: 'Cosa dicono i viaggiatori',
     noHostReviews: 'Ancora nessuna recensione per questo host.',
+    noListings: 'Nessun alloggio disponibile al momento.',
   },
   talentPage: {
     heading: 'Il Nostro Talento',

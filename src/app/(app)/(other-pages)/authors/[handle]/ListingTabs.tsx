@@ -2,7 +2,7 @@
 
 import ExperiencesCard from '@/components/ExperiencesCard'
 import StayCard from '@/components/StayCard'
-import { getExperienceListings, getStayListings, TExperienceListing, TStayListing } from '@/data/listings'
+import { getExperienceListings, TExperienceListing, TStayListing } from '@/data/listings'
 import { useLanguage } from '@/context/LanguageContext'
 import { Tab, TabGroup, TabList } from '@headlessui/react'
 import { useEffect, useState } from 'react'
@@ -15,28 +15,31 @@ interface Props {
 
 const ListingTabs = ({ onChangeTab }: Props) => {
   const { t } = useLanguage()
+  const sh = t.sectionHost
+
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'Experiences', label: t.Header.DropdownTravelers.Experiences },
     { key: 'Stays', label: t.Header.DropdownTravelers.Stays },
   ]
 
-  const [stayListings, setStayListings] = useState<TStayListing[]>([])
   const [experienceListings, setExperienceListings] = useState<TExperienceListing[]>([])
+  const [stayListings] = useState<TStayListing[]>([])
   const [activeTab, setActiveTab] = useState<TabKey>('Experiences')
 
   useEffect(() => {
     if (activeTab === 'Experiences' && !experienceListings.length) {
       getExperienceListings().then(setExperienceListings)
-    } else if (activeTab === 'Stays' && !stayListings.length) {
-      getStayListings().then(setStayListings)
     }
-  }, [activeTab, experienceListings.length, stayListings.length])
+    // Stays are only shown when hosts add them via Supabase — none yet
+  }, [activeTab, experienceListings.length])
 
   const handleTabChange = (index: number) => {
     const key = tabs[index].key
     setActiveTab(key)
     onChangeTab?.(key)
   }
+
+  const currentListings = activeTab === 'Experiences' ? experienceListings : stayListings
 
   return (
     <div className="w-full">
@@ -56,12 +59,16 @@ const ListingTabs = ({ onChangeTab }: Props) => {
         </TabList>
       </TabGroup>
 
-      <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-7">
-        {activeTab === 'Experiences' &&
-          experienceListings.slice(0, 4).map((exp) => <ExperiencesCard key={exp.id} data={exp} />)}
-        {activeTab === 'Stays' &&
-          stayListings.slice(0, 4).map((stay) => <StayCard key={stay.id} data={stay} />)}
-      </div>
+      {currentListings.length > 0 ? (
+        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-7">
+          {activeTab === 'Experiences' &&
+            experienceListings.slice(0, 4).map((exp) => <ExperiencesCard key={exp.id} data={exp} />)}
+          {activeTab === 'Stays' &&
+            stayListings.slice(0, 4).map((stay) => <StayCard key={stay.id} data={stay} />)}
+        </div>
+      ) : (
+        <p className="mt-8 text-sm text-neutral-500 dark:text-neutral-400">{sh.noListings}</p>
+      )}
     </div>
   )
 }
