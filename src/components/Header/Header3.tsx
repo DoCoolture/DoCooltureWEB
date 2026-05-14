@@ -43,13 +43,13 @@ const Header3: FC<Header3Props> = ({ className, hasBorderBottom = true, initSear
   const checkout = searchParams.get('checkout')
   const guests = searchParams.get('guests')
 
-  const locationText = location || 'República Dominicana'
+  const locationText = location || t.experienceFilters.inDominicanRepublic
   const dateText = checkin
     ? formatShortDate(checkin) + (checkout ? ' – ' + formatShortDate(checkout) : '')
-    : 'Cualquier semana'
+    : t.HeroSearchForm['Any week']
   const guestsText = guests
     ? `${guests} Explorer${Number(guests) !== 1 ? 's' : ''}`
-    : 'Agregar explorers'
+    : t.HeroSearchForm['Add guests']
 
   // for memoization of the close function
   const closeHeroSearch = useCallback(() => {
