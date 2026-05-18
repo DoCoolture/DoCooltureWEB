@@ -72,7 +72,7 @@ const CheckoutContent = () => {
 
   const precioNum = Number(experiencia.precio.replace('$', '').replace(',', ''))
   const subtotal = precioNum * currentExplorers
-  const cargoProcesamiento = 2.5
+  const cargoProcesamiento = subtotal * 0.18
   const total = subtotal + cargoProcesamiento
 
   const subtotalConvertido = convertPrice(subtotal)
@@ -127,7 +127,7 @@ const CheckoutContent = () => {
         <DescriptionDetails className="sm:text-right">
           {subtotalConvertido}
         </DescriptionDetails>
-        <DescriptionTerm>{t.booking.processingFee}</DescriptionTerm>
+        <DescriptionTerm>{t.booking.processingFee} (18%)</DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
           {cargoConvertido}
         </DescriptionDetails>
