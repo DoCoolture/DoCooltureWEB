@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { DR_CITIES } from '@/types'
 import type { UserRole } from '@/types'
 
 const GoogleIcon = () => (
@@ -28,6 +29,8 @@ export default function SignupPage() {
   const [step, setStep] = useState<1 | 2>(1)
   const [role, setRole] = useState<UserRole>('explorer')
   const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [city, setCity] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -39,8 +42,7 @@ export default function SignupPage() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: { role },
+        redirectTo: `${window.location.origin}/auth/callback?role=${role}`,
       },
     })
   }
@@ -69,7 +71,13 @@ export default function SignupPage() {
     }
 
     if (data.user) {
-      await supabase.from('profiles').update({ role }).eq('user_id', data.user.id)
+      await supabase.from('profiles').update({
+        role,
+        phone,
+        city,
+        display_name: fullName.split(' ')[0],
+        full_name: fullName,
+      }).eq('user_id', data.user.id)
     }
 
     setSuccess(true)
@@ -171,11 +179,24 @@ export default function SignupPage() {
 
               <form onSubmit={handleSignup} className="flex flex-col gap-y-4">
                 <div>
-                  <label className={labelClass}>{s.fullName}</label>
+                  <label className={labelClass}>{s.fullName} *</label>
                   <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Juan Pérez" className={inputClass} />
                 </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>Teléfono *</label>
+                    <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 809 000 0000" className={inputClass} />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Ciudad *</label>
+                    <select required value={city} onChange={(e) => setCity(e.target.value)} className={inputClass}>
+                      <option value="">Selecciona</option>
+                      {DR_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                </div>
                 <div>
-                  <label className={labelClass}>{s.email}</label>
+                  <label className={labelClass}>{s.email} *</label>
                   <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="tu@email.com" className={inputClass} />
                 </div>
                 <div>

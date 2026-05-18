@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const cookieStore = await cookies()
+    const role = searchParams.get('role')
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -39,8 +40,15 @@ export async function GET(request: NextRequest) {
         .eq('user_id', user.id)
         .single()
 
-      if (profile?.role === 'admin') return NextResponse.redirect(`${origin}/admin`)
-      if (profile?.role === 'host') return NextResponse.redirect(`${origin}/host/dashboard`)
+      // Si viene con un rol seleccionado (signup con Google) y el perfil es nuevo (explorer por defecto), actualizar
+      if (role && role !== 'explorer' && profile?.role === 'explorer') {
+        await supabase.from('profiles').update({ role }).eq('user_id', user.id)
+      }
+
+      const effectiveRole = (role && profile?.role === 'explorer' ? role : profile?.role)
+      if (effectiveRole === 'admin') return NextResponse.redirect(`${origin}/admin`)
+      if (effectiveRole === 'host') return NextResponse.redirect(`${origin}/host/dashboard`)
+      return NextResponse.redirect(`${origin}/experience`)
     }
   }
 
