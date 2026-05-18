@@ -735,4 +735,33 @@ export const es = {
     yearsExperience: 'años de experiencia',
     experiences: 'experiencias',
   },
+  footer: {
+    brand: 'Conectamos exploradores con anfitriones locales para vivir experiencias auténticas en la República Dominicana.',
+    rights: 'Todos los derechos reservados.',
+    madeWith: 'Hecho con ❤️ en República Dominicana',
+    headings: {
+      explore: 'Explorar',
+      hosts: 'Anfitriones',
+      company: 'Compañía',
+      legal: 'Legal',
+    },
+    explore: {
+      allExperiences: 'Todas las experiencias',
+      food: 'Gastronomía',
+      nature: 'Naturaleza y aventura',
+      arts: 'Arte y cultura',
+      history: 'Tours históricos',
+    },
+    hosts: {
+      becomeHost: 'Conviértete en anfitrión',
+    },
+    company: {
+      about: 'Sobre nosotros',
+    },
+    legal: {
+      terms: 'Términos de servicio',
+      privacy: 'Política de privacidad',
+      cookies: 'Política de cookies',
+    },
+  },
 }

@@ -735,4 +735,33 @@ export const en = {
     yearsExperience: 'years of experience',
     experiences: 'experiences',
   },
+  footer: {
+    brand: 'We connect explorers with local hosts to live authentic experiences in the Dominican Republic.',
+    rights: 'All rights reserved.',
+    madeWith: 'Made with ❤️ in the Dominican Republic',
+    headings: {
+      explore: 'Explore',
+      hosts: 'Hosts',
+      company: 'Company',
+      legal: 'Legal',
+    },
+    explore: {
+      allExperiences: 'All experiences',
+      food: 'Gastronomy',
+      nature: 'Nature & adventure',
+      arts: 'Art & culture',
+      history: 'Historic tours',
+    },
+    hosts: {
+      becomeHost: 'Become a host',
+    },
+    company: {
+      about: 'About us',
+    },
+    legal: {
+      terms: 'Terms of service',
+      privacy: 'Privacy policy',
+      cookies: 'Cookie policy',
+    },
+  },
 }
