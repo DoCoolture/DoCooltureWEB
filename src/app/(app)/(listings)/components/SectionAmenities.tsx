@@ -63,19 +63,25 @@ const SectionAmenities = ({ amenities = Amenities_demos }: Props) => {
         </div>
 
         {/* ----- */}
-        <div className="w-14 border-b border-neutral-200"></div>
-        <div>
-          <ButtonSecondary onClick={() => setIsOpen(true)}>View more 20 amenities</ButtonSecondary>
-        </div>
+        {amenities.length > 12 && (
+          <>
+            <div className="w-14 border-b border-neutral-200"></div>
+            <div>
+              <ButtonSecondary onClick={() => setIsOpen(true)}>
+                Ver las {amenities.length} amenidades
+              </ButtonSecondary>
+            </div>
+          </>
+        )}
       </div>
 
       <Dialog open={isOpen} onClose={setIsOpen}>
-        <DialogTitle>What this place offers</DialogTitle>
+        <DialogTitle>Todas las amenidades</DialogTitle>
 
         <DialogBody>
           <Divider className="my-7" />
           <div className="grid grid-cols-1 gap-6 text-sm text-gray-700 dark:text-gray-300">
-            {[...amenities, ...amenities].map((item, index) => (
+            {amenities.map((item, index) => (
               <div key={`${index}-${item.name}`} className="flex items-center gap-x-3">
                 <HugeiconsIcon icon={item.icon} size={24} />
                 <span>{item.name}</span>
