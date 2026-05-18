@@ -77,7 +77,7 @@ export default function AvatarDropdown() {
       },
     ]
 
-    if (profile?.role === 'host') {
+    if (profile?.role === 'host' || profile?.role === 'admin') {
       base.push({
         label: t.Header.AvatarDropDown['Host dashboard'],
         href: '/host/dashboard',

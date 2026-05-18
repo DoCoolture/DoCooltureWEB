@@ -313,8 +313,11 @@ export default function AdminPage() {
           </p>
         </div>
 
-        {/* Seed button */}
-        <div className="flex flex-col items-start gap-y-1">
+        {/* Action buttons */}
+        <div className="flex flex-col items-start gap-y-2">
+          <ButtonPrimary onClick={() => router.push('/host/experiences/new')}>
+            + Nueva experiencia
+          </ButtonPrimary>
           <button
             onClick={handleSeedExperience}
             disabled={seedStatus === 'loading'}

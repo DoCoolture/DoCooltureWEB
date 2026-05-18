@@ -61,7 +61,7 @@ export default function BecomeHostPage() {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('id')
+        .select('id, role')
         .eq('user_id', user.id)
         .single()
 
@@ -90,7 +90,7 @@ export default function BecomeHostPage() {
 
       await supabase
         .from('profiles')
-        .update({ role: 'host', phone })
+        .update({ role: profile.role === 'admin' ? 'admin' : 'host', phone })
         .eq('user_id', user.id)
 
       if (documentFront || documentBack || selfie) {

@@ -25,6 +25,12 @@ export default function HostDashboardPage() {
       return
     }
 
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single()
+
     // Obtener perfil de anfitrión
     const { data: hostData } = await supabase
       .from('hosts')
@@ -33,6 +39,11 @@ export default function HostDashboardPage() {
       .single()
 
     if (!hostData) {
+      if (profile?.role === 'admin') {
+        // Admin sin perfil de anfitrión — puede crear uno
+        setIsLoading(false)
+        return
+      }
       router.push('/become-host')
       return
     }
@@ -72,6 +83,25 @@ export default function HostDashboardPage() {
     if (!confirm('¿Estás seguro de que quieres eliminar esta experiencia?')) return
     await supabase.from('experiences').delete().eq('id', id)
     loadDashboard()
+  }
+
+  if (!isLoading && !host) {
+    return (
+      <main className="container max-w-5xl mx-auto py-12 px-4">
+        <div className="rounded-3xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 p-16 text-center">
+          <p className="text-5xl mb-4">🛡️</p>
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+            Admin sin perfil de anfitrión
+          </h2>
+          <p className="text-neutral-500 mb-6">
+            Crea un perfil de anfitrión para poder publicar y gestionar experiencias directamente.
+          </p>
+          <ButtonPrimary onClick={() => router.push('/become-host')}>
+            Crear perfil de anfitrión
+          </ButtonPrimary>
+        </div>
+      </main>
+    )
   }
 
   if (isLoading) {

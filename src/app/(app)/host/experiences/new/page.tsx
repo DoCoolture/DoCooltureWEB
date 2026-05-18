@@ -132,7 +132,7 @@ export default function NewExperiencePage() {
         .eq('user_id', user.id)
         .single()
 
-      if (!host) throw new Error('No tienes perfil de anfitrión')
+      if (!host) throw new Error('Necesitas un perfil de anfitrión. Ve a /become-host para crearlo.')
 
       // Subir imagen principal
       let featuredImageUrl = null
