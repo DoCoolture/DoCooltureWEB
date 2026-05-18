@@ -82,7 +82,7 @@ const SectionClientSay: FC<SectionClientSayProps> = ({
               ))}
             </ul>
             <div className="embla__dots flex items-center justify-center pt-10">
-              {scrollSnaps.map((_, index) => (
+              {scrollSnaps.map((_: number, index: number) => (
                 <button
                   type="button"
                   key={index}

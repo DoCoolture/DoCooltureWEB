@@ -38,7 +38,6 @@ const ExperiencesCard: FC<Props> = ({
     reviewCount,
   } = data
 
-  // ✅ Conversión de moneda real
   const { convertPrice } = useCurrency()
   const { t } = useLanguage()
   const precioNum = Number(price.replace('$', '').replace(',', ''))
@@ -73,7 +72,6 @@ const ExperiencesCard: FC<Props> = ({
         <div className="w-14 border-b border-neutral-100 dark:border-neutral-800" />
         <div className="flex items-center justify-between gap-2">
           <div>
-            {/* ✅ Precio convertido a la moneda seleccionada */}
             <span className="text-base font-semibold">{precioConvertido}</span>
             {size === 'default' && (
               <>

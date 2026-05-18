@@ -1,30 +1,21 @@
-import CarCard from '@/components/CarCard'
 import ExperiencesCard from '@/components/ExperiencesCard'
-import PropertyCard from '@/components/PropertyCard'
-import StayCard from '@/components/StayCard'
 import { Map, MapControls, MapMarker, MarkerContent, MarkerPopup } from '@/components/ui/map'
-import { TCarListing, TExperienceListing, TRealEstateListing, TStayListing } from '@/data/listings'
+import { TExperienceListing } from '@/data/listings'
 import { useLanguage } from '@/context/LanguageContext'
 import { Button } from '@/shared/Button'
 import ButtonClose from '@/shared/ButtonClose'
-import { ListingType } from '@/type'
 import { XMarkIcon } from '@heroicons/react/24/solid'
 import { useEffect, useState } from 'react'
 
 interface Props {
   currentHoverID: string
-  listings: TStayListing[] | TExperienceListing[] | TRealEstateListing[] | TCarListing[]
-  // The type of listing being displayed on the map.
-  // This is used to determine the type of markers and interactions on the map.
-  listingType: ListingType
-  // The href for the close button, which will redirect to the category page.
-  // This is used to close the map and return to the category listings.
+  listings: TExperienceListing[]
   closeButtonHref: string
 }
 
 const DEFAULT_CENTER = { lat: 18.4861, lng: -69.9312 }
 
-const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings, listingType }: Props) => {
+const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings }: Props) => {
   const { t } = useLanguage()
   const [currentHoverID, setCurrentHoverID] = useState<string>('')
 
@@ -54,19 +45,12 @@ const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings
               </MarkerContent>
               <MarkerPopup className="rounded-2xl! p-0!">
                 <div className="w-60 focus:outline-none sm:w-80">
-                  {listingType === 'Stays' && <StayCard size="small" data={listing as TStayListing} />}
-                  {listingType === 'Experiences' && (
-                    <ExperiencesCard
-                      size="small"
-                      data={listing as TExperienceListing}
-                      ratioClass="aspect-w-12 aspect-h-10"
-                      className="rounded-3xl bg-white dark:bg-neutral-900"
-                    />
-                  )}
-                  {listingType === 'Cars' && (
-                    <CarCard className="border-0!" size="small" data={listing as TCarListing} />
-                  )}
-                  {listingType === 'RealEstates' && <PropertyCard data={listing as TRealEstateListing} />}
+                  <ExperiencesCard
+                    size="small"
+                    data={listing}
+                    ratioClass="aspect-w-12 aspect-h-10"
+                    className="rounded-3xl bg-white dark:bg-neutral-900"
+                  />
                 </div>
               </MarkerPopup>
             </MapMarker>

@@ -73,7 +73,6 @@ const SectionGridHasMap: FC<Props> = ({
         closeButtonHref={`/experience-categories/${category.handle}#heading`}
         currentHoverID={currentHoverID}
         listings={listings}
-        listingType="Experiences"
       />
     </div>
   )
