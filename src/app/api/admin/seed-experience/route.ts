@@ -68,7 +68,8 @@ export async function POST() {
       .single()
 
     if (hostError) {
-      return NextResponse.json({ error: 'Error creando host: ' + hostError.message }, { status: 500 })
+      console.error('seed-experience: error creando host:', hostError)
+      return NextResponse.json({ error: 'Error creando host' }, { status: 500 })
     }
     hostId = newHost!.id
   }
@@ -114,7 +115,8 @@ export async function POST() {
     })
 
   if (expError) {
-    return NextResponse.json({ error: 'Error insertando experiencia: ' + expError.message }, { status: 500 })
+    console.error('seed-experience: error insertando experiencia:', expError)
+    return NextResponse.json({ error: 'Error insertando experiencia' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true, message: '✅ Experiencia creada en Supabase.', id: EXPERIENCE_ID })

@@ -30,8 +30,13 @@ export async function POST(request: NextRequest) {
 
     const { amount, currency = 'USD', description } = await request.json()
 
-    if (!amount || isNaN(Number(amount))) {
+    const numAmount = Number(amount)
+    if (!amount || isNaN(numAmount) || numAmount <= 0 || numAmount > 10000) {
       return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
+    }
+
+    if (!['USD', 'EUR', 'DOP'].includes(currency)) {
+      return NextResponse.json({ error: 'Invalid currency' }, { status: 400 })
     }
 
     const accessToken = await getAccessToken()

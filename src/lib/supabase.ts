@@ -244,17 +244,41 @@ export const isAdmin = async (): Promise<boolean> => {
 // HELPERS DE STORAGE
 // ================================================================
 
-// Subir avatar del usuario
+const ALLOWED_IMAGE_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+const ALLOWED_DOC_MIMES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf']
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024   // 5 MB
+const MAX_DOC_SIZE = 10 * 1024 * 1024    // 10 MB
+
+function imageExtFromMime(mime: string): string {
+  const map: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'image/gif': 'gif',
+    'application/pdf': 'pdf',
+  }
+  return map[mime] ?? 'bin'
+}
+
 export const uploadAvatar = async (
   userId: string,
   file: File
 ): Promise<string | null> => {
-  const fileExt = file.name.split('.').pop()
-  const filePath = `${userId}/avatar.${fileExt}`
+  if (!ALLOWED_IMAGE_MIMES.includes(file.type)) {
+    console.error('uploadAvatar: tipo de archivo no permitido:', file.type)
+    return null
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    console.error('uploadAvatar: archivo demasiado grande:', file.size)
+    return null
+  }
+
+  const ext = imageExtFromMime(file.type)
+  const filePath = `${userId}/avatar.${ext}`
 
   const { error } = await supabase.storage
     .from('avatars')
-    .upload(filePath, file, { upsert: true })
+    .upload(filePath, file, { upsert: true, contentType: file.type })
 
   if (error) {
     console.error('Error uploading avatar:', error)
@@ -268,19 +292,27 @@ export const uploadAvatar = async (
   return data.publicUrl
 }
 
-// Subir imagen de experiencia
 export const uploadExperienceImage = async (
   userId: string,
   file: File,
   fileName?: string
 ): Promise<string | null> => {
-  const fileExt = file.name.split('.').pop()
-  const name = fileName || `${Date.now()}.${fileExt}`
+  if (!ALLOWED_IMAGE_MIMES.includes(file.type)) {
+    console.error('uploadExperienceImage: tipo de archivo no permitido:', file.type)
+    return null
+  }
+  if (file.size > MAX_IMAGE_SIZE) {
+    console.error('uploadExperienceImage: archivo demasiado grande:', file.size)
+    return null
+  }
+
+  const ext = imageExtFromMime(file.type)
+  const name = fileName || `${Date.now()}.${ext}`
   const filePath = `${userId}/${name}`
 
   const { error } = await supabase.storage
     .from('experience-images')
-    .upload(filePath, file, { upsert: true })
+    .upload(filePath, file, { upsert: true, contentType: file.type })
 
   if (error) {
     console.error('Error uploading experience image:', error)
@@ -294,18 +326,26 @@ export const uploadExperienceImage = async (
   return data.publicUrl
 }
 
-// Subir documento de identidad
 export const uploadIdentityDocument = async (
   userId: string,
   file: File,
   type: 'front' | 'back' | 'selfie'
 ): Promise<string | null> => {
-  const fileExt = file.name.split('.').pop()
-  const filePath = `${userId}/${type}.${fileExt}`
+  if (!ALLOWED_DOC_MIMES.includes(file.type)) {
+    console.error('uploadIdentityDocument: tipo de archivo no permitido:', file.type)
+    return null
+  }
+  if (file.size > MAX_DOC_SIZE) {
+    console.error('uploadIdentityDocument: archivo demasiado grande:', file.size)
+    return null
+  }
+
+  const ext = imageExtFromMime(file.type)
+  const filePath = `${userId}/${type}.${ext}`
 
   const { error } = await supabase.storage
     .from('identity-documents')
-    .upload(filePath, file, { upsert: true })
+    .upload(filePath, file, { upsert: true, contentType: file.type })
 
   if (error) {
     console.error('Error uploading identity document:', error)
