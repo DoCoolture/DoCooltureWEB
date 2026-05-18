@@ -62,13 +62,15 @@ export function ExperienceBookingSidebar({
         <DescriptionDetails className="sm:text-right">
           ${(precioNum * explorerCount).toFixed(2)}
         </DescriptionDetails>
-        <DescriptionTerm>{t.booking.processingFee}</DescriptionTerm>
-        <DescriptionDetails className="sm:text-right">$2.50</DescriptionDetails>
+        <DescriptionTerm>{t.booking.processingFee} (18%)</DescriptionTerm>
+        <DescriptionDetails className="sm:text-right">
+          ${(precioNum * explorerCount * 0.18).toFixed(2)}
+        </DescriptionDetails>
         <DescriptionTerm className="font-semibold text-neutral-900 dark:text-neutral-100">
           {t.booking.total}
         </DescriptionTerm>
         <DescriptionDetails className="font-semibold sm:text-right">
-          ${(precioNum * explorerCount + 2.5).toFixed(2)}
+          ${(precioNum * explorerCount * 1.18).toFixed(2)}
         </DescriptionDetails>
       </DescriptionList>
 

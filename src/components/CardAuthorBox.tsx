@@ -32,8 +32,8 @@ const CardAuthorBox: FC<CardAuthorBoxProps> = ({ className = '', author, index }
       </div>
       <div className="mt-4 flex items-center justify-center gap-1 rounded-full bg-neutral-100 px-4 py-2 dark:bg-neutral-800">
         <StarIcon className="mb-px size-4 text-amber-500" />
-        <span className="pt-px text-xs font-medium">{starRating || 4.9}</span>
-        <span className="pt-px text-xs font-medium">({reviews || 100})</span>
+        <span className="pt-px text-xs font-medium">{starRating > 0 ? starRating.toFixed(1) : '—'}</span>
+        <span className="pt-px text-xs font-medium">({reviews > 0 ? reviews : 0})</span>
       </div>
     </Link>
   )
