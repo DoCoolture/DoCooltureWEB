@@ -29,6 +29,9 @@ const ExperiencesCardH: FC<Props> = ({ className = '', data }) => {
     reviewCount,
     host: author,
     id,
+    description,
+    durationTime,
+    maxGuests,
   } = data
 
   const listingHref = `/experience-listings/${listingHandle}`
@@ -68,22 +71,24 @@ const ExperiencesCardH: FC<Props> = ({ className = '', data }) => {
             </div>
           </div>
         </div>
-        <div className="mt-4 hidden text-sm text-neutral-500 sm:block dark:text-neutral-400">
-          <span className="line-clamp-2">
-            {`Making a cup of coffee in Vietnam is a whole process that you barely
-            have free time in the middle. But it's also not a really complicated
-            task to start the day with`}
-          </span>
-        </div>
+        {description && (
+          <div className="mt-4 hidden text-sm text-neutral-500 sm:block dark:text-neutral-400">
+            <span className="line-clamp-2">{description}</span>
+          </div>
+        )}
         <div className="mt-4 flex items-center gap-x-8">
-          <div className="flex items-center gap-x-2">
-            <ClockIcon className="h-4 w-4" />
-            <span className="text-sm text-neutral-500 dark:text-neutral-400">3 hours</span>
-          </div>
-          <div className="flex items-center gap-x-2">
-            <UsersIcon className="h-4 w-4" />
-            <span className="text-sm text-neutral-500 dark:text-neutral-400">Up to 6 people</span>
-          </div>
+          {durationTime && (
+            <div className="flex items-center gap-x-2">
+              <ClockIcon className="h-4 w-4" />
+              <span className="text-sm text-neutral-500 dark:text-neutral-400">{durationTime}</span>
+            </div>
+          )}
+          {maxGuests && (
+            <div className="flex items-center gap-x-2">
+              <UsersIcon className="h-4 w-4" />
+              <span className="text-sm text-neutral-500 dark:text-neutral-400">Hasta {maxGuests} personas</span>
+            </div>
+          )}
         </div>
         <div className="my-4 w-14 border-b border-neutral-100 dark:border-neutral-800"></div>
         <div className="flex items-end justify-between">

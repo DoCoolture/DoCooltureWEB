@@ -24,7 +24,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
   subHeading = 'Selected based on user reviews. Updated weekly',
   cardType = 'card2',
 }) => {
-  const tabs = ['New York', 'Tokyo', 'Paris', 'London', 'Barcelona']
+  const tabs = ['Santo Domingo', 'Punta Cana', 'Santiago', 'Puerto Plata', 'Samaná']
 
   let CardName = StayCard
   if (cardType === 'card1') {
@@ -35,7 +35,7 @@ const SectionGridFeaturePlaces: FC<SectionGridFeaturePlacesProps> = ({
 
   return (
     <div className="relative">
-      <SectionTabHeader tabActive={'New York'} subHeading={subHeading} tabs={tabs} heading={heading} />
+      <SectionTabHeader tabActive={'Santo Domingo'} subHeading={subHeading} tabs={tabs} heading={heading} />
       <div
         className={`mt-8 grid gap-x-6 gap-y-8 sm:grid-cols-2 md:gap-x-8 md:gap-y-12 lg:grid-cols-3 xl:grid-cols-4 ${gridClass}`}
       >
