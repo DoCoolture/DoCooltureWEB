@@ -10,6 +10,7 @@ import {
   ChevronDownIcon,
   HeartIcon,
   HomeIcon,
+  PlusCircleIcon,
   ShieldCheckIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline'
@@ -82,6 +83,11 @@ export default function AvatarDropdown() {
         label: t.Header.AvatarDropDown['Host dashboard'],
         href: '/host/dashboard',
         icon: HomeIcon,
+      })
+      base.push({
+        label: 'Nueva experiencia',
+        href: '/host/experiences/new',
+        icon: PlusCircleIcon,
       })
     }
 

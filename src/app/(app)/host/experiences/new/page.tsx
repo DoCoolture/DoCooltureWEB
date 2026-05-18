@@ -3,7 +3,7 @@
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { supabase, uploadExperienceImage } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   EXPERIENCE_CATEGORIES,
   AVAILABLE_LANGUAGES,
@@ -18,6 +18,19 @@ export default function NewExperiencePage() {
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [hostChecked, setHostChecked] = useState(false)
+  const [hasHostProfile, setHasHostProfile] = useState(false)
+
+  useEffect(() => {
+    const checkHost = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
+      const { data: host } = await supabase.from('hosts').select('id').eq('user_id', user.id).single()
+      setHasHostProfile(!!host)
+      setHostChecked(true)
+    }
+    checkHost()
+  }, [])
 
   // Paso 1 — Información básica
   const [title, setTitle] = useState('')
@@ -757,6 +770,33 @@ export default function NewExperiencePage() {
       </div>
     </div>
   )
+
+  if (!hostChecked) {
+    return (
+      <div className="container max-w-2xl mx-auto py-24 px-4 flex items-center justify-center">
+        <div className="animate-pulse h-8 w-48 bg-neutral-200 dark:bg-neutral-700 rounded-lg" />
+      </div>
+    )
+  }
+
+  if (!hasHostProfile) {
+    return (
+      <main className="container max-w-2xl mx-auto py-12 px-4">
+        <div className="rounded-3xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 p-16 text-center">
+          <p className="text-5xl mb-4">🏠</p>
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+            Necesitas un perfil de anfitrión
+          </h2>
+          <p className="text-neutral-500 mb-6">
+            Crea tu perfil de anfitrión primero para poder publicar experiencias.
+          </p>
+          <ButtonPrimary onClick={() => router.push('/become-host')}>
+            Crear perfil de anfitrión
+          </ButtonPrimary>
+        </div>
+      </main>
+    )
+  }
 
   return (
     <main className="container max-w-2xl mx-auto py-12 px-4 mb-24">

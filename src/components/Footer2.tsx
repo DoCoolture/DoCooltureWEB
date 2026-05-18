@@ -22,12 +22,9 @@ const navigation: {
   ],
   anfitriones: [
     { name: 'Conviértete en anfitrión', href: '/become-host' },
-    { name: 'Panel de anfitrión',       href: '/host/dashboard' },
-    { name: 'Cómo funciona',            href: '/about' },
   ],
   compania: [
     { name: 'Sobre nosotros', href: '/about' },
-    { name: 'Contacto',       href: 'mailto:hola@docoolture.com' },
   ],
   legal: [
     { name: 'Términos de servicio',    href: '/terms' },
