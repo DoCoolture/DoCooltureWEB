@@ -183,8 +183,8 @@ export default function BecomeHostPage() {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className={labelClass}>{bh.phone}</label>
-          <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 809 000 0000" className={inputClass} />
+          <label className={labelClass}>{bh.phone} *</label>
+          <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 809 000 0000" className={inputClass} />
         </div>
         <div>
           <label className={labelClass}>{bh.whatsapp}</label>
@@ -304,7 +304,7 @@ export default function BecomeHostPage() {
   )
 
   const canProceed = () => {
-    if (step === 1) return displayName && bio && city
+    if (step === 1) return displayName && bio && city && phone
     if (step === 2) return specialties.length > 0 && languages.length > 0
     if (step === 3) return true
     if (step === 4) return documentNumber && documentType

@@ -1,58 +1,43 @@
 import Logo from '@/shared/Logo'
-
+import Link from 'next/link'
 import type { JSX } from 'react'
 
 const navigation: {
-  solutions: { name: string; href: string }[]
-  support: { name: string; href: string }[]
-  company: { name: string; href: string }[]
-  legal: { name: string; href: string }[]
+  explorar:   { name: string; href: string }[]
+  anfitriones: { name: string; href: string }[]
+  compania:   { name: string; href: string }[]
+  legal:      { name: string; href: string }[]
   social: {
     name: string
     href: string
     icon: (props: React.SVGProps<SVGSVGElement>) => JSX.Element
   }[]
 } = {
-  solutions: [
-    { name: 'Marketing', href: '#' },
-    { name: 'Analytics', href: '#' },
-    { name: 'Automation', href: '#' },
-    { name: 'Commerce', href: '#' },
+  explorar: [
+    { name: 'Todas las experiencias', href: '/experience-categories/all' },
+    { name: 'Gastronomía',            href: '/experience-categories/all?category=food_drink' },
+    { name: 'Naturaleza y aventura',  href: '/experience-categories/all?category=outdoor' },
+    { name: 'Arte y cultura',         href: '/experience-categories/all?category=arts_culture' },
+    { name: 'Tours históricos',       href: '/experience-categories/all?category=history' },
   ],
-  support: [
-    { name: 'Submit ticket', href: '#' },
-    { name: 'Documentation', href: '#' },
-    { name: 'Guides', href: '#' },
+  anfitriones: [
+    { name: 'Conviértete en anfitrión', href: '/become-host' },
+    { name: 'Panel de anfitrión',       href: '/host/dashboard' },
+    { name: 'Cómo funciona',            href: '/about' },
   ],
-  company: [
-    { name: 'About', href: '#' },
-    { name: 'Blog', href: '#' },
-    { name: 'Jobs', href: '#' },
-    { name: 'Press', href: '#' },
+  compania: [
+    { name: 'Sobre nosotros', href: '/about' },
+    { name: 'Contacto',       href: 'mailto:hola@docoolture.com' },
   ],
   legal: [
-    { name: 'Terms of service', href: '#' },
-    { name: 'Privacy policy', href: '#' },
-    { name: 'License', href: '#' },
-    { name: 'Insights', href: '#' },
+    { name: 'Términos de servicio',    href: '/terms' },
+    { name: 'Política de privacidad',  href: '/privacy' },
+    { name: 'Política de cookies',     href: '/cookies' },
   ],
   social: [
     {
-      name: 'Facebook',
-      href: '#',
-      icon: (props) => (
-        <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-          <path
-            fillRule="evenodd"
-            d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
-    },
-    {
       name: 'Instagram',
-      href: '#',
+      href: 'https://www.instagram.com/docoolture',
       icon: (props) => (
         <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
           <path
@@ -64,37 +49,33 @@ const navigation: {
       ),
     },
     {
-      name: 'X',
-      href: '#',
-      icon: (props) => (
-        <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-          <path d="M13.6823 10.6218L20.2391 3H18.6854L12.9921 9.61788L8.44486 3H3.2002L10.0765 13.0074L3.2002 21H4.75404L10.7663 14.0113L15.5685 21H20.8131L13.6819 10.6218H13.6823ZM11.5541 13.0956L10.8574 12.0991L5.31391 4.16971H7.70053L12.1742 10.5689L12.8709 11.5655L18.6861 19.8835H16.2995L11.5541 13.096V13.0956Z" />
-        </svg>
-      ),
-    },
-    {
-      name: 'GitHub',
-      href: '#',
+      name: 'Facebook',
+      href: 'https://www.facebook.com/docoolture',
       icon: (props) => (
         <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
           <path
             fillRule="evenodd"
-            d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
+            d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"
             clipRule="evenodd"
           />
         </svg>
       ),
     },
     {
-      name: 'YouTube',
-      href: '#',
+      name: 'TikTok',
+      href: 'https://www.tiktok.com/@docoolture',
       icon: (props) => (
         <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
-          <path
-            fillRule="evenodd"
-            d="M19.812 5.418c.861.23 1.538.907 1.768 1.768C21.998 8.746 22 12 22 12s0 3.255-.418 4.814a2.504 2.504 0 0 1-1.768 1.768c-1.56.419-7.814.419-7.814.419s-6.255 0-7.814-.419a2.505 2.505 0 0 1-1.768-1.768C2 15.255 2 12 2 12s0-3.255.417-4.814a2.507 2.507 0 0 1 1.768-1.768C5.744 5 11.998 5 11.998 5s6.255 0 7.814.418ZM15.194 12 10 15V9l5.194 3Z"
-            clipRule="evenodd"
-          />
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.32 6.32 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.77a4.85 4.85 0 0 1-1.01-.08z" />
+        </svg>
+      ),
+    },
+    {
+      name: 'WhatsApp',
+      href: 'https://wa.me/18090000000',
+      icon: (props) => (
+        <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z" />
         </svg>
       ),
     },
@@ -102,82 +83,117 @@ const navigation: {
 }
 
 export default function Footer2() {
+  const currentYear = new Date().getFullYear()
+
   return (
     <footer className="border-t border-neutral-200 dark:border-neutral-700">
       <div className="container pt-16 pb-8 sm:pt-24 lg:pt-32">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
+
+          {/* Brand */}
           <div className="space-y-8">
-            <Logo className="w-20" />
-            <p className="text-sm/6 text-balance text-gray-600 dark:text-neutral-400">
-              Making the world a better place through constructing elegant hierarchies.
+            <Logo className="w-24" />
+            <p className="text-sm/6 text-balance text-neutral-600 dark:text-neutral-400">
+              Conectamos exploradores con anfitriones locales para vivir experiencias auténticas en la República Dominicana.
             </p>
-            <div className="flex gap-x-6">
+            <div className="flex gap-x-5">
               {navigation.social.map((item) => (
-                <a key={item.name} href={item.href} className="text-gray-600 hover:text-gray-800 dark:text-neutral-400">
+                <a
+                  key={item.name}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 transition-colors"
+                >
                   <span className="sr-only">{item.name}</span>
-                  <item.icon aria-hidden="true" className="size-6" />
+                  <item.icon aria-hidden="true" className="size-5" />
                 </a>
               ))}
             </div>
           </div>
+
+          {/* Links */}
           <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
             <div className="md:grid md:grid-cols-2 md:gap-8">
+
               <div>
-                <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-neutral-300">Solutions</h3>
+                <h3 className="text-sm/6 font-semibold text-neutral-900 dark:text-neutral-100">Explorar</h3>
                 <ul role="list" className="mt-6 space-y-4">
-                  {navigation.solutions.map((item) => (
+                  {navigation.explorar.map((item) => (
                     <li key={item.name}>
-                      <a href={item.href} className="text-sm/6 text-gray-600 hover:text-gray-900 dark:text-neutral-400">
+                      <Link
+                        href={item.href}
+                        className="text-sm/6 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
+                      >
                         {item.name}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
               </div>
+
               <div className="mt-10 md:mt-0">
-                <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-neutral-300">Support</h3>
+                <h3 className="text-sm/6 font-semibold text-neutral-900 dark:text-neutral-100">Anfitriones</h3>
                 <ul role="list" className="mt-6 space-y-4">
-                  {navigation.support.map((item) => (
+                  {navigation.anfitriones.map((item) => (
                     <li key={item.name}>
-                      <a href={item.href} className="text-sm/6 text-gray-600 hover:text-gray-900 dark:text-neutral-400">
+                      <Link
+                        href={item.href}
+                        className="text-sm/6 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
+                      >
                         {item.name}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
               </div>
+
             </div>
             <div className="md:grid md:grid-cols-2 md:gap-8">
+
               <div>
-                <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-neutral-300">Company</h3>
+                <h3 className="text-sm/6 font-semibold text-neutral-900 dark:text-neutral-100">Compañía</h3>
                 <ul role="list" className="mt-6 space-y-4">
-                  {navigation.company.map((item) => (
+                  {navigation.compania.map((item) => (
                     <li key={item.name}>
-                      <a href={item.href} className="text-sm/6 text-gray-600 hover:text-gray-900 dark:text-neutral-400">
+                      <a
+                        href={item.href}
+                        className="text-sm/6 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
+                      >
                         {item.name}
                       </a>
                     </li>
                   ))}
                 </ul>
               </div>
+
               <div className="mt-10 md:mt-0">
-                <h3 className="text-sm/6 font-semibold text-gray-900 dark:text-neutral-300">Legal</h3>
+                <h3 className="text-sm/6 font-semibold text-neutral-900 dark:text-neutral-100">Legal</h3>
                 <ul role="list" className="mt-6 space-y-4">
                   {navigation.legal.map((item) => (
                     <li key={item.name}>
-                      <a href={item.href} className="text-sm/6 text-gray-600 hover:text-gray-900 dark:text-neutral-400">
+                      <Link
+                        href={item.href}
+                        className="text-sm/6 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors"
+                      >
                         {item.name}
-                      </a>
+                      </Link>
                     </li>
                   ))}
                 </ul>
               </div>
+
             </div>
           </div>
         </div>
-        <div className="mt-16 border-t border-gray-900/10 pt-8 sm:mt-20 lg:mt-24 dark:border-gray-700">
-          <p className="text-sm/6 text-gray-600 dark:text-neutral-400">
-            &copy; 2026 Your Company, Inc. All rights reserved.
+
+        {/* Bottom bar */}
+        <div className="mt-16 border-t border-neutral-200 dark:border-neutral-700 pt-8 sm:mt-20 lg:mt-24 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <p className="text-sm/6 text-neutral-500 dark:text-neutral-400">
+            &copy; {currentYear} DoCoolture. Todos los derechos reservados.
+          </p>
+          <p className="text-sm/6 text-neutral-400 dark:text-neutral-500">
+            Hecho con ❤️ en República Dominicana
           </p>
         </div>
       </div>
