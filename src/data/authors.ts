@@ -1,5 +1,6 @@
 import avatars1 from '@/images/avatars/Image-1.png'
 import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 function toHandle(displayName: string) {
   return displayName.toLowerCase().replace(/\s+/g, '-')
@@ -51,12 +52,12 @@ export async function getAuthorByHandle(handle: string) {
   const fromList = authors.find((a) => a.handle === handle)
   if (fromList) return { ...fromList, reviewsCount: fromList.reviews }
 
-  // Fallback: search any host regardless of status (e.g. pending verification)
-  const { data: hosts } = await supabase
+  // Fallback: use admin client to bypass RLS and find hosts with any status
+  const { data: hosts } = await supabaseAdmin
     .from('hosts')
     .select('id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country')
 
-  const host = (hosts ?? []).find((h) => toHandle(h.display_name as string) === handle)
+  const host = (hosts ?? []).find((h) => h.display_name && toHandle(h.display_name as string) === handle)
   if (!host) return null
 
   return {
