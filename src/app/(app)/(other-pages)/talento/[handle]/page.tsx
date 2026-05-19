@@ -36,10 +36,10 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
 
   if (!author?.id) return notFound()
 
-  const { id: hostId, displayName, avatarUrl, count, starRating, reviewsCount } = author
+  const { id: hostId, displayName, avatarUrl, count, starRating, reviewsCount, description: authorDescription, location } = author
 
-  const description = t.experienceListing.hostBio
-  const address = sh.hostAddress
+  const description = authorDescription || t.experienceListing.hostBio
+  const address = location || sh.hostAddress
   const languages = sh.hostLanguages
   const joinedDate = t.experienceListing.hostJoinedDate
 
@@ -119,7 +119,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
               <span className="mt-2 block text-neutral-500 dark:text-neutral-400">{sh.listingsDesc}</span>
             </div>
             <Divider className="w-14!" />
-            <ListingTabs />
+            <ListingTabs hostId={hostId} />
           </div>
 
           <div className="listingSection__wrap">

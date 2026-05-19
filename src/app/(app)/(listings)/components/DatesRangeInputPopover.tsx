@@ -11,54 +11,106 @@ import { addDays } from 'date-fns'
 import { FC, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
+// Maps Spanish day names → JS getDay() number (0 = Sunday)
+const DAY_NUMBERS: Record<string, number> = {
+  Domingo: 0, domingo: 0,
+  Lunes: 1, lunes: 1,
+  Martes: 2, martes: 2,
+  Miércoles: 3, Miercoles: 3, miércoles: 3, miercoles: 3,
+  Jueves: 4, jueves: 4,
+  Viernes: 5, viernes: 5,
+  Sábado: 6, Sabado: 6, sábado: 6, sabado: 6,
+}
+
+function parseDurationDays(durationTime: string): number {
+  const rangeDay = durationTime.match(/(\d+)\s*[-–]\s*\d+\s*d[íi]a/i)
+  if (rangeDay) return parseInt(rangeDay[1])
+  const singleDay = durationTime.match(/(\d+)\s*d[íi]a/i)
+  if (singleDay) return parseInt(singleDay[1])
+  const week = durationTime.match(/(\d+)\s*semana/i)
+  if (week) return parseInt(week[1]) * 7
+  return 1 // horas, medio día → single day
+}
+
 interface Props {
   className?: string
   buttonClassName?: string
   inputDescription?: string
+  availableDays?: string[]
+  durationTime?: string
 }
 
 const DatesRangeInputPopover: FC<Props> = ({
   className = 'flex-1',
   buttonClassName,
   inputDescription,
+  availableDays = [],
+  durationTime = '',
 }) => {
   const { t } = useLanguage()
   const resolvedDescription = inputDescription ?? `${t.HeroSearchForm['CheckIn']} - ${t.HeroSearchForm['CheckOut']}`
-  const [startDate, setStartDate] = useState<Date | null>(new Date())
-  const [endDate, setEndDate] = useState<Date | null>(addDays(new Date(), 3))
 
-  //
+  const durationDays = parseDurationDays(durationTime)
+  const isMultiDay = durationDays > 1
 
-  const onChangeDate = (dates: [Date | null, Date | null]) => {
-    const [start, end] = dates
-    setStartDate(start)
-    setEndDate(end)
+  // Allowed day-of-week numbers. Empty = all allowed.
+  const allowedDayNums = availableDays.length > 0
+    ? availableDays.map((d) => DAY_NUMBERS[d]).filter((n) => n !== undefined)
+    : null
+
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
+
+  const handleChangeSingle = (date: Date | null) => {
+    setStartDate(date)
+    setEndDate(date)
   }
 
-  const renderInput = () => {
-    return (
-      <>
-        <div className="text-neutral-300 dark:text-neutral-400">
-          <CalendarIcon className="h-5 w-5 lg:h-7 lg:w-7" />
-        </div>
-        <div className="grow text-start">
-          <span className="block font-semibold xl:text-lg">
-            {startDate?.toLocaleDateString('en-US', {
-              month: 'short',
-              day: '2-digit',
-            }) || 'Add dates'}
-            {endDate
-              ? ' - ' +
-                endDate?.toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: '2-digit',
-                })
-              : ''}
-          </span>
-          <span className="mt-1 block text-sm leading-none font-light text-neutral-400">{resolvedDescription}</span>
-        </div>
-      </>
-    )
+  const handleChangeRange = (dates: [Date | null, Date | null]) => {
+    const [start] = dates
+    setStartDate(start)
+    // Auto-calculate end based on duration
+    setEndDate(start ? addDays(start, durationDays - 1) : null)
+  }
+
+  const filterDate = (date: Date) => {
+    if (!allowedDayNums) return true
+    return allowedDayNums.includes(date.getDay())
+  }
+
+  const formatDate = (d: Date | null) =>
+    d?.toLocaleDateString('es-DO', { month: 'short', day: '2-digit' }) ?? ''
+
+  const renderInput = () => (
+    <>
+      <div className="text-neutral-300 dark:text-neutral-400">
+        <CalendarIcon className="h-5 w-5 lg:h-7 lg:w-7" />
+      </div>
+      <div className="grow text-start">
+        <span className="block font-semibold xl:text-lg">
+          {startDate
+            ? isMultiDay && endDate && endDate.getTime() !== startDate.getTime()
+              ? `${formatDate(startDate)} – ${formatDate(endDate)}`
+              : formatDate(startDate)
+            : isMultiDay
+            ? t.HeroSearchForm['CheckIn'] + ' – ' + t.HeroSearchForm['CheckOut']
+            : t.HeroSearchForm['CheckIn']}
+        </span>
+        <span className="mt-1 block text-sm leading-none font-light text-neutral-400">
+          {resolvedDescription}
+        </span>
+      </div>
+    </>
+  )
+
+  const commonPickerProps = {
+    monthsShown: 2,
+    showPopperArrow: false,
+    inline: true,
+    excludeDateIntervals,
+    filterDate,
+    renderCustomHeader: (p: any) => <DatePickerCustomHeaderTwoMonth {...p} />,
+    renderDayContents: (day: number, date?: Date) => <DatePickerCustomDay dayOfMonth={day} date={date} />,
   }
 
   return (
@@ -74,11 +126,7 @@ const DatesRangeInputPopover: FC<Props> = ({
             >
               {renderInput()}
               {startDate && open && (
-                <span
-                  className={
-                    'absolute end-1 top-1/2 z-10 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-neutral-100 text-sm lg:end-3 lg:h-6 lg:w-6 dark:bg-neutral-800'
-                  }
-                >
+                <span className="absolute end-1 top-1/2 z-10 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-neutral-100 text-sm lg:end-3 lg:h-6 lg:w-6 dark:bg-neutral-800">
                   <XMarkIcon className="size-4" />
                 </span>
               )}
@@ -89,26 +137,35 @@ const DatesRangeInputPopover: FC<Props> = ({
               className="absolute start-auto -end-2 top-full z-10 mt-3 w-[calc(100%+1rem)] transition duration-150 lg:w-3xl xl:-end-10 data-closed:translate-y-1 data-closed:opacity-0"
             >
               <div className="overflow-hidden rounded-3xl bg-white py-5 shadow-lg ring-1 ring-black/5 sm:p-8 dark:bg-neutral-800">
-                <DatePicker
-                  selected={startDate}
-                  onChange={onChangeDate}
-                  startDate={startDate}
-                  endDate={endDate}
-                  selectsRange
-                  monthsShown={2}
-                  showPopperArrow={false}
-                  inline
-                  excludeDateIntervals={excludeDateIntervals}
-                  renderCustomHeader={(p) => <DatePickerCustomHeaderTwoMonth {...p} />}
-                  renderDayContents={(day, date) => <DatePickerCustomDay dayOfMonth={day} date={date} />}
-                />
+                {isMultiDay ? (
+                  // Range mode: only start date is clickable, end is auto-calculated
+                  <DatePicker
+                    selected={startDate}
+                    onChange={handleChangeRange}
+                    startDate={startDate}
+                    endDate={endDate}
+                    selectsRange
+                    {...commonPickerProps}
+                  />
+                ) : (
+                  // Single day mode
+                  <DatePicker
+                    selected={startDate}
+                    onChange={handleChangeSingle}
+                    {...commonPickerProps}
+                  />
+                )}
+                {isMultiDay && startDate && (
+                  <p className="mt-3 text-center text-xs text-neutral-400">
+                    Duración: {durationDays} {durationDays === 1 ? 'día' : 'días'} · Fin: {formatDate(endDate)}
+                  </p>
+                )}
               </div>
             </PopoverPanel>
           </>
         )}
       </Popover>
 
-      {/* inputs */}
       <input type="hidden" name="startDate" value={startDate ? startDate.toISOString() : ''} />
       <input type="hidden" name="endDate" value={endDate ? endDate.toISOString() : ''} />
     </>

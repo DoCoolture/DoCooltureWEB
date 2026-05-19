@@ -14,6 +14,13 @@ import {
 
 const TOTAL_STEPS = 4
 
+// ── Helpers de sanitización ──────────────────────────────────────────────────
+const onlyLetters = (v: string) => v.replace(/[^a-zA-ZÀ-ÿñÑ\s'\-]/g, '')
+const onlyPhone   = (v: string) => v.replace(/[^0-9+\-()\s]/g, '')
+const onlyDocNum  = (v: string) => v.replace(/[^0-9\-]/g, '')
+
+type FieldErrors = Record<string, string>
+
 export default function BecomeHostPage() {
   const router = useRouter()
   const { t } = useLanguage()
@@ -22,6 +29,7 @@ export default function BecomeHostPage() {
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
 
   // Paso 1
   const [displayName, setDisplayName] = useState('')
@@ -51,10 +59,49 @@ export default function BecomeHostPage() {
     setList(list.includes(item) ? list.filter((i) => i !== item) : [...list, item])
   }
 
+  // ── Validación por paso ──────────────────────────────────────────────────
+  const validateStep = (s: number): FieldErrors => {
+    const errs: FieldErrors = {}
+    if (s === 1) {
+      if (!displayName.trim()) errs.displayName = 'El nombre es requerido.'
+      else if (displayName.trim().length < 3) errs.displayName = 'Mínimo 3 caracteres.'
+      if (!bio.trim()) errs.bio = 'La biografía es requerida.'
+      else if (bio.trim().length < 30) errs.bio = 'Mínimo 30 caracteres.'
+      if (!city) errs.city = 'Selecciona una ciudad.'
+      const digits = phone.replace(/\D/g, '')
+      if (!phone.trim()) errs.phone = 'El teléfono es requerido.'
+      else if (digits.length < 7) errs.phone = 'Número de teléfono inválido.'
+      if (whatsapp) {
+        const wDigits = whatsapp.replace(/\D/g, '')
+        if (wDigits.length < 7) errs.whatsapp = 'Número de WhatsApp inválido.'
+      }
+    }
+    if (s === 2) {
+      if (specialties.length === 0) errs.specialties = 'Selecciona al menos una especialidad.'
+      if (languages.length === 0) errs.languages = 'Selecciona al menos un idioma.'
+      if (yearsExperience < 0 || yearsExperience > 50) errs.yearsExperience = 'Valor entre 0 y 50.'
+    }
+    if (s === 4) {
+      if (!documentNumber.trim()) errs.documentNumber = 'El número de documento es requerido.'
+      else if (documentType === 'cedula' && !/^\d{3}-?\d{7}-?\d$/.test(documentNumber.replace(/\s/g, '')))
+        errs.documentNumber = 'Formato cédula: 000-0000000-0'
+    }
+    return errs
+  }
+
+  const handleNext = () => {
+    const errs = validateStep(step)
+    setFieldErrors(errs)
+    if (Object.keys(errs).length === 0) setStep((s) => (s + 1) as any)
+  }
+
   const handleSubmit = async () => {
+    const errs = validateStep(step)
+    setFieldErrors(errs)
+    if (Object.keys(errs).length > 0) return
+
     setIsLoading(true)
     setError(null)
-
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error(bh.notAuthenticated)
@@ -64,7 +111,6 @@ export default function BecomeHostPage() {
         .select('id, role')
         .eq('user_id', user.id)
         .single()
-
       if (!profile) throw new Error(bh.profileNotFound)
 
       const { data: host, error: hostError } = await supabase
@@ -85,7 +131,6 @@ export default function BecomeHostPage() {
         })
         .select()
         .single()
-
       if (hostError) throw hostError
 
       await supabase
@@ -102,10 +147,9 @@ export default function BecomeHostPage() {
           const { data } = await supabase.storage.from('identity-documents').createSignedUrl(path, 3600 * 24 * 365)
           return data?.signedUrl || null
         }
-
         const frontUrl = documentFront ? await uploadFile(documentFront, 'front') : null
-        const backUrl = documentBack ? await uploadFile(documentBack, 'back') : null
-        const selfieUrl = selfie ? await uploadFile(selfie, 'selfie') : null
+        const backUrl  = documentBack  ? await uploadFile(documentBack,  'back')  : null
+        const selfieUrl = selfie       ? await uploadFile(selfie,         'selfie') : null
 
         await supabase.from('identity_verifications').insert({
           host_id: host.id,
@@ -154,7 +198,12 @@ export default function BecomeHostPage() {
   )
 
   const inputClass = 'w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500'
+  const inputErrClass = 'w-full rounded-xl border border-red-400 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-400'
   const labelClass = 'block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5'
+  const errMsg = (key: string) => fieldErrors[key]
+    ? <p className="mt-1 text-xs text-red-500">{fieldErrors[key]}</p>
+    : null
+  const ic = (key: string) => fieldErrors[key] ? inputErrClass : inputClass
 
   const renderStep1 = () => (
     <div className="flex flex-col gap-y-5">
@@ -165,30 +214,67 @@ export default function BecomeHostPage() {
 
       <div>
         <label className={labelClass}>{bh.displayName} *</label>
-        <input type="text" required value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder={bh.displayNamePlaceholder} className={inputClass} />
+        <input
+          type="text"
+          value={displayName}
+          onChange={(e) => { setDisplayName(onlyLetters(e.target.value)); setFieldErrors((p) => ({ ...p, displayName: '' })) }}
+          placeholder={bh.displayNamePlaceholder}
+          className={ic('displayName')}
+          maxLength={60}
+        />
+        {errMsg('displayName')}
       </div>
 
       <div>
-        <label className={labelClass}>{bh.bio} *</label>
-        <textarea required value={bio} onChange={(e) => setBio(e.target.value)} placeholder={bh.bioPlaceholder} rows={4} className={`${inputClass} resize-none`} />
+        <label className={labelClass}>{bh.bio} * <span className="text-xs text-neutral-400">({bio.length}/500)</span></label>
+        <textarea
+          value={bio}
+          onChange={(e) => { setBio(e.target.value); setFieldErrors((p) => ({ ...p, bio: '' })) }}
+          placeholder={bh.bioPlaceholder}
+          rows={4}
+          maxLength={500}
+          className={`${ic('bio')} resize-none`}
+        />
+        {errMsg('bio')}
       </div>
 
       <div>
         <label className={labelClass}>{bh.city} *</label>
-        <select required value={city} onChange={(e) => setCity(e.target.value)} className={inputClass}>
+        <select
+          value={city}
+          onChange={(e) => { setCity(e.target.value); setFieldErrors((p) => ({ ...p, city: '' })) }}
+          className={ic('city')}
+        >
           <option value="">{bh.cityPlaceholder}</option>
           {DR_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
+        {errMsg('city')}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className={labelClass}>{bh.phone} *</label>
-          <input type="tel" required value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 809 000 0000" className={inputClass} />
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => { setPhone(onlyPhone(e.target.value)); setFieldErrors((p) => ({ ...p, phone: '' })) }}
+            placeholder="+1 809 000 0000"
+            className={ic('phone')}
+            maxLength={20}
+          />
+          {errMsg('phone')}
         </div>
         <div>
           <label className={labelClass}>{bh.whatsapp}</label>
-          <input type="tel" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} placeholder="+1 809 000 0000" className={inputClass} />
+          <input
+            type="tel"
+            value={whatsapp}
+            onChange={(e) => { setWhatsapp(onlyPhone(e.target.value)); setFieldErrors((p) => ({ ...p, whatsapp: '' })) }}
+            placeholder="+1 809 000 0000"
+            className={ic('whatsapp')}
+            maxLength={20}
+          />
+          {errMsg('whatsapp')}
         </div>
       </div>
     </div>
@@ -205,29 +291,43 @@ export default function BecomeHostPage() {
         <label className={`${labelClass} mb-3`}>{bh.specialties} *</label>
         <div className="flex flex-wrap gap-2">
           {HOST_SPECIALTIES.map((s) => (
-            <button key={s} type="button" onClick={() => toggleItem(s, specialties, setSpecialties)}
+            <button key={s} type="button" onClick={() => { toggleItem(s, specialties, setSpecialties); setFieldErrors((p) => ({ ...p, specialties: '' })) }}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${specialties.includes(s) ? 'bg-primary-600 text-white' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200'}`}>
               {s}
             </button>
           ))}
         </div>
+        {errMsg('specialties')}
       </div>
 
       <div>
         <label className={`${labelClass} mb-3`}>{bh.spokenLanguages} *</label>
         <div className="flex flex-wrap gap-2">
           {AVAILABLE_LANGUAGES.map((l) => (
-            <button key={l} type="button" onClick={() => toggleItem(l, languages, setLanguages)}
+            <button key={l} type="button" onClick={() => { toggleItem(l, languages, setLanguages); setFieldErrors((p) => ({ ...p, languages: '' })) }}
               className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${languages.includes(l) ? 'bg-primary-600 text-white' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200'}`}>
               {l}
             </button>
           ))}
         </div>
+        {errMsg('languages')}
       </div>
 
       <div>
         <label className={labelClass}>{bh.yearsExperience}</label>
-        <input type="number" min={0} max={50} value={yearsExperience} onChange={(e) => setYearsExperience(Number(e.target.value))} className={inputClass} />
+        <input
+          type="number"
+          min={0}
+          max={50}
+          value={yearsExperience}
+          onChange={(e) => {
+            const v = Math.min(50, Math.max(0, Number(e.target.value)))
+            setYearsExperience(v)
+            setFieldErrors((p) => ({ ...p, yearsExperience: '' }))
+          }}
+          className={ic('yearsExperience')}
+        />
+        {errMsg('yearsExperience')}
       </div>
     </div>
   )
@@ -241,20 +341,33 @@ export default function BecomeHostPage() {
 
       {[
         { label: 'Instagram', prefix: 'instagram.com/', value: instagramUrl, setter: setInstagramUrl },
-        { label: 'Facebook', prefix: 'facebook.com/', value: facebookUrl, setter: setFacebookUrl },
+        { label: 'Facebook',  prefix: 'facebook.com/',  value: facebookUrl,  setter: setFacebookUrl  },
       ].map(({ label, prefix, value, setter }) => (
         <div key={label}>
           <label className={labelClass}>{label}</label>
           <div className="flex items-center overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
             <span className="border-r border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-500 dark:border-neutral-600 dark:bg-neutral-700">{prefix}</span>
-            <input type="text" value={value} onChange={(e) => setter(e.target.value)} placeholder="tuusuario" className="flex-1 bg-white px-4 py-3 text-sm focus:outline-none dark:bg-neutral-900" />
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => setter(e.target.value.replace(/[^a-zA-Z0-9._\-]/g, ''))}
+              placeholder="tuusuario"
+              className="flex-1 bg-white px-4 py-3 text-sm focus:outline-none dark:bg-neutral-900"
+              maxLength={60}
+            />
           </div>
         </div>
       ))}
 
       <div>
         <label className={labelClass}>{bh.website}</label>
-        <input type="url" value={websiteUrl} onChange={(e) => setWebsiteUrl(e.target.value)} placeholder="https://tuweb.com" className={inputClass} />
+        <input
+          type="url"
+          value={websiteUrl}
+          onChange={(e) => setWebsiteUrl(e.target.value)}
+          placeholder="https://tuweb.com"
+          className={inputClass}
+        />
       </div>
     </div>
   )
@@ -272,20 +385,39 @@ export default function BecomeHostPage() {
 
       <div>
         <label className={labelClass}>{bh.documentType} *</label>
-        <select required value={documentType} onChange={(e) => setDocumentType(e.target.value)} className={inputClass}>
+        <select
+          value={documentType}
+          onChange={(e) => { setDocumentType(e.target.value); setDocumentNumber(''); setFieldErrors((p) => ({ ...p, documentNumber: '' })) }}
+          className={inputClass}
+        >
           {DOCUMENT_TYPES.map((d) => <option key={d.value} value={d.value}>{d.label}</option>)}
         </select>
       </div>
 
       <div>
         <label className={labelClass}>{bh.documentNumber} *</label>
-        <input type="text" required value={documentNumber} onChange={(e) => setDocumentNumber(e.target.value)} placeholder="000-0000000-0" className={inputClass} />
+        <input
+          type="text"
+          value={documentNumber}
+          onChange={(e) => {
+            const val = documentType === 'passport'
+              ? e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()
+              : onlyDocNum(e.target.value)
+            setDocumentNumber(val)
+            setFieldErrors((p) => ({ ...p, documentNumber: '' }))
+          }}
+          placeholder={documentType === 'cedula' ? '000-0000000-0' : documentType === 'passport' ? 'AA000000' : '00000000000'}
+          className={ic('documentNumber')}
+          maxLength={documentType === 'cedula' ? 13 : 12}
+          inputMode={documentType === 'passport' ? 'text' : 'numeric'}
+        />
+        {errMsg('documentNumber')}
       </div>
 
       {[
         { label: bh.documentFront, setter: setDocumentFront, value: documentFront },
-        { label: bh.documentBack, setter: setDocumentBack, value: documentBack },
-        { label: bh.selfie, setter: setSelfie, value: selfie },
+        { label: bh.documentBack,  setter: setDocumentBack,  value: documentBack  },
+        { label: bh.selfie,        setter: setSelfie,        value: selfie         },
       ].map(({ label, setter, value }) => (
         <div key={label}>
           <label className={labelClass}>{label}</label>
@@ -334,13 +466,13 @@ export default function BecomeHostPage() {
 
         <div className="mt-8 flex items-center justify-between border-t border-neutral-200 pt-6 dark:border-neutral-700">
           {step > 1 ? (
-            <button onClick={() => setStep((s) => (s - 1) as any)} className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
+            <button onClick={() => { setStep((s) => (s - 1) as any); setFieldErrors({}) }} className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
               {bh.back}
             </button>
           ) : <div />}
 
           {step < TOTAL_STEPS ? (
-            <ButtonPrimary onClick={() => setStep((s) => (s + 1) as any)} disabled={!canProceed()} className="disabled:opacity-50">
+            <ButtonPrimary onClick={handleNext} disabled={!canProceed()} className="disabled:opacity-50">
               {bh.continue}
             </ButtonPrimary>
           ) : (

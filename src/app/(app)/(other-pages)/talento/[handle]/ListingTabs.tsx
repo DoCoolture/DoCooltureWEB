@@ -5,15 +5,22 @@ import { getExperienceListings, TExperienceListing } from '@/data/listings'
 import { useLanguage } from '@/context/LanguageContext'
 import { useEffect, useState } from 'react'
 
-const ListingTabs = () => {
+interface Props {
+  hostId: string
+}
+
+const ListingTabs = ({ hostId }: Props) => {
   const { t } = useLanguage()
   const sh = t.sectionHost
 
   const [experienceListings, setExperienceListings] = useState<TExperienceListing[]>([])
 
   useEffect(() => {
-    getExperienceListings().then(setExperienceListings)
-  }, [])
+    getExperienceListings().then((listings) => {
+      const filtered = listings.filter((exp) => exp.host.handle === hostId)
+      setExperienceListings(filtered)
+    })
+  }, [hostId])
 
   return (
     <div className="w-full">

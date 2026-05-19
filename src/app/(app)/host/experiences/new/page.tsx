@@ -3,7 +3,7 @@
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { supabase, uploadExperienceImage } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   EXPERIENCE_CATEGORIES,
   AVAILABLE_LANGUAGES,
@@ -13,11 +13,19 @@ import {
 
 const TOTAL_STEPS = 5
 
+const onlyPositiveNum = (v: string) => v.replace(/[^0-9.]/g, '')
+
+type FieldErrors = Record<string, string>
+
+const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
+const MINUTES = ['00', '15', '30', '45']
+
 export default function NewExperiencePage() {
   const router = useRouter()
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [hostChecked, setHostChecked] = useState(false)
   const [hasHostProfile, setHasHostProfile] = useState(false)
 
@@ -32,7 +40,7 @@ export default function NewExperiencePage() {
     checkHost()
   }, [])
 
-  // Paso 1 — Información básica
+  // Paso 1
   const [title, setTitle] = useState('')
   const [shortDescription, setShortDescription] = useState('')
   const [description, setDescription] = useState('')
@@ -40,7 +48,7 @@ export default function NewExperiencePage() {
   const [tags, setTags] = useState<string[]>([])
   const [tagInput, setTagInput] = useState('')
 
-  // Paso 2 — Detalles
+  // Paso 2
   const [durationTime, setDurationTime] = useState('')
   const [languages, setLanguages] = useState<string[]>([])
   const [maxGuests, setMaxGuests] = useState(10)
@@ -49,155 +57,174 @@ export default function NewExperiencePage() {
   const [address, setAddress] = useState('')
   const [city, setCity] = useState('')
 
-  // Paso 3 — Precio
+  // Paso 3
   const [priceUsd, setPriceUsd] = useState('')
   const [priceIncludes, setPriceIncludes] = useState<string[]>([])
   const [priceExcludes, setPriceExcludes] = useState<string[]>([])
   const [includeInput, setIncludeInput] = useState('')
   const [excludeInput, setExcludeInput] = useState('')
 
-  // Paso 4 — Imágenes
+  // Paso 4 — imágenes con drag & drop
   const [featuredImage, setFeaturedImage] = useState<File | null>(null)
   const [featuredImagePreview, setFeaturedImagePreview] = useState<string | null>(null)
   const [galleryImages, setGalleryImages] = useState<File[]>([])
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([])
+  const [isDraggingFeatured, setIsDraggingFeatured] = useState(false)
+  const [isDraggingGallery, setIsDraggingGallery] = useState(false)
 
-  // Paso 5 — Disponibilidad
+  // Paso 5 — hora con selects personalizados
   const [availableDays, setAvailableDays] = useState<string[]>([])
   const [availableTimes, setAvailableTimes] = useState<string[]>([])
-  const [timeInput, setTimeInput] = useState('')
+  const [timeHour, setTimeHour] = useState('')
+  const [timeMinute, setTimeMinute] = useState('00')
 
-  const toggleItem = (
-    item: string,
-    list: string[],
-    setList: (l: string[]) => void
-  ) => {
-    setList(
-      list.includes(item)
-        ? list.filter((i) => i !== item)
-        : [...list, item]
-    )
+  const toggleItem = (item: string, list: string[], setList: (l: string[]) => void) => {
+    setList(list.includes(item) ? list.filter((i) => i !== item) : [...list, item])
   }
 
   const addTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()])
-      setTagInput('')
-    }
+    const v = tagInput.trim()
+    if (v && !tags.includes(v)) { setTags([...tags, v]); setTagInput('') }
   }
-
   const addInclude = () => {
-    if (includeInput.trim() && !priceIncludes.includes(includeInput.trim())) {
-      setPriceIncludes([...priceIncludes, includeInput.trim()])
-      setIncludeInput('')
-    }
+    const v = includeInput.trim()
+    if (v && !priceIncludes.includes(v)) { setPriceIncludes([...priceIncludes, v]); setIncludeInput('') }
   }
-
   const addExclude = () => {
-    if (excludeInput.trim() && !priceExcludes.includes(excludeInput.trim())) {
-      setPriceExcludes([...priceExcludes, excludeInput.trim()])
-      setExcludeInput('')
-    }
+    const v = excludeInput.trim()
+    if (v && !priceExcludes.includes(v)) { setPriceExcludes([...priceExcludes, v]); setExcludeInput('') }
   }
-
   const addTime = () => {
-    if (timeInput && !availableTimes.includes(timeInput)) {
-      setAvailableTimes([...availableTimes, timeInput])
-      setTimeInput('')
+    if (!timeHour) return
+    const time = `${timeHour}:${timeMinute}`
+    if (!availableTimes.includes(time)) {
+      setAvailableTimes([...availableTimes, time])
+      setFieldErrors((p) => ({ ...p, availableDays: '' }))
     }
   }
 
   const handleFeaturedImage = (file: File) => {
     setFeaturedImage(file)
     setFeaturedImagePreview(URL.createObjectURL(file))
+    setFieldErrors((p) => ({ ...p, featuredImage: '' }))
   }
 
-  const handleGalleryImages = (files: FileList) => {
-    const newFiles = Array.from(files)
+  const handleGalleryImages = (files: FileList | File[]) => {
+    const newFiles = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 10 - galleryImages.length)
+    if (!newFiles.length) return
     setGalleryImages((prev) => [...prev, ...newFiles])
-    setGalleryPreviews((prev) => [
-      ...prev,
-      ...newFiles.map((f) => URL.createObjectURL(f)),
-    ])
+    setGalleryPreviews((prev) => [...prev, ...newFiles.map((f) => URL.createObjectURL(f))])
   }
 
-  const generateHandle = (title: string) => {
-    return title
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-      .slice(0, 60)
+  // Drag & drop handlers
+  const onDragOver = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation() }
+
+  const onDropFeatured = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDraggingFeatured(false)
+    const file = Array.from(e.dataTransfer.files).find(f => f.type.startsWith('image/'))
+    if (file) handleFeaturedImage(file)
+  }
+
+  const onDropGallery = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDraggingGallery(false)
+    handleGalleryImages(Array.from(e.dataTransfer.files))
+  }
+
+  const generateHandle = (t: string) =>
+    t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+     .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 60)
+
+  // ── Validación ───────────────────────────────────────────────────────────
+  const validateStep = (s: number): FieldErrors => {
+    const errs: FieldErrors = {}
+    if (s === 1) {
+      if (!title.trim()) errs.title = 'El título es requerido.'
+      else if (title.trim().length < 5) errs.title = 'Mínimo 5 caracteres.'
+      else if (title.trim().length > 100) errs.title = 'Máximo 100 caracteres.'
+      if (!shortDescription.trim()) errs.shortDescription = 'La descripción corta es requerida.'
+      else if (shortDescription.trim().length < 10) errs.shortDescription = 'Mínimo 10 caracteres.'
+      if (!description.trim()) errs.description = 'La descripción completa es requerida.'
+      else if (description.trim().length < 50) errs.description = 'Mínimo 50 caracteres.'
+      if (!category) errs.category = 'Selecciona una categoría.'
+    }
+    if (s === 2) {
+      if (!durationTime.trim()) errs.durationTime = 'La duración es requerida.'
+      if (minGuests < 1) errs.minGuests = 'Mínimo 1 explorer.'
+      if (maxGuests < minGuests) errs.maxGuests = 'El máximo debe ser mayor o igual al mínimo.'
+      if (!address.trim()) errs.address = 'La dirección es requerida.'
+      if (!meetingPoint.trim()) errs.meetingPoint = 'Las instrucciones de encuentro son requeridas.'
+      else if (meetingPoint.trim().length < 10) errs.meetingPoint = 'Mínimo 10 caracteres.'
+      if (!city) errs.city = 'Selecciona una ciudad.'
+      if (languages.length === 0) errs.languages = 'Selecciona al menos un idioma.'
+    }
+    if (s === 3) {
+      const price = Number(priceUsd)
+      if (!priceUsd) errs.priceUsd = 'El precio es requerido.'
+      else if (isNaN(price) || price <= 0) errs.priceUsd = 'El precio debe ser mayor a 0.'
+      else if (price > 100000) errs.priceUsd = 'Precio demasiado alto.'
+      if (priceIncludes.length === 0) errs.priceIncludes = 'Agrega al menos un ítem de lo que incluye.'
+    }
+    if (s === 4) {
+      if (!featuredImage) errs.featuredImage = 'La imagen principal es requerida.'
+    }
+    if (s === 5) {
+      if (availableDays.length === 0) errs.availableDays = 'Selecciona al menos un día disponible.'
+    }
+    return errs
+  }
+
+  const handleNext = () => {
+    const errs = validateStep(step)
+    setFieldErrors(errs)
+    if (Object.keys(errs).length === 0) setStep((s) => (s + 1) as any)
   }
 
   const handleSubmit = async () => {
+    const errs = validateStep(step)
+    setFieldErrors(errs)
+    if (Object.keys(errs).length > 0) return
+
     setIsLoading(true)
     setError(null)
-
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No autenticado')
 
-      const { data: host } = await supabase
-        .from('hosts')
-        .select('id')
-        .eq('user_id', user.id)
-        .single()
-
+      const { data: host } = await supabase.from('hosts').select('id').eq('user_id', user.id).single()
       if (!host) throw new Error('Necesitas un perfil de anfitrión. Ve a /become-host para crearlo.')
 
-      // Subir imagen principal
       let featuredImageUrl = null
       if (featuredImage) {
         featuredImageUrl = await uploadExperienceImage(
-          user.id,
-          featuredImage,
+          user.id, featuredImage,
           `featured-${Date.now()}.${featuredImage.name.split('.').pop()}`
         )
       }
 
-      // Subir imágenes de galería
       const galleryUrls: string[] = []
       for (const img of galleryImages) {
         const url = await uploadExperienceImage(
-          user.id,
-          img,
+          user.id, img,
           `gallery-${Date.now()}-${Math.random().toString(36).slice(2)}.${img.name.split('.').pop()}`
         )
         if (url) galleryUrls.push(url)
       }
 
-      // Crear la experiencia
       const handle = generateHandle(title)
-      const { error: expError } = await supabase
-        .from('experiences')
-        .insert({
-          host_id: host.id,
-          title,
-          handle,
-          description,
-          short_description: shortDescription,
-          category,
-          tags,
-          duration_time: durationTime,
-          languages,
-          max_guests: maxGuests,
-          min_guests: minGuests,
-          meeting_point: meetingPoint,
-          address,
-          city,
-          price_usd: Number(priceUsd),
-          price_includes: priceIncludes,
-          price_excludes: priceExcludes,
-          featured_image_url: featuredImageUrl,
-          gallery_urls: galleryUrls,
-          available_days: availableDays,
-          available_times: availableTimes,
-          is_published: true,
-          is_hidden: false,
-        })
-
+      const { error: expError } = await supabase.from('experiences').insert({
+        host_id: host.id, title, handle, description,
+        short_description: shortDescription, category, tags,
+        duration_time: durationTime, languages,
+        max_guests: maxGuests, min_guests: minGuests,
+        meeting_point: meetingPoint, address, city,
+        price_usd: Number(priceUsd),
+        price_includes: priceIncludes, price_excludes: priceExcludes,
+        featured_image_url: featuredImageUrl, gallery_urls: galleryUrls,
+        available_days: availableDays, available_times: availableTimes,
+        is_published: true, is_hidden: false,
+      })
       if (expError) throw expError
 
       router.push('/host/dashboard')
@@ -210,28 +237,32 @@ export default function NewExperiencePage() {
 
   const canProceed = () => {
     if (step === 1) return title && description && category
-    if (step === 2) return durationTime && languages.length > 0 && address && city
-    if (step === 3) return Number(priceUsd) > 0
+    if (step === 2) return durationTime && languages.length > 0 && address && city && meetingPoint
+    if (step === 3) return Number(priceUsd) > 0 && priceIncludes.length > 0
     if (step === 4) return featuredImage !== null
     if (step === 5) return availableDays.length > 0
     return false
   }
 
+  // ── Clases ───────────────────────────────────────────────────────────────
+  const base = 'w-full rounded-xl border bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2'
+  const ic = (key: string) => fieldErrors[key]
+    ? `${base} border-red-400 focus:ring-red-400`
+    : `${base} border-neutral-200 dark:border-neutral-700 focus:ring-primary-500`
+  const lc = 'block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1'
+  const hint = (text: string) => <p className="mb-1.5 text-xs text-neutral-400">{text}</p>
+  const errMsg = (key: string) => fieldErrors[key]
+    ? <p className="mt-1 text-xs text-red-500">{fieldErrors[key]}</p>
+    : null
+
   const renderProgressBar = () => (
     <div className="mb-8">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-          Paso {step} de {TOTAL_STEPS}
-        </span>
-        <span className="text-sm text-neutral-500">
-          {Math.round((step / TOTAL_STEPS) * 100)}% completado
-        </span>
+        <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Paso {step} de {TOTAL_STEPS}</span>
+        <span className="text-sm text-neutral-500">{Math.round((step / TOTAL_STEPS) * 100)}% completado</span>
       </div>
       <div className="h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full">
-        <div
-          className="h-2 bg-primary-600 rounded-full transition-all duration-300"
-          style={{ width: `${(step / TOTAL_STEPS) * 100}%` }}
-        />
+        <div className="h-2 bg-primary-600 rounded-full transition-all duration-300" style={{ width: `${(step / TOTAL_STEPS) * 100}%` }} />
       </div>
     </div>
   )
@@ -239,114 +270,76 @@ export default function NewExperiencePage() {
   const renderStep1 = () => (
     <div className="flex flex-col gap-y-5">
       <div>
-        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
-          Información básica
-        </h2>
-        <p className="text-sm text-neutral-500 mt-1">
-          Cuéntanos sobre tu experiencia.
-        </p>
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Información básica</h2>
+        <p className="text-sm text-neutral-500 mt-1">Cuéntanos sobre tu experiencia.</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Título de la experiencia *
-        </label>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="Tour gastronómico por el mercado..."
-          className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+        <label className={lc}>Título de la experiencia * <span className="text-xs text-neutral-400">({title.length}/100)</span></label>
+        {hint('Ej: "Tour gastronómico por la Zona Colonial" — sé específico y atractivo.')}
+        <input type="text" value={title}
+          onChange={(e) => { setTitle(e.target.value); setFieldErrors((p) => ({ ...p, title: '' })) }}
+          placeholder="Ej: Caminata nocturna por Santo Domingo colonial"
+          className={ic('title')} maxLength={100}
         />
+        {errMsg('title')}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Descripción corta *
-        </label>
-        <input
-          type="text"
-          value={shortDescription}
-          onChange={(e) => setShortDescription(e.target.value)}
-          placeholder="Una línea que resuma tu experiencia..."
-          maxLength={150}
-          className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+        <label className={lc}>Descripción corta * <span className="text-xs text-neutral-400">({shortDescription.length}/150)</span></label>
+        {hint('Una frase que aparece en la tarjeta de la experiencia. Máx. 150 caracteres.')}
+        <input type="text" value={shortDescription}
+          onChange={(e) => { setShortDescription(e.target.value); setFieldErrors((p) => ({ ...p, shortDescription: '' })) }}
+          placeholder="Ej: Descubre la historia viva de la primera ciudad del Nuevo Mundo."
+          maxLength={150} className={ic('shortDescription')}
         />
-        <p className="text-xs text-neutral-400 mt-1 text-right">
-          {shortDescription.length}/150
-        </p>
+        {errMsg('shortDescription')}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Descripción completa *
-        </label>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Describe tu experiencia en detalle. ¿Qué van a vivir los explorers? ¿Qué hace especial tu experiencia?"
-          rows={5}
-          className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+        <label className={lc}>Descripción completa * <span className="text-xs text-neutral-400">({description.length} chars — mín. 50)</span></label>
+        {hint('Describe qué vivirán los explorers, qué la hace única y qué esperar. Cuanto más detalle, más reservas.')}
+        <textarea value={description}
+          onChange={(e) => { setDescription(e.target.value); setFieldErrors((p) => ({ ...p, description: '' })) }}
+          placeholder={`Ej: Acompáñanos en un recorrido por los sabores más auténticos de la República Dominicana. Visitaremos el mercado Modelo, probaremos cocina criolla en comedores locales y aprenderás la historia detrás de cada plato con un guía experto.`}
+          rows={6} className={`${ic('description')} resize-none`}
         />
+        {errMsg('description')}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
-          Categoría *
-        </label>
+        <label className={`${lc} mb-2`}>Categoría *</label>
+        {hint('Selecciona la categoría que mejor describe tu experiencia.')}
         <div className="flex flex-wrap gap-2">
           {EXPERIENCE_CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setCategory(cat)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                category === cat
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200'
-              }`}
-            >
+            <button key={cat} type="button"
+              onClick={() => { setCategory(cat); setFieldErrors((p) => ({ ...p, category: '' })) }}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${category === cat ? 'bg-primary-600 text-white' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200'}`}>
               {cat}
             </button>
           ))}
         </div>
+        {errMsg('category')}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Etiquetas (opcional)
-        </label>
+        <label className={lc}>Etiquetas <span className="text-xs text-neutral-400">(opcional)</span></label>
+        {hint('Palabras clave que ayudan a los explorers a encontrar tu experiencia. Ej: "cacao", "historia", "familia".')}
         <div className="flex gap-x-2">
-          <input
-            type="text"
-            value={tagInput}
+          <input type="text" value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
             placeholder="Ej: cacao, chocolate, artesanal..."
-            className="flex-1 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            className={`flex-1 ${ic('tag')}`}
           />
-          <button
-            type="button"
-            onClick={addTag}
-            className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700"
-          >
-            + Agregar
-          </button>
+          <button type="button" onClick={addTag} className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700">+ Agregar</button>
         </div>
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {tags.map((tag) => (
-              <span
-                key={tag}
-                className="inline-flex items-center gap-x-1 rounded-full bg-neutral-100 dark:bg-neutral-700 px-3 py-1 text-sm"
-              >
+              <span key={tag} className="inline-flex items-center gap-x-1 rounded-full bg-neutral-100 dark:bg-neutral-700 px-3 py-1 text-sm">
                 {tag}
-                <button
-                  onClick={() => setTags(tags.filter((t) => t !== tag))}
-                  className="text-neutral-400 hover:text-red-500"
-                >
-                  ×
-                </button>
+                <button onClick={() => setTags(tags.filter((t) => t !== tag))} className="text-neutral-400 hover:text-red-500">×</button>
               </span>
             ))}
           </div>
@@ -358,114 +351,89 @@ export default function NewExperiencePage() {
   const renderStep2 = () => (
     <div className="flex flex-col gap-y-5">
       <div>
-        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
-          Detalles de la experiencia
-        </h2>
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Detalles de la experiencia</h2>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-            Duración *
-          </label>
-          <input
-            type="text"
-            value={durationTime}
-            onChange={(e) => setDurationTime(e.target.value)}
-            placeholder="3 horas, 2.5 horas..."
-            className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          <label className={lc}>Duración *</label>
+          {hint('Ej: "3 horas", "Medio día", "2–3 horas"')}
+          <input type="text" value={durationTime}
+            onChange={(e) => { setDurationTime(e.target.value); setFieldErrors((p) => ({ ...p, durationTime: '' })) }}
+            placeholder="Ej: 3 horas"
+            className={ic('durationTime')}
           />
+          {errMsg('durationTime')}
         </div>
         <div>
-          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-            Ciudad *
-          </label>
-          <select
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          <label className={lc}>Ciudad *</label>
+          {hint('Ciudad donde se realiza.')}
+          <select value={city}
+            onChange={(e) => { setCity(e.target.value); setFieldErrors((p) => ({ ...p, city: '' })) }}
+            className={ic('city')}
           >
             <option value="">Selecciona</option>
-            {DR_CITIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
+            {DR_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
+          {errMsg('city')}
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-            Mínimo de explorers
-          </label>
-          <input
-            type="number"
-            min={1}
-            value={minGuests}
-            onChange={(e) => setMinGuests(Number(e.target.value))}
-            className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          <label className={lc}>Mínimo de explorers</label>
+          <input type="number" inputMode="numeric" min={1} max={maxGuests} value={minGuests}
+            onChange={(e) => { setMinGuests(Math.max(1, Number(e.target.value.replace(/\D/g, '')))); setFieldErrors((p) => ({ ...p, minGuests: '' })) }}
+            className={ic('minGuests')}
           />
+          {errMsg('minGuests')}
         </div>
         <div>
-          <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-            Máximo de explorers
-          </label>
-          <input
-            type="number"
-            min={1}
-            value={maxGuests}
-            onChange={(e) => setMaxGuests(Number(e.target.value))}
-            className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+          <label className={lc}>Máximo de explorers</label>
+          <input type="number" inputMode="numeric" min={minGuests} value={maxGuests}
+            onChange={(e) => { setMaxGuests(Math.max(minGuests, Number(e.target.value.replace(/\D/g, '')))); setFieldErrors((p) => ({ ...p, maxGuests: '' })) }}
+            className={ic('maxGuests')}
           />
+          {errMsg('maxGuests')}
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Dirección / Punto de encuentro *
-        </label>
-        <input
-          type="text"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Calle Las Damas #1, Zona Colonial"
-          className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+        <label className={lc}>Dirección *</label>
+        {hint('Ej: "Calle Las Damas #1, Zona Colonial, Santo Domingo"')}
+        <input type="text" value={address}
+          onChange={(e) => { setAddress(e.target.value); setFieldErrors((p) => ({ ...p, address: '' })) }}
+          placeholder="Ej: Calle Las Damas #1, Zona Colonial"
+          className={ic('address')}
         />
+        {errMsg('address')}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Punto de encuentro (instrucciones)
-        </label>
-        <input
-          type="text"
-          value={meetingPoint}
-          onChange={(e) => setMeetingPoint(e.target.value)}
-          placeholder="Nos encontramos frente a la Catedral..."
-          className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+        <label className={lc}>Instrucciones del punto de encuentro * <span className="text-xs text-neutral-400">({meetingPoint.length} chars)</span></label>
+        {hint('Indica exactamente dónde y cómo encontrarte. Ej: "Nos encontramos frente a la puerta principal de la Catedral, busca al guía con chaleco azul."')}
+        <textarea value={meetingPoint}
+          onChange={(e) => { setMeetingPoint(e.target.value); setFieldErrors((p) => ({ ...p, meetingPoint: '' })) }}
+          placeholder="Ej: Nos encontramos frente a la puerta principal de la Catedral Primada. Busca al guía con el chaleco azul con el logo de DoCoolture. Llega 10 minutos antes."
+          rows={3}
+          className={`${ic('meetingPoint')} resize-none`}
         />
+        {errMsg('meetingPoint')}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
-          Idiomas en que ofreces la experiencia *
-        </label>
+        <label className={`${lc} mb-2`}>Idiomas en que ofreces la experiencia *</label>
+        {hint('Selecciona todos los idiomas en que puedes guiar la experiencia.')}
         <div className="flex flex-wrap gap-2">
           {AVAILABLE_LANGUAGES.map((l) => (
-            <button
-              key={l}
-              type="button"
-              onClick={() => toggleItem(l, languages, setLanguages)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                languages.includes(l)
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200'
-              }`}
-            >
+            <button key={l} type="button"
+              onClick={() => { toggleItem(l, languages, setLanguages); setFieldErrors((p) => ({ ...p, languages: '' })) }}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${languages.includes(l) ? 'bg-primary-600 text-white' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200'}`}>
               {l}
             </button>
           ))}
         </div>
+        {errMsg('languages')}
       </div>
     </div>
   )
@@ -473,108 +441,73 @@ export default function NewExperiencePage() {
   const renderStep3 = () => (
     <div className="flex flex-col gap-y-5">
       <div>
-        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
-          Precio
-        </h2>
-        <p className="text-sm text-neutral-500 mt-1">
-          El precio es por persona en USD.
-        </p>
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Precio</h2>
+        <p className="text-sm text-neutral-500 mt-1">El precio es por persona.</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Precio por persona (USD) *
-        </label>
-        <div className="flex items-center rounded-xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
-          <span className="px-4 py-3 bg-neutral-50 dark:bg-neutral-700 text-sm text-neutral-500 border-r border-neutral-200 dark:border-neutral-600">
-            $
-          </span>
-          <input
-            type="number"
-            min={1}
-            value={priceUsd}
-            onChange={(e) => setPriceUsd(e.target.value)}
+        <label className={lc}>Precio por persona *</label>
+        {hint('Ingresa el valor en dólares (USD). Ej: 120 para $120 por persona.')}
+        <div className={`flex items-center overflow-hidden rounded-xl border ${fieldErrors.priceUsd ? 'border-red-400' : 'border-neutral-200 dark:border-neutral-700'}`}>
+          <span className="px-4 py-3 bg-neutral-50 dark:bg-neutral-700 text-sm text-neutral-500 border-r border-neutral-200 dark:border-neutral-600">$</span>
+          <input type="text" inputMode="decimal" value={priceUsd}
+            onChange={(e) => {
+              const parts = onlyPositiveNum(e.target.value).split('.')
+              const clean = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : parts.join('.')
+              setPriceUsd(clean)
+              setFieldErrors((p) => ({ ...p, priceUsd: '' }))
+            }}
             placeholder="0.00"
             className="flex-1 px-4 py-3 text-sm bg-white dark:bg-neutral-900 focus:outline-none dark:text-neutral-100"
           />
-          <span className="px-4 py-3 bg-neutral-50 dark:bg-neutral-700 text-sm text-neutral-500 border-l border-neutral-200 dark:border-neutral-600">
-            USD
-          </span>
+          <span className="px-4 py-3 bg-neutral-50 dark:bg-neutral-700 text-sm text-neutral-500 border-l border-neutral-200 dark:border-neutral-600">USD</span>
         </div>
+        {errMsg('priceUsd')}
       </div>
 
-      {/* Qué incluye */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          ¿Qué incluye el precio?
-        </label>
+        <label className={lc}>¿Qué incluye el precio? * <span className="text-xs text-neutral-400">({priceIncludes.length} ítems)</span></label>
+        {hint('Ej: Guía bilingüe certificado · Degustaciones locales · Seguro de actividad · Agua y refrescos · Transporte interno')}
         <div className="flex gap-x-2">
-          <input
-            type="text"
-            value={includeInput}
-            onChange={(e) => setIncludeInput(e.target.value)}
+          <input type="text" value={includeInput}
+            onChange={(e) => { setIncludeInput(e.target.value); setFieldErrors((p) => ({ ...p, priceIncludes: '' })) }}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addInclude())}
-            placeholder="Ej: Guía bilingüe, Degustaciones..."
-            className="flex-1 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="Ej: Guía bilingüe, Degustaciones, Seguro..."
+            className={`flex-1 ${ic('priceIncludes')}`}
           />
-          <button
-            type="button"
-            onClick={addInclude}
-            className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700"
-          >
-            +
-          </button>
+          <button type="button" onClick={addInclude} className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700">+</button>
         </div>
+        {errMsg('priceIncludes')}
         {priceIncludes.length > 0 && (
           <ul className="mt-2 space-y-1">
             {priceIncludes.map((item) => (
-              <li key={item} className="flex items-center justify-between text-sm text-green-700 dark:text-green-400">
+              <li key={item} className="flex items-center justify-between rounded-lg bg-green-50 dark:bg-green-950 px-3 py-1.5 text-sm text-green-700 dark:text-green-400">
                 <span>✅ {item}</span>
-                <button
-                  onClick={() => setPriceIncludes(priceIncludes.filter((i) => i !== item))}
-                  className="text-neutral-400 hover:text-red-500 ml-2"
-                >
-                  ×
-                </button>
+                <button onClick={() => setPriceIncludes(priceIncludes.filter((i) => i !== item))} className="text-neutral-400 hover:text-red-500 ml-2">×</button>
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      {/* Qué no incluye */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          ¿Qué NO incluye el precio?
-        </label>
+        <label className={lc}>¿Qué NO incluye el precio? <span className="text-xs text-neutral-400">(opcional)</span></label>
+        {hint('Ej: Transporte al punto de encuentro · Bebidas alcohólicas · Propinas · Souvenirs')}
         <div className="flex gap-x-2">
-          <input
-            type="text"
-            value={excludeInput}
+          <input type="text" value={excludeInput}
             onChange={(e) => setExcludeInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addExclude())}
-            placeholder="Ej: Transporte, Bebidas extra..."
-            className="flex-1 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+            placeholder="Ej: Transporte, Bebidas extra, Propinas..."
+            className={`flex-1 ${base} border-neutral-200 dark:border-neutral-700 focus:ring-primary-500`}
           />
-          <button
-            type="button"
-            onClick={addExclude}
-            className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700"
-          >
-            +
-          </button>
+          <button type="button" onClick={addExclude} className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700">+</button>
         </div>
         {priceExcludes.length > 0 && (
           <ul className="mt-2 space-y-1">
             {priceExcludes.map((item) => (
-              <li key={item} className="flex items-center justify-between text-sm text-red-600 dark:text-red-400">
+              <li key={item} className="flex items-center justify-between rounded-lg bg-red-50 dark:bg-red-950 px-3 py-1.5 text-sm text-red-600 dark:text-red-400">
                 <span>❌ {item}</span>
-                <button
-                  onClick={() => setPriceExcludes(priceExcludes.filter((i) => i !== item))}
-                  className="text-neutral-400 hover:text-red-500 ml-2"
-                >
-                  ×
-                </button>
+                <button onClick={() => setPriceExcludes(priceExcludes.filter((i) => i !== item))} className="text-neutral-400 hover:text-red-500 ml-2">×</button>
               </li>
             ))}
           </ul>
@@ -586,87 +519,73 @@ export default function NewExperiencePage() {
   const renderStep4 = () => (
     <div className="flex flex-col gap-y-5">
       <div>
-        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
-          Fotos de tu experiencia
-        </h2>
-        <p className="text-sm text-neutral-500 mt-1">
-          Unas buenas fotos hacen la diferencia. Sube imágenes de alta calidad.
-        </p>
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Fotos de tu experiencia</h2>
+        <p className="text-sm text-neutral-500 mt-1">Las fotos son lo primero que ven los explorers. Usa imágenes reales y de buena calidad.</p>
       </div>
 
       {/* Imagen principal */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Imagen principal * (la más importante)
-        </label>
+        <label className={lc}>Imagen principal *</label>
+        {hint('Formato JPG, PNG o WEBP · Máx. 10 MB · Recomendado: 1200×800 px en horizontal. Arrastra o haz clic.')}
         {featuredImagePreview ? (
           <div className="relative">
-            <img
-              src={featuredImagePreview}
-              alt="Preview"
-              className="w-full h-48 object-cover rounded-xl"
-            />
+            <img src={featuredImagePreview} alt="Preview" className="w-full h-52 object-cover rounded-xl" />
             <button
-              onClick={() => {
-                setFeaturedImage(null)
-                setFeaturedImagePreview(null)
-              }}
-              className="absolute top-2 right-2 rounded-full bg-white/80 p-1.5 text-sm hover:bg-white"
-            >
-              ×
-            </button>
+              onClick={() => { setFeaturedImage(null); setFeaturedImagePreview(null) }}
+              className="absolute top-2 right-2 rounded-full bg-white/80 p-1.5 text-sm hover:bg-white shadow"
+            >×</button>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center w-full h-40 rounded-xl border-2 border-dashed border-neutral-300 dark:border-neutral-600 cursor-pointer hover:border-primary-500 transition-colors">
-            <span className="text-3xl mb-2">📷</span>
-            <span className="text-sm text-neutral-500">
-              Haz clic para subir la imagen principal
+          <label
+            className={`flex flex-col items-center justify-center w-full h-44 rounded-xl border-2 border-dashed cursor-pointer transition-colors ${
+              isDraggingFeatured ? 'border-primary-500 bg-primary-50 dark:bg-primary-950' : fieldErrors.featuredImage ? 'border-red-400' : 'border-neutral-300 dark:border-neutral-600 hover:border-primary-500'
+            }`}
+            onDragOver={(e) => { onDragOver(e); setIsDraggingFeatured(true) }}
+            onDragEnter={() => setIsDraggingFeatured(true)}
+            onDragLeave={() => setIsDraggingFeatured(false)}
+            onDrop={onDropFeatured}
+          >
+            <span className="text-3xl mb-2">{isDraggingFeatured ? '📂' : '📷'}</span>
+            <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              {isDraggingFeatured ? 'Suelta la imagen aquí' : 'Arrastra tu imagen o haz clic para subir'}
             </span>
             <span className="text-xs text-neutral-400 mt-1">JPG, PNG, WEBP — Máx 10MB</span>
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => e.target.files?.[0] && handleFeaturedImage(e.target.files[0])}
-            />
+            <input type="file" accept="image/*" className="hidden"
+              onChange={(e) => e.target.files?.[0] && handleFeaturedImage(e.target.files[0])} />
           </label>
         )}
+        {errMsg('featuredImage')}
       </div>
 
       {/* Galería */}
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Galería de fotos (opcional, hasta 10 fotos)
-        </label>
-        <label className="flex flex-col items-center justify-center w-full h-32 rounded-xl border-2 border-dashed border-neutral-300 dark:border-neutral-600 cursor-pointer hover:border-primary-500 transition-colors mb-3">
-          <span className="text-2xl mb-1">🖼️</span>
-          <span className="text-sm text-neutral-500">Agregar más fotos</span>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={(e) => e.target.files && handleGalleryImages(e.target.files)}
-          />
+        <label className={lc}>Galería de fotos <span className="text-xs text-neutral-400">(opcional, hasta 10 fotos)</span></label>
+        {hint('Muestra diferentes ángulos, momentos y detalles de la experiencia. Arrastra varias fotos a la vez.')}
+        <label
+          className={`flex flex-col items-center justify-center w-full h-32 rounded-xl border-2 border-dashed cursor-pointer transition-colors mb-3 ${
+            isDraggingGallery ? 'border-primary-500 bg-primary-50 dark:bg-primary-950' : 'border-neutral-300 dark:border-neutral-600 hover:border-primary-500'
+          }`}
+          onDragOver={(e) => { onDragOver(e); setIsDraggingGallery(true) }}
+          onDragEnter={() => setIsDraggingGallery(true)}
+          onDragLeave={() => setIsDraggingGallery(false)}
+          onDrop={onDropGallery}
+        >
+          <span className="text-2xl mb-1">{isDraggingGallery ? '📂' : '🖼️'}</span>
+          <span className="text-sm text-neutral-500">
+            {isDraggingGallery ? 'Suelta las fotos aquí' : 'Arrastra fotos o haz clic para agregar'}
+          </span>
+          <input type="file" accept="image/*" multiple className="hidden"
+            onChange={(e) => e.target.files && handleGalleryImages(e.target.files)} />
         </label>
         {galleryPreviews.length > 0 && (
           <div className="grid grid-cols-3 gap-2">
             {galleryPreviews.map((src, i) => (
               <div key={i} className="relative">
-                <img
-                  src={src}
-                  alt={`Gallery ${i + 1}`}
-                  className="w-full h-24 object-cover rounded-lg"
-                />
+                <img src={src} alt={`Gallery ${i + 1}`} className="w-full h-24 object-cover rounded-lg" />
                 <button
-                  onClick={() => {
-                    setGalleryImages(galleryImages.filter((_, idx) => idx !== i))
-                    setGalleryPreviews(galleryPreviews.filter((_, idx) => idx !== i))
-                  }}
-                  className="absolute top-1 right-1 rounded-full bg-white/80 px-1.5 py-0.5 text-xs hover:bg-white"
-                >
-                  ×
-                </button>
+                  onClick={() => { setGalleryImages(galleryImages.filter((_, idx) => idx !== i)); setGalleryPreviews(galleryPreviews.filter((_, idx) => idx !== i)) }}
+                  className="absolute top-1 right-1 rounded-full bg-white/80 px-1.5 py-0.5 text-xs hover:bg-white shadow"
+                >×</button>
               </div>
             ))}
           </div>
@@ -678,95 +597,72 @@ export default function NewExperiencePage() {
   const renderStep5 = () => (
     <div className="flex flex-col gap-y-5">
       <div>
-        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
-          Disponibilidad
-        </h2>
-        <p className="text-sm text-neutral-500 mt-1">
-          ¿Cuándo ofreces esta experiencia?
-        </p>
+        <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Disponibilidad</h2>
+        <p className="text-sm text-neutral-500 mt-1">¿Cuándo ofreces esta experiencia?</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-3">
-          Días disponibles *
-        </label>
+        <label className={`${lc} mb-2`}>Días disponibles *</label>
+        {hint('Selecciona los días de la semana en que normalmente ofreces esta experiencia.')}
         <div className="flex flex-wrap gap-2">
           {DAYS_OF_WEEK.map((day) => (
-            <button
-              key={day}
-              type="button"
-              onClick={() => toggleItem(day, availableDays, setAvailableDays)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
-                availableDays.includes(day)
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200'
-              }`}
-            >
+            <button key={day} type="button"
+              onClick={() => { toggleItem(day, availableDays, setAvailableDays); setFieldErrors((p) => ({ ...p, availableDays: '' })) }}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${availableDays.includes(day) ? 'bg-primary-600 text-white' : 'bg-neutral-100 dark:bg-neutral-700 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-200'}`}>
               {day}
             </button>
           ))}
         </div>
+        {errMsg('availableDays')}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1.5">
-          Horarios disponibles
-        </label>
-        <div className="flex gap-x-2">
-          <input
-            type="time"
-            value={timeInput}
-            onChange={(e) => setTimeInput(e.target.value)}
-            className="flex-1 rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
-          <button
-            type="button"
-            onClick={addTime}
-            className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700"
-          >
+        <label className={lc}>Horarios disponibles <span className="text-xs text-neutral-400">(opcional)</span></label>
+        {hint('Agrega las horas de inicio. Ej: 09:00, 14:00, 17:00.')}
+        <div className="flex gap-x-2 items-center">
+          <div className="flex flex-1 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
+            <select
+              value={timeHour}
+              onChange={(e) => setTimeHour(e.target.value)}
+              className="flex-1 bg-white dark:bg-neutral-900 px-3 py-3 text-sm focus:outline-none border-r border-neutral-200 dark:border-neutral-700"
+            >
+              <option value="">HH</option>
+              {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
+            </select>
+            <span className="flex items-center px-2 text-neutral-400 bg-white dark:bg-neutral-900 text-sm">:</span>
+            <select
+              value={timeMinute}
+              onChange={(e) => setTimeMinute(e.target.value)}
+              className="flex-1 bg-white dark:bg-neutral-900 px-3 py-3 text-sm focus:outline-none"
+            >
+              {MINUTES.map((m) => <option key={m} value={m}>{m}</option>)}
+            </select>
+          </div>
+          <button type="button" onClick={addTime}
+            disabled={!timeHour}
+            className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-40">
             + Agregar
           </button>
         </div>
         {availableTimes.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {availableTimes.sort().map((time) => (
-              <span
-                key={time}
-                className="inline-flex items-center gap-x-1 rounded-full bg-neutral-100 dark:bg-neutral-700 px-3 py-1.5 text-sm"
-              >
+              <span key={time} className="inline-flex items-center gap-x-1 rounded-full bg-neutral-100 dark:bg-neutral-700 px-3 py-1.5 text-sm">
                 🕐 {time}
-                <button
-                  onClick={() => setAvailableTimes(availableTimes.filter((t) => t !== time))}
-                  className="text-neutral-400 hover:text-red-500"
-                >
-                  ×
-                </button>
+                <button onClick={() => setAvailableTimes(availableTimes.filter((t) => t !== time))} className="text-neutral-400 hover:text-red-500">×</button>
               </span>
             ))}
           </div>
         )}
       </div>
 
-      {/* Resumen */}
       <div className="rounded-2xl bg-neutral-50 dark:bg-neutral-700 p-5 space-y-2 text-sm">
-        <p className="font-semibold text-neutral-900 dark:text-neutral-100 mb-3">
-          Resumen de tu experiencia
-        </p>
-        <p className="text-neutral-600 dark:text-neutral-400">
-          📌 <strong>{title}</strong>
-        </p>
-        <p className="text-neutral-600 dark:text-neutral-400">
-          🗺️ {category} · {city}
-        </p>
-        <p className="text-neutral-600 dark:text-neutral-400">
-          ⏱️ {durationTime} · hasta {maxGuests} explorers
-        </p>
-        <p className="text-neutral-600 dark:text-neutral-400">
-          💵 ${priceUsd} USD por persona
-        </p>
-        <p className="text-neutral-600 dark:text-neutral-400">
-          📅 {availableDays.join(', ')}
-        </p>
+        <p className="font-semibold text-neutral-900 dark:text-neutral-100 mb-3">Resumen de tu experiencia</p>
+        <p className="text-neutral-600 dark:text-neutral-400">📌 <strong>{title}</strong></p>
+        <p className="text-neutral-600 dark:text-neutral-400">🗺️ {category} · {city}</p>
+        <p className="text-neutral-600 dark:text-neutral-400">⏱️ {durationTime} · hasta {maxGuests} explorers</p>
+        <p className="text-neutral-600 dark:text-neutral-400">💵 ${priceUsd} USD por persona</p>
+        <p className="text-neutral-600 dark:text-neutral-400">📅 {availableDays.join(', ')}</p>
       </div>
     </div>
   )
@@ -784,15 +680,9 @@ export default function NewExperiencePage() {
       <main className="container max-w-2xl mx-auto py-12 px-4">
         <div className="rounded-3xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 p-16 text-center">
           <p className="text-5xl mb-4">🏠</p>
-          <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-            Necesitas un perfil de anfitrión
-          </h2>
-          <p className="text-neutral-500 mb-6">
-            Crea tu perfil de anfitrión primero para poder publicar experiencias.
-          </p>
-          <ButtonPrimary onClick={() => router.push('/become-host')}>
-            Crear perfil de anfitrión
-          </ButtonPrimary>
+          <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">Necesitas un perfil de anfitrión</h2>
+          <p className="text-neutral-500 mb-6">Crea tu perfil de anfitrión primero para poder publicar experiencias.</p>
+          <ButtonPrimary onClick={() => router.push('/become-host')}>Crear perfil de anfitrión</ButtonPrimary>
         </div>
       </main>
     )
@@ -800,14 +690,9 @@ export default function NewExperiencePage() {
 
   return (
     <main className="container max-w-2xl mx-auto py-12 px-4 mb-24">
-
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-          Nueva experiencia
-        </h1>
-        <p className="mt-2 text-neutral-500 dark:text-neutral-400">
-          Crea una experiencia que los explorers nunca olvidarán.
-        </p>
+        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">Nueva experiencia</h1>
+        <p className="mt-2 text-neutral-500 dark:text-neutral-400">Crea una experiencia que los explorers nunca olvidarán.</p>
       </div>
 
       <div className="bg-white dark:bg-neutral-800 rounded-3xl shadow-lg p-8">
@@ -827,35 +712,23 @@ export default function NewExperiencePage() {
 
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700">
           {step > 1 ? (
-            <button
-              onClick={() => setStep((s) => (s - 1) as any)}
-              className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-            >
+            <button onClick={() => { setStep((s) => (s - 1) as any); setFieldErrors({}) }}
+              className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
               ← Volver
             </button>
           ) : (
-            <button
-              onClick={() => router.push('/host/dashboard')}
-              className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-            >
+            <button onClick={() => router.push('/host/dashboard')}
+              className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
               ← Dashboard
             </button>
           )}
 
           {step < TOTAL_STEPS ? (
-            <ButtonPrimary
-              onClick={() => setStep((s) => (s + 1) as any)}
-              disabled={!canProceed()}
-              className="disabled:opacity-50"
-            >
+            <ButtonPrimary onClick={handleNext} disabled={!canProceed()} className="disabled:opacity-50">
               Continuar →
             </ButtonPrimary>
           ) : (
-            <ButtonPrimary
-              onClick={handleSubmit}
-              disabled={isLoading || !canProceed()}
-              className="disabled:opacity-50"
-            >
+            <ButtonPrimary onClick={handleSubmit} disabled={isLoading || !canProceed()} className="disabled:opacity-50">
               {isLoading ? 'Publicando...' : '🚀 Publicar experiencia'}
             </ButtonPrimary>
           )}

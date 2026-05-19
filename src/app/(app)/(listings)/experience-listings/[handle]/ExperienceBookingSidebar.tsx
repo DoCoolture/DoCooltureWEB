@@ -1,6 +1,7 @@
 'use client'
 
 import StartRating from '@/components/StartRating'
+import { useCurrency } from '@/context/CurrencyContext'
 import { useLanguage } from '@/context/LanguageContext'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
@@ -15,6 +16,8 @@ interface Props {
   date?: string | null
   reviewStart: number
   reviewCount: number
+  availableDays: string[]
+  durationTime: string
   action: (formData: FormData) => Promise<void>
 }
 
@@ -24,18 +27,21 @@ export function ExperienceBookingSidebar({
   date,
   reviewStart,
   reviewCount,
+  availableDays,
+  durationTime,
   action,
 }: Props) {
   const { t } = useLanguage()
+  const { convertPrice } = useCurrency()
   const [explorerCount, setExplorerCount] = useState(1)
-  const precioNum = Number(price.replace('$', ''))
+  const precioNum = Number(price.replace(/[^0-9.]/g, ''))
 
   return (
     <div className="listingSection__wrap sm:shadow-xl">
       {/* PRECIO */}
       <div className="flex justify-between">
         <span className="text-3xl font-semibold">
-          {price}
+          {convertPrice(precioNum)}
           <span className="ml-1 text-base font-normal text-neutral-500 dark:text-neutral-400">
             /{t.booking.explorer}
           </span>
@@ -49,7 +55,7 @@ export function ExperienceBookingSidebar({
         className="flex flex-col rounded-3xl border border-neutral-200 dark:border-neutral-700"
         id="booking-form"
       >
-        <DatesRangeInputPopover className="z-11 flex-1" />
+        <DatesRangeInputPopover className="z-11 flex-1" availableDays={availableDays} durationTime={durationTime} />
         <div className="w-full border-b border-neutral-200 dark:border-neutral-700" />
         <GuestsInputPopover className="flex-1" onChangeTotalGuests={setExplorerCount} />
       </Form>
@@ -57,20 +63,20 @@ export function ExperienceBookingSidebar({
       {/* DESGLOSE DINÁMICO */}
       <DescriptionList>
         <DescriptionTerm>
-          {price} × {explorerCount} {explorerCount > 1 ? t.booking.explorers : t.booking.explorer}
+          {convertPrice(precioNum)} × {explorerCount} {explorerCount > 1 ? t.booking.explorers : t.booking.explorer}
         </DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
-          ${(precioNum * explorerCount).toFixed(2)}
+          {convertPrice(precioNum * explorerCount)}
         </DescriptionDetails>
         <DescriptionTerm>{t.booking.processingFee} (18%)</DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
-          ${(precioNum * explorerCount * 0.18).toFixed(2)}
+          {convertPrice(precioNum * explorerCount * 0.18)}
         </DescriptionDetails>
         <DescriptionTerm className="font-semibold text-neutral-900 dark:text-neutral-100">
           {t.booking.total}
         </DescriptionTerm>
         <DescriptionDetails className="font-semibold sm:text-right">
-          ${(precioNum * explorerCount * 1.18).toFixed(2)}
+          {convertPrice(precioNum * explorerCount * 1.18)}
         </DescriptionDetails>
       </DescriptionList>
 

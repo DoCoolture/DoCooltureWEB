@@ -59,6 +59,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
     host,
     durationTime,
     languages,
+    availableDays,
   } = listing
 
   const reviews = await getExperienceReviews(listing.id)
@@ -204,7 +205,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
           {renderSectionHeader()}
           {renderSectionInfo()}
           {renderSectionIncludes()}
-          <SectionDateRange />
+          <SectionDateRange availableDays={availableDays} durationTime={durationTime} />
         </div>
 
         {/* SIDEBAR */}
@@ -216,6 +217,8 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
               date={resolvedDate}
               reviewStart={reviewStart}
               reviewCount={reviewCount}
+              availableDays={availableDays}
+              durationTime={durationTime}
               action={handleSubmitForm}
             />
           </div>

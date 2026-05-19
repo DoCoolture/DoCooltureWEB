@@ -47,7 +47,8 @@ export async function getAuthors() {
 
 export async function getAuthorByHandle(handle: string) {
   const authors = await getAuthors()
-  const author = authors.find((a) => a.handle === handle) ?? authors[0]
+  const author = authors.find((a) => a.handle === handle)
+  if (!author) return null
 
   return {
     ...author,

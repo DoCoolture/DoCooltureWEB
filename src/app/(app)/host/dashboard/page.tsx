@@ -1,5 +1,6 @@
 'use client'
 
+import EditExperienceModal from '@/components/EditExperienceModal'
 import { supabase } from '@/lib/supabase'
 import type { Host, Booking, Experience } from '@/lib/supabase'
 import ButtonPrimary from '@/shared/ButtonPrimary'
@@ -13,6 +14,7 @@ export default function HostDashboardPage() {
   const [experiences, setExperiences] = useState<Experience[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [editingExp, setEditingExp] = useState<Experience | null>(null)
 
   useEffect(() => {
     loadDashboard()
@@ -315,7 +317,7 @@ export default function HostDashboardPage() {
                     {exp.is_published ? 'Despublicar' : 'Publicar'}
                   </button>
                   <button
-                    onClick={() => router.push(`/host/experiences/${exp.id}/edit`)}
+                    onClick={() => setEditingExp(exp)}
                     className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                   >
                     Editar
@@ -408,6 +410,24 @@ export default function HostDashboardPage() {
         )}
       </div>
 
+      {editingExp && (
+        <EditExperienceModal
+          experience={{
+            id: editingExp.id,
+            title: editingExp.title,
+            description: editingExp.description,
+            category: editingExp.category,
+            price_usd: editingExp.price_usd ?? 0,
+            duration_time: editingExp.duration_time,
+            max_guests: editingExp.max_guests,
+            address: editingExp.address,
+            city: editingExp.city,
+            is_published: editingExp.is_published,
+          }}
+          onClose={() => setEditingExp(null)}
+          onSaved={() => { loadDashboard(); setEditingExp(null) }}
+        />
+      )}
     </main>
   )
 }

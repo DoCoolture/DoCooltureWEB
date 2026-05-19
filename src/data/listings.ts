@@ -107,6 +107,7 @@ const TASTE_OF_DOMINICAN = {
   },
   listingCategory: 'Gastronomía',
   date: 'weekendsAvailable',
+  availableDays: ['Sábado', 'Domingo'] as string[],
   description:
     'Descubre la esencia de la República Dominicana a través de su gastronomía. Un recorrido sensorial que combina historia, tradición y sabor — desde ingredientes taínos hasta influencias africanas y europeas. Cada plato cuenta una historia. Guiado por expertos locales en la Zona Colonial de Santo Domingo.',
   durationTime: '3–4 horas',
@@ -241,20 +242,26 @@ export const getExperienceListingByHandle = async (handle: string) => {
     durationTime: exp.duration_time,
     languages: (exp.languages as string[] | null) ?? [],
     featuredImage: exp.featured_image_url ?? '',
-    galleryImgs: (exp.gallery_urls as string[] | null) ?? [],
+    galleryImgs: [
+      ...(exp.featured_image_url ? [exp.featured_image_url] : []),
+      ...((exp.gallery_urls as string[] | null) ?? []),
+    ],
     like: false,
     address: exp.address,
     reviewStart: exp.average_rating ?? 0,
     reviewCount: exp.total_reviews ?? 0,
     price: `$${exp.price_usd}`,
     maxGuests: exp.max_guests,
+    availableDays: (exp.available_days as string[] | null) ?? [],
     saleOff: null as string | null,
     isAds: null as string | null,
     map: { lat: exp.latitude ?? 0, lng: exp.longitude ?? 0 },
     host: {
       displayName: hostData?.display_name ?? 'Anfitrión DoCoolture',
       avatarUrl,
-      handle: exp.host_id,
+      handle: hostData?.display_name
+        ? hostData.display_name.toLowerCase().replace(/\s+/g, '-')
+        : exp.host_id,
       description: hostData?.bio ?? '',
       listingsCount: hostData?.total_listings ?? 1,
       reviewsCount: hostData?.total_reviews ?? 0,
