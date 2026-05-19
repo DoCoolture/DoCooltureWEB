@@ -42,7 +42,6 @@ const SectionHost = ({
 }: Props) => {
   const { t } = useLanguage()
   const sh = t.sectionHost
-  const router = useRouter()
 
   const handleShare = async () => {
     const url = window.location.href
