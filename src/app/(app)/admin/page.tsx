@@ -121,9 +121,9 @@ export default function AdminPage() {
     if (activeTab === 'hosts') {
       const { data } = await supabase
         .from('hosts')
-        .select('*')
+        .select('*, identity_verifications(id, status, document_type, document_number, document_front_url, document_back_url, selfie_url, created_at)')
         .order('created_at', { ascending: false })
-      setHosts(data || [])
+      setHosts((data || []) as any[])
     }
 
     if (activeTab === 'bookings') {
@@ -525,59 +525,117 @@ export default function AdminPage() {
           {/* ANFITRIONES */}
           {activeTab === 'hosts' && (
             <div className="space-y-4">
-              {hosts.map((host) => (
-                <div
-                  key={host.id}
-                  className="flex flex-col sm:flex-row sm:items-center gap-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-x-2">
-                      <p className="font-semibold text-neutral-900 dark:text-neutral-100">
-                        {host.display_name}
-                      </p>
-                      {host.is_verified && (
-                        <span className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5">
-                          ✅ Verificado
-                        </span>
-                      )}
+              {(hosts as any[]).map((host) => {
+                const verDocs: any[] = host.identity_verifications ?? []
+                const latestDoc = verDocs[verDocs.length - 1] ?? null
+                return (
+                  <div
+                    key={host.id}
+                    className="flex flex-col gap-4 rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4"
+                  >
+                    {/* Host info + status */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-x-2 flex-wrap">
+                          <p className="font-semibold text-neutral-900 dark:text-neutral-100">
+                            {host.display_name}
+                          </p>
+                          {host.is_verified && (
+                            <span className="text-xs bg-green-100 text-green-700 rounded-full px-2 py-0.5">
+                              ✅ Verificado
+                            </span>
+                          )}
+                          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                            host.status === 'active'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}>
+                            {host.status === 'active' ? 'Activo' : 'Suspendido'}
+                          </span>
+                        </div>
+                        <p className="text-sm text-neutral-500 mt-0.5">
+                          {host.city} · {host.total_listings} experiencias · ⭐ {host.average_rating.toFixed(1)}
+                        </p>
+                        <p className="text-xs text-neutral-400 mt-0.5">
+                          Estado verificación: <span className="font-medium">{host.verification_status}</span>
+                        </p>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex items-center gap-x-2 shrink-0 flex-wrap">
+                        {!host.is_verified && (
+                          <button
+                            onClick={() => handleVerifyHost(host)}
+                            className="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400"
+                          >
+                            ✅ Verificar
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleSuspendHost(host)}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
+                            host.status === 'active'
+                              ? 'border-red-200 text-red-600 hover:bg-red-50'
+                              : 'border-green-200 text-green-700 hover:bg-green-50'
+                          }`}
+                        >
+                          {host.status === 'active' ? 'Suspender' : 'Reactivar'}
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-sm text-neutral-500">
-                      {host.city} · {host.total_listings} experiencias ·
-                      ⭐ {host.average_rating.toFixed(1)}
-                    </p>
-                    <p className="text-xs text-neutral-400 mt-0.5">
-                      Verificación: {host.verification_status}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-x-2 shrink-0 flex-wrap justify-end">
-                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                      host.status === 'active'
-                        ? 'bg-green-100 text-green-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                      {host.status === 'active' ? 'Activo' : 'Suspendido'}
-                    </span>
-                    {!host.is_verified && (
-                      <button
-                        onClick={() => handleVerifyHost(host)}
-                        className="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400"
-                      >
-                        ✅ Verificar
-                      </button>
+
+                    {/* Identity documents (if submitted) */}
+                    {latestDoc && (
+                      <div className="rounded-xl bg-neutral-50 dark:bg-neutral-800 px-4 py-3 text-sm">
+                        <p className="font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                          📄 Documentos enviados —{' '}
+                          {latestDoc.document_type === 'cedula' ? 'Cédula' : latestDoc.document_type === 'passport' ? 'Pasaporte' : 'Licencia'}
+                          {latestDoc.document_number ? ` #${latestDoc.document_number}` : ''}
+                          <span className={`ml-2 rounded-full px-2 py-0.5 text-xs ${
+                            latestDoc.status === 'approved' ? 'bg-green-100 text-green-700' :
+                            latestDoc.status === 'rejected' ? 'bg-red-100 text-red-700' :
+                            'bg-amber-100 text-amber-700'
+                          }`}>
+                            {latestDoc.status === 'approved' ? '✅ Aprobado' : latestDoc.status === 'rejected' ? '❌ Rechazado' : '⏳ Pendiente'}
+                          </span>
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {latestDoc.document_front_url && (
+                            <button
+                              onClick={() => window.open(latestDoc.document_front_url, '_blank')}
+                              className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                            >
+                              📄 Frente
+                            </button>
+                          )}
+                          {latestDoc.document_back_url && (
+                            <button
+                              onClick={() => window.open(latestDoc.document_back_url, '_blank')}
+                              className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                            >
+                              📄 Dorso
+                            </button>
+                          )}
+                          {latestDoc.selfie_url && (
+                            <button
+                              onClick={() => window.open(latestDoc.selfie_url, '_blank')}
+                              className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-700"
+                            >
+                              🤳 Selfie
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     )}
-                    <button
-                      onClick={() => handleSuspendHost(host)}
-                      className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
-                        host.status === 'active'
-                          ? 'border-red-200 text-red-600 hover:bg-red-50'
-                          : 'border-green-200 text-green-700 hover:bg-green-50'
-                      }`}
-                    >
-                      {host.status === 'active' ? 'Suspender' : 'Reactivar'}
-                    </button>
+
+                    {!latestDoc && !host.is_verified && (
+                      <p className="text-xs text-neutral-400 italic">
+                        Sin documentos enviados — puedes verificar manualmente si lo conoces.
+                      </p>
+                    )}
                   </div>
-                </div>
-              ))}
+                )
+              })}
               {hosts.length === 0 && (
                 <p className="text-center text-neutral-500 py-10">
                   No hay anfitriones registrados.
