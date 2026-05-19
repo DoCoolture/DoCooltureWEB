@@ -1,6 +1,6 @@
 'use client'
 
-import { supabase } from '@/lib/supabase'
+import { supabase, uploadExperienceImage } from '@/lib/supabase'
 import { CITY_ADDRESSES, DR_CITIES, DURATION_OPTIONS } from '@/types'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
@@ -23,6 +23,8 @@ interface ExperienceData {
   address: string
   city: string
   is_published: boolean
+  featured_image_url?: string | null
+  gallery_urls?: string[] | null
 }
 
 interface Props {
@@ -36,6 +38,15 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const overlayRef = useRef<HTMLDivElement>(null)
+  const featuredInputRef = useRef<HTMLInputElement>(null)
+  const galleryInputRef = useRef<HTMLInputElement>(null)
+
+  // Photo state
+  const [featuredUrl, setFeaturedUrl] = useState<string | null>(experience.featured_image_url ?? null)
+  const [galleryUrls, setGalleryUrls] = useState<string[]>(experience.gallery_urls ?? [])
+  const [uploadingFeatured, setUploadingFeatured] = useState(false)
+  const [uploadingGallery, setUploadingGallery] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   // Duration preset state
   const isKnownDuration = (DURATION_OPTIONS as readonly string[]).includes(experience.duration_time)
@@ -47,6 +58,9 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
   const [addressPreset, setAddressPreset] = useState(isKnownAddress ? experience.address : CUSTOM)
 
   useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) setUserId(user.id)
+    })
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
@@ -74,6 +88,33 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
     else set('address', '')
   }
 
+  const handleFeaturedUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !userId) return
+    setUploadingFeatured(true)
+    const url = await uploadExperienceImage(userId, file, `featured-${Date.now()}.${file.name.split('.').pop()}`)
+    if (url) setFeaturedUrl(url)
+    setUploadingFeatured(false)
+    e.target.value = ''
+  }
+
+  const handleGalleryUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || !userId) return
+    setUploadingGallery(true)
+    const uploads = Array.from(files).map((file) =>
+      uploadExperienceImage(userId, file, `gallery-${Date.now()}-${Math.random().toString(36).slice(2)}.${file.name.split('.').pop()}`)
+    )
+    const results = await Promise.all(uploads)
+    setGalleryUrls((prev) => [...prev, ...(results.filter(Boolean) as string[])])
+    setUploadingGallery(false)
+    e.target.value = ''
+  }
+
+  const removeGalleryImage = (index: number) => {
+    setGalleryUrls((prev) => prev.filter((_, i) => i !== index))
+  }
+
   const handleSave = async () => {
     if (!form.title.trim() || !form.description.trim()) {
       setError('El título y la descripción son obligatorios.')
@@ -94,6 +135,8 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
         address: form.address.trim(),
         city: form.city.trim(),
         is_published: form.is_published,
+        featured_image_url: featuredUrl,
+        gallery_urls: galleryUrls,
       })
       .eq('id', form.id)
 
@@ -250,6 +293,90 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
               <label htmlFor="is_published" className="text-sm text-neutral-700 dark:text-neutral-300">
                 Experiencia publicada (visible para explorers)
               </label>
+            </div>
+          </div>
+
+          {/* ── FOTOS ── */}
+          <div className="border-t border-neutral-200 dark:border-neutral-700 pt-4 space-y-4">
+            <h3 className="text-sm font-semibold text-neutral-900 dark:text-neutral-100">Fotos</h3>
+
+            {/* Foto principal */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                Foto principal
+              </label>
+              {featuredUrl ? (
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={featuredUrl} alt="Foto principal" className="w-full h-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => setFeaturedUrl(null)}
+                    className="absolute top-2 right-2 rounded-full bg-black/60 p-1 text-white hover:bg-black/80"
+                  >
+                    <XMarkIcon className="size-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center w-full aspect-video rounded-xl border-2 border-dashed border-neutral-300 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-800 text-neutral-400 text-sm">
+                  Sin foto principal
+                </div>
+              )}
+              <input
+                ref={featuredInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFeaturedUpload}
+              />
+              <button
+                type="button"
+                disabled={uploadingFeatured || !userId}
+                onClick={() => featuredInputRef.current?.click()}
+                className="mt-2 rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50"
+              >
+                {uploadingFeatured ? 'Subiendo...' : featuredUrl ? 'Cambiar foto principal' : 'Subir foto principal'}
+              </button>
+            </div>
+
+            {/* Galería */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
+                Galería ({galleryUrls.length} fotos)
+              </label>
+              {galleryUrls.length > 0 && (
+                <div className="grid grid-cols-3 gap-2 mb-3">
+                  {galleryUrls.map((url, i) => (
+                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeGalleryImage(i)}
+                        className="absolute top-1 right-1 rounded-full bg-black/60 p-0.5 text-white hover:bg-black/80"
+                      >
+                        <XMarkIcon className="size-3.5" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <input
+                ref={galleryInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                className="hidden"
+                onChange={handleGalleryUpload}
+              />
+              <button
+                type="button"
+                disabled={uploadingGallery || !userId}
+                onClick={() => galleryInputRef.current?.click()}
+                className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50"
+              >
+                {uploadingGallery ? 'Subiendo...' : '+ Agregar fotos a la galería'}
+              </button>
             </div>
           </div>
         </div>

@@ -77,21 +77,24 @@ export async function getAuthorByHandle(handle: string) {
 
   // 1. UUID handle → try admin client first (bypasses RLS), then anon fallback
   if (UUID_RE.test(handle)) {
-    const { data: hostAdmin } = await supabaseAdmin
+    const { data: hostAdmin, error: adminErr } = await supabaseAdmin
       .from('hosts')
       .select(SELECT)
       .eq('id', handle)
       .single()
+    if (adminErr) console.error('[authors] admin lookup error:', adminErr)
     if (hostAdmin) return mapHost(hostAdmin as Record<string, unknown>, handle)
 
     // Fallback: use anon client (works for active hosts)
-    const { data: hostAnon } = await supabaseAnon
+    const { data: hostAnon, error: anonErr } = await supabaseAnon
       .from('hosts')
       .select(SELECT)
       .eq('id', handle)
       .single()
+    if (anonErr) console.error('[authors] anon lookup error:', anonErr)
     if (hostAnon) return mapHost(hostAnon as Record<string, unknown>, handle)
 
+    console.error('[authors] host not found for UUID:', handle)
     return null
   }
 
