@@ -1,7 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import avatars1 from '@/images/avatars/Image-1.png'
 
-// Server-side anon client (never browser client in data layer)
+// Server-side anon fallback (used if admin client is unavailable)
 const supabaseAnon = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -44,14 +45,33 @@ const SPECIALTY_BG_IMAGES: Record<string, string> = {
 
 const DEFAULT_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500'
 
+const SELECT_HOSTS = 'id, display_name, bio, avatar_url, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience'
+
 export async function getTalents(): Promise<TTalent[]> {
-  const { data: hosts, error } = await supabaseAnon
+  // Try admin client first (bypasses RLS — active hosts are public by design)
+  let hosts: Record<string, unknown>[] | null = null
+
+  const { data: adminData, error: adminErr } = await supabaseAdmin
     .from('hosts')
-    .select('id, display_name, bio, avatar_url, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience, status')
+    .select(SELECT_HOSTS)
     .eq('status', 'active')
     .order('average_rating', { ascending: false })
 
-  if (error) console.error('[getTalents] error:', JSON.stringify(error))
+  if (adminErr) {
+    console.error('[getTalents] admin error:', JSON.stringify(adminErr))
+    // Fallback to anon client
+    const { data: anonData, error: anonErr } = await supabaseAnon
+      .from('hosts')
+      .select(SELECT_HOSTS)
+      .eq('status', 'active')
+      .order('average_rating', { ascending: false })
+    if (anonErr) console.error('[getTalents] anon error:', JSON.stringify(anonErr))
+    hosts = anonData
+  } else {
+    hosts = adminData
+  }
+
+  if (!hosts) console.error('[getTalents] no hosts returned')
 
   if (!hosts || hosts.length === 0) {
     return []
