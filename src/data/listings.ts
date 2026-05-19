@@ -159,7 +159,10 @@ export async function getExperienceListings() {
     durationTime: exp.duration_time,
     languages: (exp.languages as string[] | null) ?? [],
     featuredImage: exp.featured_image_url ?? '',
-    galleryImgs: (exp.gallery_urls as string[] | null) ?? [],
+    galleryImgs: [
+      ...(exp.featured_image_url ? [exp.featured_image_url] : []),
+      ...((exp.gallery_urls as string[] | null) ?? []),
+    ],
     like: false,
     address: exp.address,
     reviewStart: exp.average_rating ?? 0,
