@@ -1,7 +1,8 @@
 import { Calendar01Icon, Comment01Icon } from '@/components/Icons'
 import StartRating from '@/components/StartRating'
-import { getAuthorByHandle } from '@/data/authors'
 import { getServerT } from '@/lib/locale-server'
+import { supabaseAdmin } from '@/lib/supabase-admin'
+import { createClient } from '@supabase/supabase-js'
 import Avatar from '@/shared/Avatar'
 import { Divider } from '@/shared/divider'
 import { Link } from '@/shared/link'
@@ -14,26 +15,82 @@ import { Metadata } from 'next'
 import HostAdminActions from '@/components/HostAdminActions'
 import ReportHostDialog from '@/components/ReportHostDialog'
 import ListingTabs from './ListingTabs'
+import avatars1 from '@/images/avatars/Image-1.png'
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const SELECT = 'id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country'
+
+async function getHost(handle: string) {
+  // Try admin client first (bypasses all RLS)
+  try {
+    if (UUID_RE.test(handle)) {
+      const { data, error } = await supabaseAdmin
+        .from('hosts')
+        .select(SELECT)
+        .eq('id', handle)
+        .single()
+      if (error) console.error('[talento] admin UUID error:', JSON.stringify(error))
+      if (data) return data
+    } else {
+      const { data, error } = await supabaseAdmin
+        .from('hosts')
+        .select(SELECT)
+        .ilike('display_name', handle.replace(/-/g, ' '))
+        .single()
+      if (error) console.error('[talento] admin name error:', JSON.stringify(error))
+      if (data) return data
+    }
+  } catch (e) {
+    console.error('[talento] admin client exception:', e)
+  }
+
+  // Fallback: anon client (works for active hosts)
+  try {
+    const anon = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+    if (UUID_RE.test(handle)) {
+      const { data, error } = await anon
+        .from('hosts')
+        .select(SELECT)
+        .eq('id', handle)
+        .single()
+      if (error) console.error('[talento] anon UUID error:', JSON.stringify(error))
+      if (data) return data
+    } else {
+      const { data } = await anon.from('hosts').select(SELECT).eq('status', 'active')
+      const match = (data ?? []).find(
+        (h: any) => h.display_name?.toLowerCase().replace(/\s+/g, '-') === handle
+      )
+      if (match) return match
+    }
+  } catch (e) {
+    console.error('[talento] anon client exception:', e)
+  }
+
+  console.error('[talento] host not found for handle:', handle)
+  return null
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
   const { handle } = await params
-  const author = await getAuthorByHandle(handle)
-
-  if (!author?.id) return { title: 'Host not found', description: '' }
-
+  const host = await getHost(handle)
+  if (!host) return { title: 'Host not found', description: '' }
   return {
-    title: `${author.displayName} — DoCoolture`,
-    description: author.description,
+    title: `${host.display_name} — DoCoolture`,
+    description: host.bio ?? '',
   }
 }
 
 const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const { handle } = await params
-  const [author, t] = await Promise.all([getAuthorByHandle(handle), getServerT()])
+  const [host, t] = await Promise.all([getHost(handle), getServerT()])
   const sh = t.sectionHost
   const tp = t.talentPage
 
-  if (!author?.id) {
+  if (!host) {
     return (
       <main className="container max-w-2xl mx-auto py-24 px-4 text-center">
         <p className="text-5xl mb-4">🔍</p>
@@ -53,16 +110,20 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
     )
   }
 
-  const { id: hostId, displayName, avatarUrl, count, starRating, reviewsCount, description: authorDescription, location } = author
-
-  const description = authorDescription || t.experienceListing.hostBio
+  const hostId = host.id as string
+  const displayName = host.display_name as string
+  const avatarUrl = (host.avatar_url as string | null) ?? avatars1.src
+  const count = (host.total_listings as number) ?? 0
+  const starRating = (host.average_rating as number) ?? 0
+  const reviewsCount = (host.total_reviews as number) ?? 0
+  const description = (host.bio as string | null) || t.experienceListing.hostBio
+  const location = [host.city, host.country].filter(Boolean).join(', ')
   const address = location || sh.hostAddress
   const languages = sh.hostLanguages
   const joinedDate = t.experienceListing.hostJoinedDate
 
   return (
     <div>
-      {/* Back to talent list */}
       <div className="container mt-8">
         <Link
           href="/talento"
