@@ -262,9 +262,7 @@ export const getExperienceListingByHandle = async (handle: string) => {
     host: {
       displayName: hostData?.display_name ?? 'Anfitrión DoCoolture',
       avatarUrl,
-      handle: hostData?.display_name
-        ? hostData.display_name.toLowerCase().replace(/\s+/g, '-')
-        : exp.host_id,
+      handle: exp.host_id,
       description: hostData?.bio ?? '',
       listingsCount: hostData?.total_listings ?? 1,
       reviewsCount: hostData?.total_reviews ?? 0,

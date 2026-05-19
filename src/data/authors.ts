@@ -1,9 +1,27 @@
 import avatars1 from '@/images/avatars/Image-1.png'
 import { supabase } from '@/lib/supabase'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 function toHandle(displayName: string) {
   return displayName.toLowerCase().replace(/\s+/g, '-')
+}
+
+function mapHost(host: Record<string, unknown>, handle: string) {
+  return {
+    id: host.id as string,
+    displayName: host.display_name as string,
+    handle,
+    avatarUrl: (host.avatar_url as string | null) ?? avatars1.src,
+    bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
+    count: (host.total_listings as number) ?? 0,
+    description: (host.bio as string | null) ?? '',
+    jobName: 'Cultural Guide',
+    starRating: (host.average_rating as number) ?? 0,
+    reviews: (host.total_reviews as number) ?? 0,
+    reviewsCount: (host.total_reviews as number) ?? 0,
+    location: [host.city, host.country].filter(Boolean).join(', '),
+  }
 }
 
 export async function getAuthors() {
@@ -28,7 +46,6 @@ export async function getAuthors() {
     }))
   }
 
-  // Fallback mientras no haya hosts en Supabase
   return [
     {
       id: 'fallback',
@@ -47,33 +64,35 @@ export async function getAuthors() {
 }
 
 export async function getAuthorByHandle(handle: string) {
-  // Try from the active-hosts list first
+  const SELECT = 'id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country'
+
+  // 1. UUID handle → look up directly by id (bypasses display_name derivation)
+  if (UUID_RE.test(handle)) {
+    const { data: host } = await supabase
+      .from('hosts')
+      .select(SELECT)
+      .eq('id', handle)
+      .single()
+    if (host) return mapHost(host as Record<string, unknown>, handle)
+    return null
+  }
+
+  // 2. Display-name handle → search active hosts first
   const authors = await getAuthors()
   const fromList = authors.find((a) => a.handle === handle)
   if (fromList) return { ...fromList, reviewsCount: fromList.reviews }
 
-  // Fallback: use admin client to bypass RLS and find hosts with any status
-  const { data: hosts } = await supabaseAdmin
+  // 3. Not active — search all hosts (relies on public RLS policy)
+  const { data: hosts } = await supabase
     .from('hosts')
-    .select('id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country')
+    .select(SELECT)
 
-  const host = (hosts ?? []).find((h) => h.display_name && toHandle(h.display_name as string) === handle)
+  const host = (hosts ?? []).find(
+    (h) => h.display_name && toHandle(h.display_name as string) === handle
+  )
   if (!host) return null
 
-  return {
-    id: host.id as string,
-    displayName: host.display_name as string,
-    handle,
-    avatarUrl: (host.avatar_url as string | null) ?? avatars1.src,
-    bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
-    count: (host.total_listings as number) ?? 0,
-    description: (host.bio as string | null) ?? '',
-    jobName: 'Cultural Guide',
-    starRating: (host.average_rating as number) ?? 0,
-    reviews: (host.total_reviews as number) ?? 0,
-    reviewsCount: (host.total_reviews as number) ?? 0,
-    location: [host.city, host.country].filter(Boolean).join(', '),
-  }
+  return mapHost(host as Record<string, unknown>, handle)
 }
 
 export type TAuthor = Awaited<ReturnType<typeof getAuthors>>[number]
