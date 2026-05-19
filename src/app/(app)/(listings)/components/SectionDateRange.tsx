@@ -5,7 +5,8 @@ import DatePickerCustomHeaderTwoMonth from '@/components/DatePickerCustomHeaderT
 import { excludeDateIntervals } from '@/contains/contants'
 import { useLanguage } from '@/context/LanguageContext'
 import { Divider } from '@/shared/divider'
-import { addDays } from 'date-fns'
+import { addDays, format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { SectionHeading, SectionSubheading } from './SectionHeading'
@@ -54,26 +55,14 @@ const SectionDateRange = ({ availableDays = [], durationTime = '' }: Props) => {
     return allowedDayNums.includes(date.getDay())
   }
 
-  const handleChangeSingle = (date: Date | null) => {
+  // Single click sets start; end is auto-calculated from duration
+  const handleChange = (date: Date | null) => {
     setStartDate(date)
-    setEndDate(date)
+    setEndDate(date ? addDays(date, durationDays - 1) : null)
   }
 
-  const handleChangeRange = (dates: [Date | null, Date | null]) => {
-    const [start] = dates
-    setStartDate(start)
-    setEndDate(start ? addDays(start, durationDays - 1) : null)
-  }
-
-  const commonProps = {
-    monthsShown: 2,
-    showPopperArrow: false,
-    inline: true,
-    excludeDateIntervals,
-    filterDate,
-    renderCustomHeader: (p: any) => <DatePickerCustomHeaderTwoMonth {...p} />,
-    renderDayContents: (day: number, date?: Date) => <DatePickerCustomDay dayOfMonth={day} date={date} />,
-  }
+  const fmt = (d: Date | null) =>
+    d ? format(d, "d 'de' MMMM", { locale: es }) : ''
 
   return (
     <div className="listingSection__wrap">
@@ -87,28 +76,25 @@ const SectionDateRange = ({ availableDays = [], durationTime = '' }: Props) => {
       </div>
       <Divider className="w-14!" />
 
-      {isMultiDay ? (
-        <DatePicker
-          selected={startDate}
-          onChange={handleChangeRange}
-          startDate={startDate}
-          endDate={endDate}
-          selectsRange
-          {...commonProps}
-        />
-      ) : (
-        <DatePicker
-          selected={startDate}
-          onChange={handleChangeSingle}
-          {...commonProps}
-        />
-      )}
+      <DatePicker
+        selected={startDate}
+        onChange={handleChange}
+        startDate={startDate}
+        endDate={isMultiDay ? endDate : undefined}
+        monthsShown={2}
+        showPopperArrow={false}
+        inline
+        excludeDateIntervals={excludeDateIntervals}
+        filterDate={filterDate}
+        renderCustomHeader={(p) => <DatePickerCustomHeaderTwoMonth {...p} />}
+        renderDayContents={(day, date) => <DatePickerCustomDay dayOfMonth={day} date={date} />}
+      />
 
       {startDate && (
         <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
           {isMultiDay
-            ? `Del ${startDate.toLocaleDateString('es-DO', { day: 'numeric', month: 'long' })} al ${endDate?.toLocaleDateString('es-DO', { day: 'numeric', month: 'long' })} (${durationDays} días)`
-            : `Fecha seleccionada: ${startDate.toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' })}`}
+            ? `Del ${fmt(startDate)} al ${fmt(endDate)} · ${durationDays} días`
+            : `Fecha seleccionada: ${format(startDate, "EEEE d 'de' MMMM", { locale: es })}`}
         </p>
       )}
     </div>

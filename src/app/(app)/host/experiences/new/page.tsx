@@ -9,6 +9,8 @@ import {
   AVAILABLE_LANGUAGES,
   DAYS_OF_WEEK,
   DR_CITIES,
+  CITY_ADDRESSES,
+  DURATION_OPTIONS,
 } from '@/types'
 
 const TOTAL_STEPS = 5
@@ -50,11 +52,13 @@ export default function NewExperiencePage() {
 
   // Paso 2
   const [durationTime, setDurationTime] = useState('')
+  const [durationPreset, setDurationPreset] = useState('')
   const [languages, setLanguages] = useState<string[]>([])
   const [maxGuests, setMaxGuests] = useState(10)
   const [minGuests, setMinGuests] = useState(1)
   const [meetingPoint, setMeetingPoint] = useState('')
   const [address, setAddress] = useState('')
+  const [addressPreset, setAddressPreset] = useState('')
   const [city, setCity] = useState('')
 
   // Paso 3
@@ -357,19 +361,41 @@ export default function NewExperiencePage() {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className={lc}>Duración *</label>
-          {hint('Ej: "3 horas", "Medio día", "2–3 horas"')}
-          <input type="text" value={durationTime}
-            onChange={(e) => { setDurationTime(e.target.value); setFieldErrors((p) => ({ ...p, durationTime: '' })) }}
-            placeholder="Ej: 3 horas"
-            className={ic('durationTime')}
-          />
+          {hint('Elige una opción o escribe una duración personalizada.')}
+          <select
+            value={durationPreset}
+            onChange={(e) => {
+              const val = e.target.value
+              setDurationPreset(val)
+              if (val !== 'custom') {
+                setDurationTime(val)
+                setFieldErrors((p) => ({ ...p, durationTime: '' }))
+              } else {
+                setDurationTime('')
+              }
+            }}
+            className={`${ic('durationTime')} mb-2`}
+          >
+            <option value="">Selecciona una duración...</option>
+            {DURATION_OPTIONS.map((d) => (
+              <option key={d} value={d}>{d}</option>
+            ))}
+            <option value="custom">✏️ Escribir duración personalizada...</option>
+          </select>
+          {durationPreset === 'custom' && (
+            <input type="text" value={durationTime}
+              onChange={(e) => { setDurationTime(e.target.value); setFieldErrors((p) => ({ ...p, durationTime: '' })) }}
+              placeholder="Ej: 2–3 horas, Medio día..."
+              className={ic('durationTime')}
+            />
+          )}
           {errMsg('durationTime')}
         </div>
         <div>
           <label className={lc}>Ciudad *</label>
           {hint('Ciudad donde se realiza.')}
           <select value={city}
-            onChange={(e) => { setCity(e.target.value); setFieldErrors((p) => ({ ...p, city: '' })) }}
+            onChange={(e) => { setCity(e.target.value); setAddressPreset(''); setAddress(''); setFieldErrors((p) => ({ ...p, city: '', address: '' })) }}
             className={ic('city')}
           >
             <option value="">Selecciona</option>
@@ -400,12 +426,36 @@ export default function NewExperiencePage() {
 
       <div>
         <label className={lc}>Dirección *</label>
-        {hint('Ej: "Calle Las Damas #1, Zona Colonial, Santo Domingo"')}
-        <input type="text" value={address}
-          onChange={(e) => { setAddress(e.target.value); setFieldErrors((p) => ({ ...p, address: '' })) }}
-          placeholder="Ej: Calle Las Damas #1, Zona Colonial"
-          className={ic('address')}
-        />
+        {hint('Elige un lugar conocido o escribe una dirección personalizada.')}
+        {city && (CITY_ADDRESSES[city]?.length ?? 0) > 0 && (
+          <select
+            value={addressPreset}
+            onChange={(e) => {
+              const val = e.target.value
+              setAddressPreset(val)
+              if (val !== 'custom') {
+                setAddress(val)
+                setFieldErrors((p) => ({ ...p, address: '' }))
+              } else {
+                setAddress('')
+              }
+            }}
+            className={`${ic('address')} mb-2`}
+          >
+            <option value="">Selecciona un lugar de referencia...</option>
+            {CITY_ADDRESSES[city].map((addr) => (
+              <option key={addr} value={addr}>{addr}</option>
+            ))}
+            <option value="custom">✏️ Escribir dirección personalizada...</option>
+          </select>
+        )}
+        {(!city || addressPreset === 'custom' || !(CITY_ADDRESSES[city]?.length)) && (
+          <input type="text" value={address}
+            onChange={(e) => { setAddress(e.target.value); setFieldErrors((p) => ({ ...p, address: '' })) }}
+            placeholder="Ej: Calle Las Damas #1, Zona Colonial"
+            className={ic('address')}
+          />
+        )}
         {errMsg('address')}
       </div>
 

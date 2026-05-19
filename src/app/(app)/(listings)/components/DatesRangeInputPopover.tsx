@@ -7,11 +7,11 @@ import { useLanguage } from '@/context/LanguageContext'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { CalendarIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
-import { addDays } from 'date-fns'
+import { addDays, format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { FC, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
-// Maps Spanish day names → JS getDay() number (0 = Sunday)
 const DAY_NUMBERS: Record<string, number> = {
   Domingo: 0, domingo: 0,
   Lunes: 1, lunes: 1,
@@ -29,7 +29,7 @@ function parseDurationDays(durationTime: string): number {
   if (singleDay) return parseInt(singleDay[1])
   const week = durationTime.match(/(\d+)\s*semana/i)
   if (week) return parseInt(week[1]) * 7
-  return 1 // horas, medio día → single day
+  return 1
 }
 
 interface Props {
@@ -53,7 +53,6 @@ const DatesRangeInputPopover: FC<Props> = ({
   const durationDays = parseDurationDays(durationTime)
   const isMultiDay = durationDays > 1
 
-  // Allowed day-of-week numbers. Empty = all allowed.
   const allowedDayNums = availableDays.length > 0
     ? availableDays.map((d) => DAY_NUMBERS[d]).filter((n) => n !== undefined)
     : null
@@ -61,16 +60,10 @@ const DatesRangeInputPopover: FC<Props> = ({
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
 
-  const handleChangeSingle = (date: Date | null) => {
+  // Single click selects start date; end is auto-calculated from duration
+  const handleChange = (date: Date | null) => {
     setStartDate(date)
-    setEndDate(date)
-  }
-
-  const handleChangeRange = (dates: [Date | null, Date | null]) => {
-    const [start] = dates
-    setStartDate(start)
-    // Auto-calculate end based on duration
-    setEndDate(start ? addDays(start, durationDays - 1) : null)
+    setEndDate(date ? addDays(date, durationDays - 1) : null)
   }
 
   const filterDate = (date: Date) => {
@@ -78,7 +71,7 @@ const DatesRangeInputPopover: FC<Props> = ({
     return allowedDayNums.includes(date.getDay())
   }
 
-  const formatDate = (d: Date | null) =>
+  const fmt = (d: Date | null) =>
     d?.toLocaleDateString('es-DO', { month: 'short', day: '2-digit' }) ?? ''
 
   const renderInput = () => (
@@ -89,11 +82,11 @@ const DatesRangeInputPopover: FC<Props> = ({
       <div className="grow text-start">
         <span className="block font-semibold xl:text-lg">
           {startDate
-            ? isMultiDay && endDate && endDate.getTime() !== startDate.getTime()
-              ? `${formatDate(startDate)} – ${formatDate(endDate)}`
-              : formatDate(startDate)
+            ? isMultiDay && endDate
+              ? `${fmt(startDate)} – ${fmt(endDate)}`
+              : fmt(startDate)
             : isMultiDay
-            ? t.HeroSearchForm['CheckIn'] + ' – ' + t.HeroSearchForm['CheckOut']
+            ? `${t.HeroSearchForm['CheckIn']} – ${t.HeroSearchForm['CheckOut']}`
             : t.HeroSearchForm['CheckIn']}
         </span>
         <span className="mt-1 block text-sm leading-none font-light text-neutral-400">
@@ -102,16 +95,6 @@ const DatesRangeInputPopover: FC<Props> = ({
       </div>
     </>
   )
-
-  const commonPickerProps = {
-    monthsShown: 2,
-    showPopperArrow: false,
-    inline: true,
-    excludeDateIntervals,
-    filterDate,
-    renderCustomHeader: (p: any) => <DatePickerCustomHeaderTwoMonth {...p} />,
-    renderDayContents: (day: number, date?: Date) => <DatePickerCustomDay dayOfMonth={day} date={date} />,
-  }
 
   return (
     <>
@@ -137,27 +120,22 @@ const DatesRangeInputPopover: FC<Props> = ({
               className="absolute start-auto -end-2 top-full z-10 mt-3 w-[calc(100%+1rem)] transition duration-150 lg:w-3xl xl:-end-10 data-closed:translate-y-1 data-closed:opacity-0"
             >
               <div className="overflow-hidden rounded-3xl bg-white py-5 shadow-lg ring-1 ring-black/5 sm:p-8 dark:bg-neutral-800">
-                {isMultiDay ? (
-                  // Range mode: only start date is clickable, end is auto-calculated
-                  <DatePicker
-                    selected={startDate}
-                    onChange={handleChangeRange}
-                    startDate={startDate}
-                    endDate={endDate}
-                    selectsRange
-                    {...commonPickerProps}
-                  />
-                ) : (
-                  // Single day mode
-                  <DatePicker
-                    selected={startDate}
-                    onChange={handleChangeSingle}
-                    {...commonPickerProps}
-                  />
-                )}
-                {isMultiDay && startDate && (
+                <DatePicker
+                  selected={startDate}
+                  onChange={handleChange}
+                  startDate={startDate}
+                  endDate={isMultiDay ? endDate : undefined}
+                  monthsShown={2}
+                  showPopperArrow={false}
+                  inline
+                  excludeDateIntervals={excludeDateIntervals}
+                  filterDate={filterDate}
+                  renderCustomHeader={(p) => <DatePickerCustomHeaderTwoMonth {...p} />}
+                  renderDayContents={(day, date) => <DatePickerCustomDay dayOfMonth={day} date={date} />}
+                />
+                {startDate && isMultiDay && (
                   <p className="mt-3 text-center text-xs text-neutral-400">
-                    Duración: {durationDays} {durationDays === 1 ? 'día' : 'días'} · Fin: {formatDate(endDate)}
+                    {`${format(startDate, "d MMM", { locale: es })} – ${format(endDate!, "d MMM", { locale: es })} · ${durationDays} días`}
                   </p>
                 )}
               </div>

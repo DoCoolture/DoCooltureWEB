@@ -46,13 +46,32 @@ export async function getAuthors() {
 }
 
 export async function getAuthorByHandle(handle: string) {
+  // Try from the active-hosts list first
   const authors = await getAuthors()
-  const author = authors.find((a) => a.handle === handle)
-  if (!author) return null
+  const fromList = authors.find((a) => a.handle === handle)
+  if (fromList) return { ...fromList, reviewsCount: fromList.reviews }
+
+  // Fallback: search any host regardless of status (e.g. pending verification)
+  const { data: hosts } = await supabase
+    .from('hosts')
+    .select('id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country')
+
+  const host = (hosts ?? []).find((h) => toHandle(h.display_name as string) === handle)
+  if (!host) return null
 
   return {
-    ...author,
-    reviewsCount: author.reviews,
+    id: host.id as string,
+    displayName: host.display_name as string,
+    handle,
+    avatarUrl: (host.avatar_url as string | null) ?? avatars1.src,
+    bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
+    count: (host.total_listings as number) ?? 0,
+    description: (host.bio as string | null) ?? '',
+    jobName: 'Cultural Guide',
+    starRating: (host.average_rating as number) ?? 0,
+    reviews: (host.total_reviews as number) ?? 0,
+    reviewsCount: (host.total_reviews as number) ?? 0,
+    location: [host.city, host.country].filter(Boolean).join(', '),
   }
 }
 

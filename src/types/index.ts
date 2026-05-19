@@ -186,6 +186,108 @@ export const DR_CITIES = [
 export type DRCity = typeof DR_CITIES[number]
 
 // ----------------------------------------------------------------
+// DIRECCIONES PREDETERMINADAS POR CIUDAD
+// ----------------------------------------------------------------
+export const DURATION_OPTIONS = [
+  '1 hora',
+  '1.5 horas',
+  '2 horas',
+  '3 horas',
+  '4 horas',
+  'Medio día (4–5 horas)',
+  'Día completo (8 horas)',
+  '2 días',
+  '3 días',
+  '4 días',
+  '1 semana',
+] as const
+
+export const CITY_ADDRESSES: Record<string, string[]> = {
+  'Santo Domingo': [
+    'Zona Colonial, Santo Domingo',
+    'Parque Colón, Zona Colonial',
+    'Malecón de Santo Domingo',
+    'Mercado Modelo, Santo Domingo',
+    'Plaza de la Cultura, Santo Domingo',
+    'Jardín Botánico Nacional, Santo Domingo',
+    'Acuario Nacional, Santo Domingo',
+    'Parque Mirador Sur, Santo Domingo',
+  ],
+  'Santiago': [
+    'Monumento a los Héroes, Santiago',
+    'Calle del Sol, Santiago',
+    'Mercado Modelo de Santiago',
+    'Centro León, Santiago',
+    'Parque Duarte, Santiago',
+  ],
+  'Punta Cana': [
+    'Bávaro, Punta Cana',
+    'Cap Cana, Punta Cana',
+    'Playa Bávaro, Punta Cana',
+    'Palma Real Shopping Village, Punta Cana',
+    'Aeropuerto Internacional de Punta Cana',
+  ],
+  'Puerto Plata': [
+    'Malecón de Puerto Plata',
+    'Fortaleza San Felipe, Puerto Plata',
+    'Telefèrico de Puerto Plata',
+    'Ocean World Adventure Park, Puerto Plata',
+    'Playa Dorada, Puerto Plata',
+  ],
+  'La Romana': [
+    'Casa de Campo, La Romana',
+    'Altos de Chavón, La Romana',
+    'Parque Central de La Romana',
+  ],
+  'Samaná': [
+    'Malecón de Samaná',
+    'Los Haitises, Samaná',
+    'Salto El Limón, Samaná',
+    'Playa Rincón, Samaná',
+  ],
+  'Jarabacoa': [
+    'Parque Central de Jarabacoa',
+    'Salto Baiguate, Jarabacoa',
+    'Salto Jimenoa, Jarabacoa',
+    'La Confluencia, Jarabacoa',
+  ],
+  'Constanza': [
+    'Parque Central de Constanza',
+    'Valle Nuevo, Constanza',
+    'Lago Aguas Blancas, Constanza',
+  ],
+  'Barahona': [
+    'Malecón de Barahona',
+    'Parque Nacional Jaragua, Barahona',
+    'Playa San Rafael, Barahona',
+  ],
+  'San Pedro de Macorís': [
+    'Parque Central de San Pedro de Macorís',
+    'Malecón de San Pedro de Macorís',
+  ],
+  'San Francisco de Macorís': [
+    'Parque Duarte, San Francisco de Macorís',
+    'Centro de San Francisco de Macorís',
+  ],
+  'Higüey': [
+    'Basílica de la Altagracia, Higüey',
+    'Parque Central de Higüey',
+  ],
+  'Bonao': [
+    'Parque Central de Bonao',
+    'Centro de Bonao',
+  ],
+  'Moca': [
+    'Parque Central de Moca',
+    'Iglesia de Moca',
+  ],
+  'Azua': [
+    'Parque Central de Azua',
+    'Malecón de Azua',
+  ],
+}
+
+// ----------------------------------------------------------------
 // ESTADOS DE RESERVA
 // ----------------------------------------------------------------
 export const BOOKING_STATUS_LABELS: Record<string, string> = {
