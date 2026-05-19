@@ -1,13 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import avatars1 from '@/images/avatars/Image-1.png'
-
-// Server-side anon fallback (used if admin client is unavailable)
-const supabaseAnon = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-)
 
 function toHandle(displayName: string) {
   return displayName.toLowerCase().replace(/\s+/g, '-')
@@ -47,41 +40,11 @@ const DEFAULT_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-164077
 
 const SELECT_HOSTS = 'id, display_name, bio, avatar_url, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience'
 
-export async function getTalents(): Promise<TTalent[]> {
-  // Try admin client first (bypasses RLS — active hosts are public by design)
-  let hosts: Record<string, unknown>[] | null = null
-
-  const { data: adminData, error: adminErr } = await supabaseAdmin
-    .from('hosts')
-    .select(SELECT_HOSTS)
-    .eq('status', 'active')
-    .order('average_rating', { ascending: false })
-
-  if (adminErr) {
-    console.error('[getTalents] admin error:', JSON.stringify(adminErr))
-    // Fallback to anon client
-    const { data: anonData, error: anonErr } = await supabaseAnon
-      .from('hosts')
-      .select(SELECT_HOSTS)
-      .eq('status', 'active')
-      .order('average_rating', { ascending: false })
-    if (anonErr) console.error('[getTalents] anon error:', JSON.stringify(anonErr))
-    hosts = anonData
-  } else {
-    hosts = adminData
-  }
-
-  if (!hosts) console.error('[getTalents] no hosts returned')
-
-  if (!hosts || hosts.length === 0) {
-    return []
-  }
-
+function mapHosts(hosts: Record<string, unknown>[]): TTalent[] {
   return hosts.map((host) => {
     const specialties = (host.specialties as string[] | null) ?? []
     const primarySpecialty = specialties[0] ?? ''
     const bgImage = SPECIALTY_BG_IMAGES[primarySpecialty] ?? DEFAULT_BG
-
     return {
       id: host.id as string,
       displayName: host.display_name as string,
@@ -99,4 +62,42 @@ export async function getTalents(): Promise<TTalent[]> {
       yearsExperience: (host.years_experience as number) ?? 0,
     }
   })
+}
+
+export async function getTalents(): Promise<TTalent[]> {
+  // 1. Admin client — bypasses all RLS
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('hosts')
+      .select(SELECT_HOSTS)
+      .eq('status', 'active')
+      .order('average_rating', { ascending: false })
+    if (error) {
+      console.error('[getTalents] admin error:', JSON.stringify(error))
+    } else if (data && data.length > 0) {
+      return mapHosts(data as Record<string, unknown>[])
+    }
+  } catch (e) {
+    console.error('[getTalents] admin exception:', e)
+  }
+
+  // 2. Server client with session cookies (works for authenticated users)
+  try {
+    const supabase = await createSupabaseServerClient()
+    const { data, error } = await supabase
+      .from('hosts')
+      .select(SELECT_HOSTS)
+      .eq('status', 'active')
+      .order('average_rating', { ascending: false })
+    if (error) {
+      console.error('[getTalents] server client error:', JSON.stringify(error))
+    } else if (data && data.length > 0) {
+      return mapHosts(data as Record<string, unknown>[])
+    }
+  } catch (e) {
+    console.error('[getTalents] server client exception:', e)
+  }
+
+  console.error('[getTalents] all clients returned no hosts')
+  return []
 }
