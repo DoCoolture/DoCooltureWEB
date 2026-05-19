@@ -1,6 +1,14 @@
 import avatars1 from '@/images/avatars/Image-1.png'
-import { supabase } from '@/lib/supabase'
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { createClient } from '@supabase/supabase-js'
+
+// Server-side anon client (createClient, not createBrowserClient)
+// so queries work correctly without browser cookies.
+const supabaseAnon = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  { auth: { autoRefreshToken: false, persistSession: false } }
+)
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -26,7 +34,7 @@ function mapHost(host: Record<string, unknown>, handle: string) {
 }
 
 export async function getAuthors() {
-  const { data: hosts } = await supabase
+  const { data: hosts } = await supabaseAnon
     .from('hosts')
     .select('id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country')
     .eq('status', 'active')
@@ -67,14 +75,23 @@ export async function getAuthors() {
 export async function getAuthorByHandle(handle: string) {
   const SELECT = 'id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country'
 
-  // 1. UUID handle → look up directly by id using admin client (bypasses RLS)
+  // 1. UUID handle → try admin client first (bypasses RLS), then anon fallback
   if (UUID_RE.test(handle)) {
-    const { data: host } = await supabaseAdmin
+    const { data: hostAdmin } = await supabaseAdmin
       .from('hosts')
       .select(SELECT)
       .eq('id', handle)
       .single()
-    if (host) return mapHost(host as Record<string, unknown>, handle)
+    if (hostAdmin) return mapHost(hostAdmin as Record<string, unknown>, handle)
+
+    // Fallback: use anon client (works for active hosts)
+    const { data: hostAnon } = await supabaseAnon
+      .from('hosts')
+      .select(SELECT)
+      .eq('id', handle)
+      .single()
+    if (hostAnon) return mapHost(hostAnon as Record<string, unknown>, handle)
+
     return null
   }
 
