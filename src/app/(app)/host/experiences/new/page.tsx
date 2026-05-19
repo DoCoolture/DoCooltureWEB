@@ -3,7 +3,7 @@
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { supabase, uploadExperienceImage } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import {
   EXPERIENCE_CATEGORIES,
   AVAILABLE_LANGUAGES,
@@ -14,6 +14,20 @@ import {
 } from '@/types'
 
 const TOTAL_STEPS = 5
+
+const TAG_SUGGESTIONS: Record<string, string[]> = {
+  'Gastronomía':        ['cocina criolla', 'mercado local', 'degustación', 'cacao', 'ron', 'café', 'mariscos', 'chef', 'recetas tradicionales', 'street food'],
+  'Tour Cultural':      ['zona colonial', 'historia', 'patrimonio', 'arte', 'tradiciones', 'folklore', 'comunidad', 'guía local', 'arquitectura', 'museos'],
+  'Arte y Artesanía':   ['artesanía', 'pintura', 'cerámica', 'tejidos', 'taller', 'manualidades', 'souvenirs', 'merengue', 'larimar', 'ámbar'],
+  'Música y Baile':     ['merengue', 'bachata', 'salsa', 'música en vivo', 'clases de baile', 'tambores', 'palos', 'carnaval', 'ritmo', 'cultura afro'],
+  'Aventura y Naturaleza': ['senderismo', 'cascadas', 'montaña', 'río', 'naturaleza', 'ecoturismo', 'fauna', 'flora', 'camping', 'rapel'],
+  'Tours Históricos':   ['colonia', 'fortaleza', 'Ozama', 'primera catedral', 'Cristóbal Colón', 'taíno', 'historia dominicana', 'siglo XVI', 'patrimonial', 'UNESCO'],
+  'Bienestar':          ['yoga', 'meditación', 'spa', 'playa', 'relajación', 'retiro', 'respiración', 'bienestar', 'mindfulness', 'naturaleza'],
+  'Fotografía':         ['fotografía', 'atardecer', 'paisajes', 'arquitectura', 'retrato', 'street photography', 'lightroom', 'composición', 'edición', 'Instagram'],
+  'Clases y Talleres':  ['taller', 'clase', 'aprender', 'español', 'cocina', 'arte', 'música', 'baile', 'manualidades', 'certificado'],
+  'Vida Nocturna':      ['noche', 'cocteles', 'bares', 'música en vivo', 'gastronomía nocturna', 'clubes', 'bachata', 'ambiente', 'rooftop', 'zona rosa'],
+  default:              ['familiar', 'para parejas', 'grupos', 'sol y playa', 'aventura', 'cultural', 'gastronómico', 'histórico', 'fotográfico', 'único'],
+}
 
 const onlyPositiveNum = (v: string) => v.replace(/[^0-9.]/g, '')
 
@@ -328,7 +342,7 @@ export default function NewExperiencePage() {
 
       <div>
         <label className={lc}>Etiquetas <span className="text-xs text-neutral-400">(opcional)</span></label>
-        {hint('Palabras clave que ayudan a los explorers a encontrar tu experiencia. Ej: "cacao", "historia", "familia".')}
+        {hint('Palabras clave que ayudan a los explorers a encontrar tu experiencia. Haz clic en una sugerencia o escribe la tuya.')}
         <div className="flex gap-x-2">
           <input type="text" value={tagInput}
             onChange={(e) => setTagInput(e.target.value)}
@@ -338,12 +352,36 @@ export default function NewExperiencePage() {
           />
           <button type="button" onClick={addTag} className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700">+ Agregar</button>
         </div>
+
+        {/* Sugerencias según categoría */}
+        {(() => {
+          const suggestions = (TAG_SUGGESTIONS[category] ?? TAG_SUGGESTIONS.default).filter((s) => !tags.includes(s))
+          if (!suggestions.length) return null
+          return (
+            <div className="mt-2">
+              <p className="text-xs text-neutral-400 mb-1.5">Sugerencias — haz clic para agregar:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {suggestions.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setTags((prev) => [...prev, s])}
+                    className="rounded-full border border-neutral-200 dark:border-neutral-600 px-3 py-1 text-xs text-neutral-600 dark:text-neutral-400 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                  >
+                    + {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
+
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {tags.map((tag) => (
-              <span key={tag} className="inline-flex items-center gap-x-1 rounded-full bg-neutral-100 dark:bg-neutral-700 px-3 py-1 text-sm">
+              <span key={tag} className="inline-flex items-center gap-x-1 rounded-full bg-primary-50 dark:bg-primary-950 border border-primary-200 dark:border-primary-800 px-3 py-1 text-sm text-primary-700 dark:text-primary-300">
                 {tag}
-                <button onClick={() => setTags(tags.filter((t) => t !== tag))} className="text-neutral-400 hover:text-red-500">×</button>
+                <button onClick={() => setTags(tags.filter((t) => t !== tag))} className="text-primary-400 hover:text-red-500">×</button>
               </span>
             ))}
           </div>
