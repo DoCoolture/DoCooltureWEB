@@ -10,8 +10,8 @@ import 'rc-slider/assets/index.css'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s - DoCoolture',
-    default: 'DoCoolture - Experiencias únicas',
+    template: '%s | DoCoolture',
+    default: 'DoCoolture',
   },
   description: 'Descubre y reserva experiencias inolvidables con DoCoolture.',
   keywords: ['DoCoolture', 'Experiencias', 'Tours', 'Aventura', 'República Dominicana'],

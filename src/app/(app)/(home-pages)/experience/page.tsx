@@ -22,7 +22,7 @@ import { Metadata } from 'next'
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getServerT()
   return {
-    title: t.homePage.sectionHero.title.slice(0, 60),
+    title: 'DoCoolture',
     description: t.homePage.sectionHero.description,
   }
 }
