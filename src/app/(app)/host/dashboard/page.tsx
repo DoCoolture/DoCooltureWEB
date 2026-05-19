@@ -423,6 +423,8 @@ export default function HostDashboardPage() {
             address: editingExp.address,
             city: editingExp.city,
             is_published: editingExp.is_published,
+            featured_image_url: editingExp.featured_image_url,
+            gallery_urls: editingExp.gallery_urls,
           }}
           onClose={() => setEditingExp(null)}
           onSaved={() => { loadDashboard(); setEditingExp(null) }}

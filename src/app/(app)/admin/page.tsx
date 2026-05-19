@@ -270,6 +270,19 @@ export default function AdminPage() {
     loadData()
   }
 
+  const handleVerifyHost = async (host: Host) => {
+    await supabase
+      .from('hosts')
+      .update({
+        is_verified: true,
+        verification_status: 'approved',
+        verified_at: new Date().toISOString(),
+      })
+      .eq('id', host.id)
+    loadData()
+    loadStats()
+  }
+
   if (!isAdmin && !isLoading) return null
 
   const tabs: { key: Tab; label: string; count?: number }[] = [
@@ -536,7 +549,7 @@ export default function AdminPage() {
                       Verificación: {host.verification_status}
                     </p>
                   </div>
-                  <div className="flex items-center gap-x-2 shrink-0">
+                  <div className="flex items-center gap-x-2 shrink-0 flex-wrap justify-end">
                     <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                       host.status === 'active'
                         ? 'bg-green-100 text-green-700'
@@ -544,6 +557,14 @@ export default function AdminPage() {
                     }`}>
                       {host.status === 'active' ? 'Activo' : 'Suspendido'}
                     </span>
+                    {!host.is_verified && (
+                      <button
+                        onClick={() => handleVerifyHost(host)}
+                        className="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400"
+                      >
+                        ✅ Verificar
+                      </button>
+                    )}
                     <button
                       onClick={() => handleSuspendHost(host)}
                       className={`rounded-lg px-3 py-1.5 text-xs font-medium border transition-colors ${
@@ -765,6 +786,8 @@ export default function AdminPage() {
             address: editingExp.address,
             city: editingExp.city,
             is_published: editingExp.is_published,
+            featured_image_url: editingExp.featured_image_url,
+            gallery_urls: editingExp.gallery_urls,
           }}
           onClose={() => setEditingExp(null)}
           onSaved={() => { loadData(); loadStats() }}
