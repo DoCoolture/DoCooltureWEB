@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase'
+import { createSupabaseServerClient } from '@/lib/supabase-server'
 import avatars1 from '@/images/avatars/Image-1.png'
 
 function toHandle(displayName: string) {
@@ -38,6 +38,8 @@ const SPECIALTY_BG_IMAGES: Record<string, string> = {
 const DEFAULT_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500'
 
 export async function getTalents(): Promise<TTalent[]> {
+  const supabase = await createSupabaseServerClient()
+
   const { data: hosts, error } = await supabase
     .from('hosts')
     .select('id, display_name, bio, avatar_url, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience')
@@ -45,7 +47,10 @@ export async function getTalents(): Promise<TTalent[]> {
     .order('average_rating', { ascending: false })
 
   if (error) console.error('[getTalents] error:', JSON.stringify(error))
-  if (!hosts || hosts.length === 0) return []
+  if (!hosts || hosts.length === 0) {
+    console.error('[getTalents] no active hosts found')
+    return []
+  }
 
   return hosts.map((host) => {
     const specialties = (host.specialties as string[] | null) ?? []

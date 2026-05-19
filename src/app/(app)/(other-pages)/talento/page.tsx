@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import BackgroundSection from '@/components/BackgroundSection'
 import BgGlassmorphism from '@/components/BgGlassmorphism'
 import CardTalent from '@/components/CardTalent'
