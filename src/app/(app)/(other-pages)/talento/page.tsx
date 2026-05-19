@@ -4,12 +4,47 @@ import BackgroundSection from '@/components/BackgroundSection'
 import BgGlassmorphism from '@/components/BgGlassmorphism'
 import CardTalent from '@/components/CardTalent'
 import TalentFilterChips from '@/components/TalentFilterChips'
-import { getTalents } from '@/data/hosts'
+import { getTalents, TTalent } from '@/data/hosts'
 import { getServerT } from '@/lib/locale-server'
 import BecomeHostCta from '@/components/BecomeHostCta'
 import Heading from '@/shared/Heading'
 import { HOST_SPECIALTIES } from '@/types'
 import { Metadata } from 'next'
+import { supabaseAdmin } from '@/lib/supabase-admin'
+import avatars1 from '@/images/avatars/Image-1.png'
+
+const SPECIALTY_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500'
+
+async function getHostsDirect(): Promise<TTalent[]> {
+  const { data, error } = await supabaseAdmin
+    .from('hosts')
+    .select('id, display_name, bio, avatar_url, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience')
+    .eq('status', 'active')
+    .order('average_rating', { ascending: false })
+
+  if (error) {
+    console.error('[talento] admin direct error:', JSON.stringify(error))
+    return []
+  }
+
+  console.log('[talento] admin direct found:', data?.length ?? 0, 'hosts')
+  return (data ?? []).map((h: any) => ({
+    id: h.id,
+    displayName: h.display_name,
+    handle: (h.display_name as string).toLowerCase().replace(/\s+/g, '-'),
+    avatarUrl: h.avatar_url ?? avatars1.src,
+    bgImage: SPECIALTY_BG,
+    specialties: h.specialties ?? [],
+    city: h.city ?? null,
+    averageRating: h.average_rating ?? 0,
+    totalReviews: h.total_reviews ?? 0,
+    totalListings: h.total_listings ?? 0,
+    bio: h.bio ?? null,
+    isSuperhost: h.is_superhost ?? false,
+    isVerified: h.is_verified ?? false,
+    yearsExperience: h.years_experience ?? 0,
+  }))
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getServerT()
@@ -26,7 +61,7 @@ const TalentoPage = async ({
   searchParams: Promise<{ [key: string]: string | undefined }>
 }) => {
   const sp = await searchParams
-  const [t, talents] = await Promise.all([getServerT(), getTalents()])
+  const [t, talents] = await Promise.all([getServerT(), getHostsDirect()])
   const tp = t.talentPage
 
   const activeSpecialty = sp.specialty ?? null
