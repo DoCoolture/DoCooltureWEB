@@ -1,5 +1,6 @@
 import avatars1 from '@/images/avatars/Image-1.png'
 import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -66,9 +67,9 @@ export async function getAuthors() {
 export async function getAuthorByHandle(handle: string) {
   const SELECT = 'id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country'
 
-  // 1. UUID handle → look up directly by id (bypasses display_name derivation)
+  // 1. UUID handle → look up directly by id using admin client (bypasses RLS)
   if (UUID_RE.test(handle)) {
-    const { data: host } = await supabase
+    const { data: host } = await supabaseAdmin
       .from('hosts')
       .select(SELECT)
       .eq('id', handle)
@@ -82,8 +83,8 @@ export async function getAuthorByHandle(handle: string) {
   const fromList = authors.find((a) => a.handle === handle)
   if (fromList) return { ...fromList, reviewsCount: fromList.reviews }
 
-  // 3. Not active — search all hosts (relies on public RLS policy)
-  const { data: hosts } = await supabase
+  // 3. Not active — search all hosts using admin client (bypasses RLS)
+  const { data: hosts } = await supabaseAdmin
     .from('hosts')
     .select(SELECT)
 
