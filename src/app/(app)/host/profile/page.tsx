@@ -48,6 +48,13 @@ export default function HostProfilePage() {
     if (!hostData) { router.push('/become-host'); return }
 
     setHost(hostData)
+
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('avatar_url')
+      .eq('user_id', user.id)
+      .single()
+
     setForm({
       display_name: hostData.display_name ?? '',
       bio: hostData.bio ?? '',
@@ -57,7 +64,7 @@ export default function HostProfilePage() {
       instagram_url: hostData.instagram_url ?? '',
       facebook_url: hostData.facebook_url ?? '',
       website_url: hostData.website_url ?? '',
-      avatar_url: hostData.avatar_url ?? '',
+      avatar_url: profileData?.avatar_url ?? '',
     })
     setIsLoading(false)
   }
@@ -86,9 +93,8 @@ export default function HostProfilePage() {
     setSaving(true)
     setError('')
 
-    const { error: err } = await supabase
-      .from('hosts')
-      .update({
+    const [{ error: hostErr }, { error: profileErr }] = await Promise.all([
+      supabase.from('hosts').update({
         display_name: form.display_name.trim(),
         bio: form.bio.trim() || null,
         city: form.city.trim() || null,
@@ -97,11 +103,14 @@ export default function HostProfilePage() {
         instagram_url: form.instagram_url.trim() || null,
         facebook_url: form.facebook_url.trim() || null,
         website_url: form.website_url.trim() || null,
+      }).eq('id', host.id),
+      supabase.from('profiles').update({
         avatar_url: form.avatar_url || null,
-      })
-      .eq('id', host.id)
+      }).eq('user_id', host.user_id),
+    ])
 
     setSaving(false)
+    const err = hostErr ?? profileErr
     if (err) {
       setError('Error al guardar: ' + err.message)
     } else {
