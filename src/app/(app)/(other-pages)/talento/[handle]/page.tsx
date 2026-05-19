@@ -11,14 +11,13 @@ import { Award04Icon, Medal01Icon } from '@hugeicons/core-free-icons'
 import { ChevronLeftIcon } from '@heroicons/react/24/outline'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import HostAdminActions from '@/components/HostAdminActions'
 import ReportHostDialog from '@/components/ReportHostDialog'
 import ListingTabs from './ListingTabs'
 
 export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
   const { handle } = await params
-  const [author, t] = await Promise.all([getAuthorByHandle(handle), getServerT()])
+  const author = await getAuthorByHandle(handle)
 
   if (!author?.id) return { title: 'Host not found', description: '' }
 
@@ -34,7 +33,25 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const sh = t.sectionHost
   const tp = t.talentPage
 
-  if (!author?.id) return notFound()
+  if (!author?.id) {
+    return (
+      <main className="container max-w-2xl mx-auto py-24 px-4 text-center">
+        <p className="text-5xl mb-4">🔍</p>
+        <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
+          Perfil no encontrado
+        </h1>
+        <p className="text-neutral-500 mb-6">
+          Este perfil de anfitrión no está disponible o aún no ha sido verificado.
+        </p>
+        <a
+          href="/talento"
+          className="inline-flex items-center justify-center rounded-full bg-primary-600 px-6 py-2.5 text-sm font-medium text-white hover:bg-primary-700"
+        >
+          Ver todos los anfitriones
+        </a>
+      </main>
+    )
+  }
 
   const { id: hostId, displayName, avatarUrl, count, starRating, reviewsCount, description: authorDescription, location } = author
 

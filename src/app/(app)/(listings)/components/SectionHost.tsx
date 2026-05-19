@@ -42,6 +42,19 @@ const SectionHost = ({
 }: Props) => {
   const { t } = useLanguage()
   const sh = t.sectionHost
+  const router = useRouter()
+
+  const handleShare = async () => {
+    const url = window.location.href
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: document.title, url })
+      } catch {}
+    } else {
+      await navigator.clipboard.writeText(url)
+      alert('¡Enlace copiado al portapapeles!')
+    }
+  }
 
   return (
     <div className="listingSection__wrap">
@@ -93,11 +106,19 @@ const SectionHost = ({
 
       {/* == */}
       <div className="flex gap-2">
-        <ButtonSecondary href={'/talento/' + handle}>{sh.seeProfile}</ButtonSecondary>
-        <ButtonSecondary outline>
+        <a
+          href={'/talento/' + handle}
+          className="inline-flex items-center justify-center gap-x-2 rounded-full border border-neutral-950/10 bg-white px-4 py-2 text-sm font-medium text-neutral-950 hover:bg-neutral-950/[2.5%] dark:border-white/15 dark:bg-neutral-800 dark:text-white dark:hover:bg-white/5"
+        >
+          {sh.seeProfile}
+        </a>
+        <button
+          onClick={handleShare}
+          className="inline-flex items-center justify-center gap-x-2 rounded-full border border-neutral-950/10 bg-white px-4 py-2 text-sm font-medium text-neutral-950 hover:bg-neutral-950/[2.5%] dark:border-white/15 dark:bg-neutral-800 dark:text-white dark:hover:bg-white/5"
+        >
           {sh.share}
           <HugeiconsIcon icon={Navigation03Icon} size={20} color="currentColor" strokeWidth={1.5} className="mb-px" />
-        </ButtonSecondary>
+        </button>
       </div>
       <Divider />
       <HostAdminActions hostId={handle} hostName={displayName} />
