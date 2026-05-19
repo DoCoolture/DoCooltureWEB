@@ -1,5 +1,4 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
-import { supabaseAdmin } from '@/lib/supabase-admin'
+import { supabase } from '@/lib/supabase'
 import avatars1 from '@/images/avatars/Image-1.png'
 
 function toHandle(displayName: string) {
@@ -38,9 +37,16 @@ const SPECIALTY_BG_IMAGES: Record<string, string> = {
 
 const DEFAULT_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500'
 
-const SELECT_HOSTS = 'id, display_name, bio, avatar_url, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience'
+export async function getTalents(): Promise<TTalent[]> {
+  const { data: hosts, error } = await supabase
+    .from('hosts')
+    .select('id, display_name, bio, avatar_url, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience')
+    .eq('status', 'active')
+    .order('average_rating', { ascending: false })
 
-function mapHosts(hosts: Record<string, unknown>[]): TTalent[] {
+  if (error) console.error('[getTalents] error:', JSON.stringify(error))
+  if (!hosts || hosts.length === 0) return []
+
   return hosts.map((host) => {
     const specialties = (host.specialties as string[] | null) ?? []
     const primarySpecialty = specialties[0] ?? ''
@@ -62,42 +68,4 @@ function mapHosts(hosts: Record<string, unknown>[]): TTalent[] {
       yearsExperience: (host.years_experience as number) ?? 0,
     }
   })
-}
-
-export async function getTalents(): Promise<TTalent[]> {
-  // 1. Admin client — bypasses all RLS
-  try {
-    const { data, error } = await supabaseAdmin
-      .from('hosts')
-      .select(SELECT_HOSTS)
-      .eq('status', 'active')
-      .order('average_rating', { ascending: false })
-    if (error) {
-      console.error('[getTalents] admin error:', JSON.stringify(error))
-    } else if (data && data.length > 0) {
-      return mapHosts(data as Record<string, unknown>[])
-    }
-  } catch (e) {
-    console.error('[getTalents] admin exception:', e)
-  }
-
-  // 2. Server client with session cookies (works for authenticated users)
-  try {
-    const supabase = await createSupabaseServerClient()
-    const { data, error } = await supabase
-      .from('hosts')
-      .select(SELECT_HOSTS)
-      .eq('status', 'active')
-      .order('average_rating', { ascending: false })
-    if (error) {
-      console.error('[getTalents] server client error:', JSON.stringify(error))
-    } else if (data && data.length > 0) {
-      return mapHosts(data as Record<string, unknown>[])
-    }
-  } catch (e) {
-    console.error('[getTalents] server client exception:', e)
-  }
-
-  console.error('[getTalents] all clients returned no hosts')
-  return []
 }
