@@ -86,6 +86,7 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
       const data = await res.json()
 
       if (!res.ok || !data.approved) {
+        console.error('Cardnet response:', data)
         setError(data.error ?? 'El pago fue rechazado. Verifica los datos de tu tarjeta.')
         setLoading(false)
         return

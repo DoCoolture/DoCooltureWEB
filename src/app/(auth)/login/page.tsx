@@ -4,7 +4,7 @@ import ButtonPrimary from '@/shared/ButtonPrimary'
 import { useLanguage } from '@/context/LanguageContext'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 
 const GoogleIcon = () => (
@@ -18,6 +18,7 @@ const GoogleIcon = () => (
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { t } = useLanguage()
   const l = t.login
 
@@ -45,7 +46,10 @@ export default function LoginPage() {
       .eq('user_id', data.user.id)
       .single()
 
-    if (profile?.role === 'admin') {
+    const next = searchParams.get('next')
+    if (next) {
+      router.push(next)
+    } else if (profile?.role === 'admin') {
       router.push('/admin')
     } else if (profile?.role === 'host') {
       router.push('/host/dashboard')
@@ -55,9 +59,11 @@ export default function LoginPage() {
   }
 
   const handleGoogleLogin = async () => {
+    const next = searchParams.get('next') ?? ''
+    const callbackUrl = `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`
     await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: callbackUrl },
     })
   }
 

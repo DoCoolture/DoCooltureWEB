@@ -164,7 +164,7 @@ const PayWith: React.FC<PayWithProps> = ({
       {activeTab === 'cardnet_rest' && (
         <CardnetDirectForm
           totalAmount={totalUsd}
-          currency="USD"
+          currency="DOP"
           tourName={tourName}
           bookingDate={bookingDate}
           guests={guests}

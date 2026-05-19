@@ -45,6 +45,7 @@ export async function GET(request: NextRequest) {
         await supabase.from('profiles').update({ role }).eq('user_id', user.id)
       }
 
+      if (next !== '/experience') return NextResponse.redirect(`${origin}${next}`)
       const effectiveRole = (role && profile?.role === 'explorer' ? role : profile?.role)
       if (effectiveRole === 'admin') return NextResponse.redirect(`${origin}/admin`)
       if (effectiveRole === 'host') return NextResponse.redirect(`${origin}/host/dashboard`)
