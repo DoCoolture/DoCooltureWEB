@@ -1,8 +1,11 @@
 'use client'
 
 import { supabase } from '@/lib/supabase'
+import { CITY_ADDRESSES, DR_CITIES, DURATION_OPTIONS } from '@/types'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
+
+const CUSTOM = '__custom__'
 
 const CATEGORIES = [
   'Gastronomía', 'Aventura', 'Cultura', 'Naturaleza', 'Arte', 'Música',
@@ -34,6 +37,15 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
   const [error, setError] = useState('')
   const overlayRef = useRef<HTMLDivElement>(null)
 
+  // Duration preset state
+  const isKnownDuration = (DURATION_OPTIONS as readonly string[]).includes(experience.duration_time)
+  const [durationPreset, setDurationPreset] = useState(isKnownDuration ? experience.duration_time : CUSTOM)
+
+  // Address preset state — init to CUSTOM if not a known preset for the city
+  const cityAddresses = CITY_ADDRESSES[experience.city] ?? []
+  const isKnownAddress = cityAddresses.includes(experience.address)
+  const [addressPreset, setAddressPreset] = useState(isKnownAddress ? experience.address : CUSTOM)
+
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     document.addEventListener('keydown', handleKey)
@@ -42,6 +54,24 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
 
   const set = (field: keyof ExperienceData, value: string | number | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleCityChange = (city: string) => {
+    set('city', city)
+    set('address', '')
+    setAddressPreset('')
+  }
+
+  const handleDurationPreset = (val: string) => {
+    setDurationPreset(val)
+    if (val !== CUSTOM) set('duration_time', val)
+    else set('duration_time', '')
+  }
+
+  const handleAddressPreset = (val: string) => {
+    setAddressPreset(val)
+    if (val !== CUSTOM) set('address', val)
+    else set('address', '')
   }
 
   const handleSave = async () => {
@@ -76,6 +106,10 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
     }
   }
 
+  const inputCls = 'w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500'
+
+  const currentCityAddresses = CITY_ADDRESSES[form.city] ?? []
+
   return (
     <div
       ref={overlayRef}
@@ -104,120 +138,112 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {/* Title */}
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Título
-              </label>
-              <input
-                type="text"
-                value={form.title}
-                onChange={(e) => set('title', e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Título</label>
+              <input type="text" value={form.title} onChange={(e) => set('title', e.target.value)} className={inputCls} />
             </div>
 
             {/* Description */}
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Descripción
-              </label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Descripción</label>
               <textarea
                 value={form.description}
                 onChange={(e) => set('description', e.target.value)}
                 rows={4}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                className={`${inputCls} resize-none`}
               />
             </div>
 
             {/* Category */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Categoría
-              </label>
-              <select
-                value={form.category}
-                onChange={(e) => set('category', e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Categoría</label>
+              <select value={form.category} onChange={(e) => set('category', e.target.value)} className={inputCls}>
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
 
             {/* Price */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Precio (USD)
-              </label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Precio (USD)</label>
               <input
-                type="number"
-                min={0}
-                value={form.price_usd}
+                type="number" min={0} value={form.price_usd}
                 onChange={(e) => set('price_usd', Number(e.target.value))}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className={inputCls}
               />
             </div>
 
             {/* Duration */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Duración
-              </label>
-              <input
-                type="text"
-                placeholder="ej. 3–4 horas"
-                value={form.duration_time}
-                onChange={(e) => set('duration_time', e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Duración</label>
+              <select value={durationPreset} onChange={(e) => handleDurationPreset(e.target.value)} className={inputCls}>
+                <option value="">Seleccionar duración...</option>
+                {DURATION_OPTIONS.map((d) => <option key={d} value={d}>{d}</option>)}
+                <option value={CUSTOM}>✏️ Escribir duración personalizada...</option>
+              </select>
+              {durationPreset === CUSTOM && (
+                <input
+                  type="text"
+                  placeholder="ej. 3–4 horas"
+                  value={form.duration_time}
+                  onChange={(e) => set('duration_time', e.target.value)}
+                  className={`${inputCls} mt-2`}
+                />
+              )}
             </div>
 
             {/* Max guests */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Máximo de personas
-              </label>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Máximo de personas</label>
               <input
-                type="number"
-                min={1}
-                value={form.max_guests}
+                type="number" min={1} value={form.max_guests}
                 onChange={(e) => set('max_guests', Number(e.target.value))}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-
-            {/* Address */}
-            <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Dirección
-              </label>
-              <input
-                type="text"
-                value={form.address}
-                onChange={(e) => set('address', e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className={inputCls}
               />
             </div>
 
             {/* City */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">
-                Ciudad
-              </label>
-              <input
-                type="text"
-                value={form.city}
-                onChange={(e) => set('city', e.target.value)}
-                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Ciudad</label>
+              <select value={form.city} onChange={(e) => handleCityChange(e.target.value)} className={inputCls}>
+                <option value="">Seleccionar ciudad...</option>
+                {DR_CITIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            {/* Address */}
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Dirección</label>
+              {currentCityAddresses.length > 0 ? (
+                <>
+                  <select value={addressPreset} onChange={(e) => handleAddressPreset(e.target.value)} className={inputCls}>
+                    <option value="">Seleccionar dirección...</option>
+                    {currentCityAddresses.map((a) => <option key={a} value={a}>{a}</option>)}
+                    <option value={CUSTOM}>✏️ Escribir dirección personalizada...</option>
+                  </select>
+                  {addressPreset === CUSTOM && (
+                    <input
+                      type="text"
+                      placeholder="Escribe la dirección"
+                      value={form.address}
+                      onChange={(e) => set('address', e.target.value)}
+                      className={`${inputCls} mt-2`}
+                    />
+                  )}
+                </>
+              ) : (
+                <input
+                  type="text"
+                  placeholder="Escribe la dirección"
+                  value={form.address}
+                  onChange={(e) => set('address', e.target.value)}
+                  className={inputCls}
+                />
+              )}
             </div>
 
             {/* Published */}
             <div className="sm:col-span-2 flex items-center gap-x-3">
               <input
-                id="is_published"
-                type="checkbox"
-                checked={form.is_published}
+                id="is_published" type="checkbox" checked={form.is_published}
                 onChange={(e) => set('is_published', e.target.checked)}
                 className="size-4 rounded border-neutral-300"
               />
