@@ -1,6 +1,12 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 import avatars1 from '@/images/avatars/Image-1.png'
 
+function getProfileAvatar(profiles: unknown): string | null {
+  if (!profiles) return null
+  const p = Array.isArray(profiles) ? profiles[0] : profiles
+  return (p as any)?.avatar_url ?? null
+}
+
 function toHandle(displayName: string) {
   return displayName.toLowerCase().replace(/\s+/g, '-')
 }
@@ -60,7 +66,7 @@ export async function getTalents(): Promise<TTalent[]> {
       id: host.id as string,
       displayName: host.display_name as string,
       handle: toHandle(host.display_name as string),
-      avatarUrl: ((host as any).profiles?.avatar_url as string | null) ?? avatars1.src,
+      avatarUrl: (getProfileAvatar((host as any).profiles)) ?? avatars1.src,
       bgImage,
       specialties,
       city: (host.city as string | null) ?? null,

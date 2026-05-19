@@ -32,7 +32,7 @@ async function getHostsDirect(): Promise<TTalent[]> {
     id: h.id,
     displayName: h.display_name,
     handle: (h.display_name as string).toLowerCase().replace(/\s+/g, '-'),
-    avatarUrl: (h as any).profiles?.avatar_url ?? avatars1.src,
+    avatarUrl: (() => { const p = (h as any).profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? avatars1.src,
     bgImage: SPECIALTY_BG,
     specialties: h.specialties ?? [],
     city: h.city ?? null,

@@ -44,7 +44,7 @@ export async function getAuthors() {
       id: host.id as string,
       displayName: host.display_name as string,
       handle: toHandle(host.display_name as string),
-      avatarUrl: ((host as any).profiles?.avatar_url as string | null) ?? avatars1.src,
+      avatarUrl: (() => { const p = (host as any).profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? avatars1.src,
       bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
       count: (host.total_listings as number) ?? 0,
       description: (host.bio as string | null) ?? '',

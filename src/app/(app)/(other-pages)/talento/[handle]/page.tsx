@@ -112,7 +112,8 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
 
   const hostId = host.id as string
   const displayName = host.display_name as string
-  const avatarUrl = ((host as any).profiles?.avatar_url as string | null) ?? avatars1.src
+  const profilesData = (host as any).profiles
+  const avatarUrl = (Array.isArray(profilesData) ? profilesData[0]?.avatar_url : profilesData?.avatar_url) ?? avatars1.src
   const count = (host.total_listings as number) ?? 0
   const starRating = (host.average_rating as number) ?? 0
   const reviewsCount = (host.total_reviews as number) ?? 0
