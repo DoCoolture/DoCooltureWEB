@@ -4,7 +4,7 @@ import BackgroundSection from '@/components/BackgroundSection'
 import BgGlassmorphism from '@/components/BgGlassmorphism'
 import CardTalent from '@/components/CardTalent'
 import TalentFilterChips from '@/components/TalentFilterChips'
-import { getTalents, TTalent } from '@/data/hosts'
+import { TTalent } from '@/data/hosts'
 import { getServerT } from '@/lib/locale-server'
 import BecomeHostCta from '@/components/BecomeHostCta'
 import Heading from '@/shared/Heading'
@@ -18,7 +18,7 @@ const SPECIALTY_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640
 async function getHostsDirect(): Promise<TTalent[]> {
   const { data, error } = await supabaseAdmin
     .from('hosts')
-    .select('id, display_name, bio, avatar_url, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience')
+    .select('id, display_name, bio, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience, profiles(avatar_url)')
     .eq('status', 'active')
     .order('average_rating', { ascending: false })
 
@@ -32,7 +32,7 @@ async function getHostsDirect(): Promise<TTalent[]> {
     id: h.id,
     displayName: h.display_name,
     handle: (h.display_name as string).toLowerCase().replace(/\s+/g, '-'),
-    avatarUrl: h.avatar_url ?? avatars1.src,
+    avatarUrl: (h as any).profiles?.avatar_url ?? avatars1.src,
     bgImage: SPECIALTY_BG,
     specialties: h.specialties ?? [],
     city: h.city ?? null,

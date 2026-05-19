@@ -42,7 +42,7 @@ export async function getTalents(): Promise<TTalent[]> {
 
   const { data: hosts, error } = await supabase
     .from('hosts')
-    .select('id, display_name, bio, avatar_url, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience')
+    .select('id, display_name, bio, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience, profiles(avatar_url)')
     .eq('status', 'active')
     .order('average_rating', { ascending: false })
 
@@ -60,7 +60,7 @@ export async function getTalents(): Promise<TTalent[]> {
       id: host.id as string,
       displayName: host.display_name as string,
       handle: toHandle(host.display_name as string),
-      avatarUrl: (host.avatar_url as string | null) ?? avatars1.src,
+      avatarUrl: ((host as any).profiles?.avatar_url as string | null) ?? avatars1.src,
       bgImage,
       specialties,
       city: (host.city as string | null) ?? null,

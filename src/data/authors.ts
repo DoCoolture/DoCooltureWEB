@@ -36,7 +36,7 @@ function mapHost(host: Record<string, unknown>, handle: string) {
 export async function getAuthors() {
   const { data: hosts } = await supabaseAnon
     .from('hosts')
-    .select('id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country')
+    .select('id, display_name, bio, total_reviews, average_rating, total_listings, city, country, profiles(avatar_url)')
     .eq('status', 'active')
 
   if (hosts && hosts.length > 0) {
@@ -44,7 +44,7 @@ export async function getAuthors() {
       id: host.id as string,
       displayName: host.display_name as string,
       handle: toHandle(host.display_name as string),
-      avatarUrl: (host.avatar_url as string | null) ?? avatars1.src,
+      avatarUrl: ((host as any).profiles?.avatar_url as string | null) ?? avatars1.src,
       bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
       count: (host.total_listings as number) ?? 0,
       description: (host.bio as string | null) ?? '',

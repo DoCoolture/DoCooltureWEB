@@ -18,7 +18,7 @@ import ListingTabs from './ListingTabs'
 import avatars1 from '@/images/avatars/Image-1.png'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-const SELECT = 'id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country'
+const SELECT = 'id, display_name, bio, total_reviews, average_rating, total_listings, city, country, profiles(avatar_url)'
 
 async function getHost(handle: string) {
   // Try admin client first (bypasses all RLS)
@@ -112,7 +112,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
 
   const hostId = host.id as string
   const displayName = host.display_name as string
-  const avatarUrl = (host.avatar_url as string | null) ?? avatars1.src
+  const avatarUrl = ((host as any).profiles?.avatar_url as string | null) ?? avatars1.src
   const count = (host.total_listings as number) ?? 0
   const starRating = (host.average_rating as number) ?? 0
   const reviewsCount = (host.total_reviews as number) ?? 0
