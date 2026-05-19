@@ -1,7 +1,6 @@
 'use client'
 
 import CardnetDirectForm from '@/components/CardnetDirectForm'
-import CardnetRedirectButton from '@/components/CardnetRedirectButton'
 import { useLanguage } from '@/context/LanguageContext'
 import { supabase } from '@/lib/supabase'
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'
@@ -21,12 +20,11 @@ interface PayWithProps {
   hostId: string | null
 }
 
-type PaymentTab = 'paypal' | 'cardnet_redirect' | 'cardnet_rest'
+type PaymentTab = 'paypal' | 'cardnet_rest'
 
 const TABS: { id: PaymentTab; label: string }[] = [
+  { id: 'cardnet_rest', label: 'Cardnet' },
   { id: 'paypal', label: 'PayPal' },
-  { id: 'cardnet_redirect', label: 'Cardnet (Redirect)' },
-  { id: 'cardnet_rest', label: 'Cardnet (REST)' },
 ]
 
 const PayWith: React.FC<PayWithProps> = ({
@@ -44,7 +42,7 @@ const PayWith: React.FC<PayWithProps> = ({
   const { t } = useLanguage()
   const b = t.booking
   const router = useRouter()
-  const [activeTab, setActiveTab] = React.useState<PaymentTab>('paypal')
+  const [activeTab, setActiveTab] = React.useState<PaymentTab>('cardnet_rest')
   const [paypalError, setPaypalError] = React.useState<string | null>(null)
   const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID ?? ''
 
@@ -162,23 +160,7 @@ const PayWith: React.FC<PayWithProps> = ({
         </>
       )}
 
-      {/* Cardnet — Redirect (Opción 1: Web con Pantalla) */}
-      {activeTab === 'cardnet_redirect' && (
-        <CardnetRedirectButton
-          totalUsd={totalUsd}
-          tourName={tourName}
-          bookingDate={bookingDate}
-          guests={guests}
-          customerId={customerId}
-          customerEmail={customerEmail}
-          customerName={customerName}
-          notes={notes}
-          experienceId={experienceId}
-          hostId={hostId}
-        />
-      )}
-
-      {/* Cardnet — REST Direct (Opción 3: Web sin Pantalla REST) */}
+      {/* Cardnet — REST */}
       {activeTab === 'cardnet_rest' && (
         <CardnetDirectForm
           totalAmount={totalUsd}
