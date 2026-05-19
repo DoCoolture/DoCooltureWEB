@@ -11,8 +11,6 @@ import Heading from '@/shared/Heading'
 import { HOST_SPECIALTIES } from '@/types'
 import { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import avatars1 from '@/images/avatars/Image-1.png'
-
 const SPECIALTY_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500'
 
 async function getHostsDirect(): Promise<TTalent[]> {
@@ -32,7 +30,7 @@ async function getHostsDirect(): Promise<TTalent[]> {
     id: h.id,
     displayName: h.display_name,
     handle: (h.display_name as string).toLowerCase().replace(/\s+/g, '-'),
-    avatarUrl: (() => { const p = (h as any).profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? avatars1.src,
+    avatarUrl: (() => { const p = (h as any).profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? '',
     bgImage: SPECIALTY_BG,
     specialties: h.specialties ?? [],
     city: h.city ?? null,

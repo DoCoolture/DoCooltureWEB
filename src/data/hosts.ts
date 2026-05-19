@@ -1,5 +1,4 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'
-import avatars1 from '@/images/avatars/Image-1.png'
 
 function getProfileAvatar(profiles: unknown): string | null {
   if (!profiles) return null
@@ -66,7 +65,7 @@ export async function getTalents(): Promise<TTalent[]> {
       id: host.id as string,
       displayName: host.display_name as string,
       handle: toHandle(host.display_name as string),
-      avatarUrl: (getProfileAvatar((host as any).profiles)) ?? avatars1.src,
+      avatarUrl: (getProfileAvatar((host as any).profiles)) ?? '',
       bgImage,
       specialties,
       city: (host.city as string | null) ?? null,

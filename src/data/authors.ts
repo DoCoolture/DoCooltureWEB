@@ -1,4 +1,3 @@
-import avatars1 from '@/images/avatars/Image-1.png'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { createClient } from '@supabase/supabase-js'
 
@@ -17,11 +16,13 @@ function toHandle(displayName: string) {
 }
 
 function mapHost(host: Record<string, unknown>, handle: string) {
+  const p = host.profiles
+  const profilesObj = Array.isArray(p) ? p[0] : p
   return {
     id: host.id as string,
     displayName: host.display_name as string,
     handle,
-    avatarUrl: (host.avatar_url as string | null) ?? avatars1.src,
+    avatarUrl: ((profilesObj as any)?.avatar_url as string | null) ?? '',
     bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
     count: (host.total_listings as number) ?? 0,
     description: (host.bio as string | null) ?? '',
@@ -44,7 +45,7 @@ export async function getAuthors() {
       id: host.id as string,
       displayName: host.display_name as string,
       handle: toHandle(host.display_name as string),
-      avatarUrl: (() => { const p = (host as any).profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? avatars1.src,
+      avatarUrl: (() => { const p = (host as any).profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? '',
       bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
       count: (host.total_listings as number) ?? 0,
       description: (host.bio as string | null) ?? '',
@@ -60,7 +61,7 @@ export async function getAuthors() {
       id: 'fallback',
       displayName: 'Eden Smith',
       handle: 'eden-smith',
-      avatarUrl: avatars1.src,
+      avatarUrl: '',
       bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
       count: 1,
       description: 'Somos un equipo apasionado por mostrar la República Dominicana auténtica — su cultura, su gente y sus tradiciones.',
@@ -73,7 +74,7 @@ export async function getAuthors() {
 }
 
 export async function getAuthorByHandle(handle: string) {
-  const SELECT = 'id, display_name, bio, avatar_url, total_reviews, average_rating, total_listings, city, country'
+  const SELECT = 'id, display_name, bio, total_reviews, average_rating, total_listings, city, country, profiles(avatar_url)'
 
   // 1. UUID handle → try admin client first (bypasses RLS), then anon fallback
   if (UUID_RE.test(handle)) {

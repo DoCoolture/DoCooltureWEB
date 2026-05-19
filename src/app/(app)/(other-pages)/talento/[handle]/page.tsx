@@ -15,7 +15,6 @@ import { Metadata } from 'next'
 import HostAdminActions from '@/components/HostAdminActions'
 import ReportHostDialog from '@/components/ReportHostDialog'
 import ListingTabs from './ListingTabs'
-import avatars1 from '@/images/avatars/Image-1.png'
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const SELECT = 'id, display_name, bio, total_reviews, average_rating, total_listings, city, country, profiles(avatar_url)'
@@ -113,7 +112,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const hostId = host.id as string
   const displayName = host.display_name as string
   const profilesData = (host as any).profiles
-  const avatarUrl = (Array.isArray(profilesData) ? profilesData[0]?.avatar_url : profilesData?.avatar_url) ?? avatars1.src
+  const avatarUrl = (Array.isArray(profilesData) ? profilesData[0]?.avatar_url : profilesData?.avatar_url) ?? ''
   const count = (host.total_listings as number) ?? 0
   const starRating = (host.average_rating as number) ?? 0
   const reviewsCount = (host.total_reviews as number) ?? 0
