@@ -15,6 +15,19 @@ import {
 
 const TOTAL_STEPS = 5
 
+const INCLUDES_SUGGESTIONS = [
+  'Guía bilingüe certificado', 'Degustaciones locales', 'Seguro de actividad',
+  'Agua y refrescos', 'Transporte interno', 'Equipo de seguridad',
+  'Foto del recuerdo', 'Material didáctico', 'Entrada a sitios turísticos',
+  'Desayuno incluido', 'Almuerzo típico', 'Snacks locales',
+]
+
+const EXCLUDES_SUGGESTIONS = [
+  'Transporte al punto de encuentro', 'Bebidas alcohólicas', 'Propinas',
+  'Souvenirs', 'Seguro de viaje personal', 'Comidas adicionales',
+  'Gastos personales', 'Alojamiento', 'Vuelos', 'Servicio de hotel',
+]
+
 const TAG_SUGGESTIONS: Record<string, string[]> = {
   'Gastronomía':        ['cocina criolla', 'mercado local', 'degustación', 'cacao', 'ron', 'café', 'mariscos', 'chef', 'recetas tradicionales', 'street food'],
   'Tour Cultural':      ['zona colonial', 'historia', 'patrimonio', 'arte', 'tradiciones', 'folklore', 'comunidad', 'guía local', 'arquitectura', 'museos'],
@@ -555,7 +568,7 @@ export default function NewExperiencePage() {
 
       <div>
         <label className={lc}>¿Qué incluye el precio? * <span className="text-xs text-neutral-400">({priceIncludes.length} ítems)</span></label>
-        {hint('Ej: Guía bilingüe certificado · Degustaciones locales · Seguro de actividad · Agua y refrescos · Transporte interno')}
+        {hint('Haz clic en una sugerencia o escribe tu propio ítem.')}
         <div className="flex gap-x-2">
           <input type="text" value={includeInput}
             onChange={(e) => { setIncludeInput(e.target.value); setFieldErrors((p) => ({ ...p, priceIncludes: '' })) }}
@@ -565,6 +578,25 @@ export default function NewExperiencePage() {
           />
           <button type="button" onClick={addInclude} className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700">+</button>
         </div>
+        {(() => {
+          const suggestions = INCLUDES_SUGGESTIONS.filter((s) => !priceIncludes.includes(s))
+          if (!suggestions.length) return null
+          return (
+            <div className="mt-2">
+              <p className="text-xs text-neutral-400 mb-1.5">Sugerencias:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {suggestions.map((s) => (
+                  <button key={s} type="button"
+                    onClick={() => { setPriceIncludes((prev) => [...prev, s]); setFieldErrors((p) => ({ ...p, priceIncludes: '' })) }}
+                    className="rounded-full border border-neutral-200 dark:border-neutral-600 px-3 py-1 text-xs text-neutral-600 dark:text-neutral-400 hover:border-green-500 hover:text-green-600 dark:hover:text-green-400 transition-colors"
+                  >
+                    + {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
         {errMsg('priceIncludes')}
         {priceIncludes.length > 0 && (
           <ul className="mt-2 space-y-1">
@@ -580,7 +612,7 @@ export default function NewExperiencePage() {
 
       <div>
         <label className={lc}>¿Qué NO incluye el precio? <span className="text-xs text-neutral-400">(opcional)</span></label>
-        {hint('Ej: Transporte al punto de encuentro · Bebidas alcohólicas · Propinas · Souvenirs')}
+        {hint('Haz clic en una sugerencia o escribe tu propio ítem.')}
         <div className="flex gap-x-2">
           <input type="text" value={excludeInput}
             onChange={(e) => setExcludeInput(e.target.value)}
@@ -590,6 +622,25 @@ export default function NewExperiencePage() {
           />
           <button type="button" onClick={addExclude} className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-3 text-sm hover:bg-neutral-50 dark:hover:bg-neutral-700">+</button>
         </div>
+        {(() => {
+          const suggestions = EXCLUDES_SUGGESTIONS.filter((s) => !priceExcludes.includes(s))
+          if (!suggestions.length) return null
+          return (
+            <div className="mt-2">
+              <p className="text-xs text-neutral-400 mb-1.5">Sugerencias:</p>
+              <div className="flex flex-wrap gap-1.5">
+                {suggestions.map((s) => (
+                  <button key={s} type="button"
+                    onClick={() => setPriceExcludes((prev) => [...prev, s])}
+                    className="rounded-full border border-neutral-200 dark:border-neutral-600 px-3 py-1 text-xs text-neutral-600 dark:text-neutral-400 hover:border-red-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                  >
+                    + {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
         {priceExcludes.length > 0 && (
           <ul className="mt-2 space-y-1">
             {priceExcludes.map((item) => (
