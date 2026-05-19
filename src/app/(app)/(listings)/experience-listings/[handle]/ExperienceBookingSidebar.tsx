@@ -34,6 +34,7 @@ export function ExperienceBookingSidebar({
   const { t } = useLanguage()
   const { convertPrice } = useCurrency()
   const [explorerCount, setExplorerCount] = useState(1)
+  const [hasDate, setHasDate] = useState(false)
   const precioNum = Number(price.replace(/[^0-9.]/g, ''))
 
   return (
@@ -55,7 +56,12 @@ export function ExperienceBookingSidebar({
         className="flex flex-col rounded-3xl border border-neutral-200 dark:border-neutral-700"
         id="booking-form"
       >
-        <DatesRangeInputPopover className="z-11 flex-1" availableDays={availableDays} durationTime={durationTime} />
+        <DatesRangeInputPopover
+          className="z-11 flex-1"
+          availableDays={availableDays}
+          durationTime={durationTime}
+          onDateChange={(d) => setHasDate(!!d)}
+        />
         <div className="w-full border-b border-neutral-200 dark:border-neutral-700" />
         <GuestsInputPopover className="flex-1" onChangeTotalGuests={setExplorerCount} />
       </Form>
@@ -88,7 +94,17 @@ export function ExperienceBookingSidebar({
       </div>
 
       {/* BOTÓN RESERVAR */}
-      <ButtonPrimary form="booking-form" type="submit">
+      {!hasDate && (
+        <p className="text-center text-sm text-amber-600 dark:text-amber-400">
+          📅 Selecciona una fecha para continuar
+        </p>
+      )}
+      <ButtonPrimary
+        form="booking-form"
+        type="submit"
+        disabled={!hasDate}
+        className={!hasDate ? 'opacity-50 cursor-not-allowed' : ''}
+      >
         {t.booking.bookNow}
       </ButtonPrimary>
     </div>

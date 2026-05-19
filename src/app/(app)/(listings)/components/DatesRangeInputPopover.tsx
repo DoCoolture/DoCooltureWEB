@@ -38,6 +38,7 @@ interface Props {
   inputDescription?: string
   availableDays?: string[]
   durationTime?: string
+  onDateChange?: (date: Date | null) => void
 }
 
 const DatesRangeInputPopover: FC<Props> = ({
@@ -46,6 +47,7 @@ const DatesRangeInputPopover: FC<Props> = ({
   inputDescription,
   availableDays = [],
   durationTime = '',
+  onDateChange,
 }) => {
   const { t } = useLanguage()
   const resolvedDescription = inputDescription ?? `${t.HeroSearchForm['CheckIn']} - ${t.HeroSearchForm['CheckOut']}`
@@ -60,10 +62,10 @@ const DatesRangeInputPopover: FC<Props> = ({
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
 
-  // Single click selects start date; end is auto-calculated from duration
   const handleChange = (date: Date | null) => {
     setStartDate(date)
     setEndDate(date ? addDays(date, durationDays - 1) : null)
+    onDateChange?.(date)
   }
 
   const filterDate = (date: Date) => {
