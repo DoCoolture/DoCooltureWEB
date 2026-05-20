@@ -194,14 +194,15 @@ export default function AccountPage() {
       .eq('user_id', userId)
 
     if (!error) {
-      await supabase
-        .from('hosts')
-        .update({
+      fetch('/api/account/sync-host', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           display_name: form.display_name,
           city: form.city || null,
           bio: form.about_me || null,
-        })
-        .eq('user_id', userId)
+        }),
+      }).catch(() => {})
     }
 
     setSaving(false)
