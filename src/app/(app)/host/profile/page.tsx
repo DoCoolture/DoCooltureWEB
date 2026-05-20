@@ -105,6 +105,9 @@ export default function HostProfilePage() {
         website_url: form.website_url.trim() || null,
       }).eq('id', host.id),
       supabase.from('profiles').update({
+        display_name: form.display_name.trim(),
+        city: form.city.trim() || null,
+        about_me: form.bio.trim() || null,
         avatar_url: form.avatar_url || null,
       }).eq('user_id', host.user_id),
     ])

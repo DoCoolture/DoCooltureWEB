@@ -127,6 +127,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Step 4: Send in-platform + email notification to host (non-blocking)
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify-booking`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ hostId, tourName, bookingDate, guests, customerName, customerEmail, totalAmount: amount, currency }),
+    }).catch(() => {})
+
     return NextResponse.json({
       approved: true,
       approvalCode: saleData['approval-code'],

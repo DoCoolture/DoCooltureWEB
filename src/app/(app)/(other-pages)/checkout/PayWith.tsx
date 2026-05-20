@@ -99,6 +99,21 @@ const PayWith: React.FC<PayWithProps> = ({
       return
     }
 
+    fetch('/api/notify-booking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        hostId,
+        tourName,
+        bookingDate,
+        guests,
+        customerName,
+        customerEmail: customerEmail || data.payerEmail,
+        totalAmount: totalUsd,
+        currency: 'USD',
+      }),
+    }).catch(() => {})
+
     router.push('/pay-done')
   }
 

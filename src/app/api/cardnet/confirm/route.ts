@@ -64,6 +64,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Booking save failed' }, { status: 500 })
     }
 
+    fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify-booking`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        hostId: booking.hostId,
+        tourName: booking.tourName,
+        bookingDate: booking.bookingDate,
+        guests: booking.guests,
+        customerName: booking.customerName,
+        customerEmail: booking.customerEmail,
+        totalAmount: booking.totalUsd,
+        currency: 'USD',
+      }),
+    }).catch(() => {})
+
     return NextResponse.json({ success: true, authorizationCode, maskedCard: creditCardNumber })
   } catch (err) {
     console.error('Cardnet confirm error:', err)
