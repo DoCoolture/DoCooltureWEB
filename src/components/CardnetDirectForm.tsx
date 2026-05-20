@@ -86,7 +86,6 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
       const data = await res.json()
 
       if (!res.ok || !data.approved) {
-        console.error('Cardnet response:', data)
         setError(data.error ?? 'El pago fue rechazado. Verifica los datos de tu tarjeta.')
         setLoading(false)
         return
@@ -101,12 +100,6 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950">
-        <p className="text-sm text-amber-700 dark:text-amber-300">
-          Entorno de pruebas Cardnet (QA). No uses tarjetas reales.
-        </p>
-      </div>
-
       <div className="space-y-3">
         <div>
           <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">

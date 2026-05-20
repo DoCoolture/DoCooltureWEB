@@ -39,7 +39,6 @@ export async function POST(request: NextRequest) {
     const currencyCode = CURRENCY_CODES[currency?.toUpperCase()] ?? '214'
 
     // Step 1: Get idempotency key
-    console.log('[Cardnet] Requesting idempotency key from:', `${CARDNET_REST_BASE}/idenpotency-keys`)
     let keyText = ''
     try {
       const keyRes = await fetch(`${CARDNET_REST_BASE}/idenpotency-keys`, {
@@ -47,7 +46,6 @@ export async function POST(request: NextRequest) {
         headers: { Accept: 'text/plain' },
       })
       keyText = await keyRes.text()
-      console.log('[Cardnet] Idempotency key status:', keyRes.status, '| body:', keyText)
       if (!keyRes.ok) {
         return NextResponse.json({ error: `Idempotency key failed: ${keyRes.status} ${keyText}` }, { status: 500 })
       }
@@ -82,18 +80,15 @@ export async function POST(request: NextRequest) {
       environment: 'Ecommerce',
     }
     if (token) salePayload.token = token
-    console.log('[Cardnet] Sale payload:', { ...salePayload, 'card-number': '****', cvv: '***' })
 
     let saleData: any = {}
-    let saleRawBody = ''
     try {
       const saleRes = await fetch(`${CARDNET_REST_BASE}/transactions/sales`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify(salePayload),
       })
-      saleRawBody = await saleRes.text()
-      console.log('[Cardnet] Sale status:', saleRes.status, '| raw body:', saleRawBody)
+      const saleRawBody = await saleRes.text()
       try { saleData = JSON.parse(saleRawBody) } catch { saleData = { message: saleRawBody } }
       if (!saleRes.ok || saleData['response-code'] !== '00') {
         const code = saleData['response-code'] ?? saleRes.status.toString()

@@ -5,7 +5,6 @@ import rightImg from '@/images/about-hero-right.png'
 import { getPublicTestimonials } from '@/data/reviews'
 import { getServerT } from '@/lib/locale-server'
 import { Metadata } from 'next'
-import SectionFounder from './SectionFounder'
 import SectionHero from './SectionHero'
 import SectionStatistic from './SectionStatistic'
 
@@ -29,8 +28,6 @@ const PageAbout = async () => {
           heading={`👋 ${t.about.heading}`}
           subHeading={t.about.subheading}
         />
-
-        <SectionFounder />
 
         <div className="relative py-20">
           <BackgroundSection />

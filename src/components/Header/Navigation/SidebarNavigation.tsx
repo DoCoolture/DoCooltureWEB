@@ -11,7 +11,7 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import clsx from 'clsx'
 import Form from 'next/form'
 import { useRouter } from 'next/navigation'
-import React, { useEffect } from 'react'
+import React from 'react'
 import CurrLangDropdown from '../CurrLangDropdown'
 
 interface Props {
@@ -24,21 +24,10 @@ const SidebarNavigation: React.FC<Props> = ({ data, currencies, languages }) => 
   const handleClose = useClose()
   const router = useRouter()
 
-  // Prefetch the next step to improve performance
-  useEffect(() => {
-    router.prefetch('/stay-categories/all')
-  }, [router])
-
-  // Handle form submission
   const handleSubmitForm = async (formData: FormData) => {
-    const formObject = Object.fromEntries(formData.entries())
-    // Handle form submission logic here
-    console.log('Form submitted:', formObject)
-    const searchQuery = formObject.search as string
-    // Close the popover
+    const searchQuery = Object.fromEntries(formData.entries()).search as string
     handleClose()
-    // Redirect to the search page
-    router.push('/stay-categories/all' + (searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''))
+    router.push('/experience-categories/all' + (searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''))
   }
 
   const _renderMenuChild = (
@@ -119,8 +108,6 @@ const SidebarNavigation: React.FC<Props> = ({ data, currencies, languages }) => 
 
   return (
     <div>
-      <span>Discover the most outstanding articles on all topics of life. Write your stories and share them</span>
-
       <div className="mt-4 flex items-center justify-between">
         <SocialsList itemClass="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center rounded-full text-xl" />
       </div>
