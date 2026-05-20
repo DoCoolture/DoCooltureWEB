@@ -4,44 +4,61 @@ import BackgroundSection from '@/components/BackgroundSection'
 import BgGlassmorphism from '@/components/BgGlassmorphism'
 import CardTalent from '@/components/CardTalent'
 import TalentFilterChips from '@/components/TalentFilterChips'
-import { TTalent } from '@/data/hosts'
+import { TTalent, SPECIALTY_BG_IMAGES } from '@/data/hosts'
 import { getServerT } from '@/lib/locale-server'
 import BecomeHostCta from '@/components/BecomeHostCta'
 import Heading from '@/shared/Heading'
 import { HOST_SPECIALTIES } from '@/types'
 import { Metadata } from 'next'
 import { supabaseAdmin } from '@/lib/supabase-admin'
-const SPECIALTY_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500'
+const DEFAULT_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500'
 
 async function getHostsDirect(): Promise<TTalent[]> {
-  const { data, error } = await supabaseAdmin
-    .from('hosts')
-    .select('id, display_name, bio, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience, profiles(avatar_url)')
-    .eq('status', 'active')
-    .order('average_rating', { ascending: false })
+  const [hostsResult, expsResult] = await Promise.all([
+    supabaseAdmin
+      .from('hosts')
+      .select('id, display_name, bio, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience, profiles(avatar_url)')
+      .eq('status', 'active')
+      .order('average_rating', { ascending: false }),
+    supabaseAdmin
+      .from('experiences')
+      .select('host_id, category')
+      .eq('is_published', true)
+      .eq('is_hidden', false),
+  ])
 
-  if (error) {
-    console.error('[talento] admin direct error:', JSON.stringify(error))
+  if (hostsResult.error) {
+    console.error('[talento] admin direct error:', JSON.stringify(hostsResult.error))
     return []
   }
 
-  console.log('[talento] admin direct found:', data?.length ?? 0, 'hosts')
-  return (data ?? []).map((h: any) => ({
-    id: h.id,
-    displayName: h.display_name,
-    handle: (h.display_name as string).toLowerCase().replace(/\s+/g, '-'),
-    avatarUrl: (() => { const p = (h as any).profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? '',
-    bgImage: SPECIALTY_BG,
-    specialties: h.specialties ?? [],
-    city: h.city ?? null,
-    averageRating: h.average_rating ?? 0,
-    totalReviews: h.total_reviews ?? 0,
-    totalListings: h.total_listings ?? 0,
-    bio: h.bio ?? null,
-    isSuperhost: h.is_superhost ?? false,
-    isVerified: h.is_verified ?? false,
-    yearsExperience: h.years_experience ?? 0,
-  }))
+  const categoryByHost = new Map<string, Set<string>>()
+  for (const exp of expsResult.data ?? []) {
+    if (!categoryByHost.has(exp.host_id)) categoryByHost.set(exp.host_id, new Set())
+    if (exp.category) categoryByHost.get(exp.host_id)!.add(exp.category)
+  }
+
+  return (hostsResult.data ?? []).map((h: any) => {
+    const expCategories = [...(categoryByHost.get(h.id) ?? [])]
+    const primaryCategory = expCategories[0] ?? (h.specialties as string[] | null)?.[0] ?? ''
+    return {
+      id: h.id,
+      displayName: h.display_name,
+      handle: (h.display_name as string).toLowerCase().replace(/\s+/g, '-'),
+      avatarUrl: (() => { const p = h.profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? '',
+      bgImage: SPECIALTY_BG_IMAGES[primaryCategory] ?? DEFAULT_BG,
+      specialties: h.specialties ?? [],
+      experienceCategories: expCategories,
+      city: h.city ?? null,
+      averageRating: h.average_rating ?? 0,
+      totalReviews: h.total_reviews ?? 0,
+      totalListings: h.total_listings ?? 0,
+      bio: h.bio ?? null,
+      isSuperhost: h.is_superhost ?? false,
+      isVerified: h.is_verified ?? false,
+      yearsExperience: h.years_experience ?? 0,
+    }
+  })
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -66,7 +83,7 @@ const TalentoPage = async ({
   const specialtyMap = tp.specialtyMap as Record<string, string>
 
   const filtered = activeSpecialty
-    ? talents.filter((talent) => talent.specialties.includes(activeSpecialty))
+    ? talents.filter((talent) => talent.experienceCategories.includes(activeSpecialty))
     : talents
 
   return (
@@ -95,7 +112,7 @@ const TalentoPage = async ({
               <CardTalent
                 key={talent.id}
                 talent={talent}
-                specialtyLabel={talent.specialties.map((s) => specialtyMap[s] ?? s).join(', ')}
+                specialtyLabel={talent.experienceCategories.map((s) => specialtyMap[s] ?? s).join(', ')}
                 superhostLabel={tp.superhost}
               />
             ))}

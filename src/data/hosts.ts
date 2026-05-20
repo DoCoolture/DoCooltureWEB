@@ -17,6 +17,7 @@ export type TTalent = {
   avatarUrl: string
   bgImage: string
   specialties: string[]
+  experienceCategories: string[]
   city: string | null
   averageRating: number
   totalReviews: number
@@ -27,7 +28,7 @@ export type TTalent = {
   yearsExperience: number
 }
 
-const SPECIALTY_BG_IMAGES: Record<string, string> = {
+export const SPECIALTY_BG_IMAGES: Record<string, string> = {
   'Gastronomía': 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
   'Historia y Cultura': 'https://images.pexels.com/photos/1674666/pexels-photo-1674666.jpeg?auto=compress&cs=tinysrgb&w=500',
   'Arte y Artesanía': 'https://images.pexels.com/photos/1532771/pexels-photo-1532771.jpeg?auto=compress&cs=tinysrgb&w=500',
@@ -45,29 +46,42 @@ const DEFAULT_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-164077
 export async function getTalents(): Promise<TTalent[]> {
   const supabase = await createSupabaseServerClient()
 
-  const { data: hosts, error } = await supabase
-    .from('hosts')
-    .select('id, display_name, bio, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience, profiles(avatar_url)')
-    .eq('status', 'active')
-    .order('average_rating', { ascending: false })
+  const [hostsResult, expsResult] = await Promise.all([
+    supabase
+      .from('hosts')
+      .select('id, display_name, bio, specialties, city, average_rating, total_reviews, total_listings, is_superhost, is_verified, years_experience, profiles(avatar_url)')
+      .eq('status', 'active')
+      .order('average_rating', { ascending: false }),
+    supabase
+      .from('experiences')
+      .select('host_id, category')
+      .eq('is_published', true)
+      .eq('is_hidden', false),
+  ])
 
-  if (error) console.error('[getTalents] error:', JSON.stringify(error))
-  if (!hosts || hosts.length === 0) {
+  if (hostsResult.error) console.error('[getTalents] error:', JSON.stringify(hostsResult.error))
+  if (!hostsResult.data || hostsResult.data.length === 0) {
     console.error('[getTalents] no active hosts found')
     return []
   }
 
-  return hosts.map((host) => {
-    const specialties = (host.specialties as string[] | null) ?? []
-    const primarySpecialty = specialties[0] ?? ''
-    const bgImage = SPECIALTY_BG_IMAGES[primarySpecialty] ?? DEFAULT_BG
+  const categoryByHost = new Map<string, Set<string>>()
+  for (const exp of expsResult.data ?? []) {
+    if (!categoryByHost.has(exp.host_id)) categoryByHost.set(exp.host_id, new Set())
+    if (exp.category) categoryByHost.get(exp.host_id)!.add(exp.category)
+  }
+
+  return hostsResult.data.map((host) => {
+    const expCategories = [...(categoryByHost.get(host.id as string) ?? [])]
+    const primaryCategory = expCategories[0] ?? (host.specialties as string[] | null)?.[0] ?? ''
     return {
       id: host.id as string,
       displayName: host.display_name as string,
       handle: toHandle(host.display_name as string),
-      avatarUrl: (getProfileAvatar((host as any).profiles)) ?? '',
-      bgImage,
-      specialties,
+      avatarUrl: getProfileAvatar((host as any).profiles) ?? '',
+      bgImage: SPECIALTY_BG_IMAGES[primaryCategory] ?? DEFAULT_BG,
+      specialties: (host.specialties as string[] | null) ?? [],
+      experienceCategories: expCategories,
       city: (host.city as string | null) ?? null,
       averageRating: (host.average_rating as number) ?? 0,
       totalReviews: (host.total_reviews as number) ?? 0,
