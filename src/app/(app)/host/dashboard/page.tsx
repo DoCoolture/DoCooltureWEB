@@ -11,6 +11,7 @@ import Image from 'next/image'
 export default function HostDashboardPage() {
   const router = useRouter()
   const [host, setHost] = useState<Host | null>(null)
+  const [displayName, setDisplayName] = useState<string>('')
   const [experiences, setExperiences] = useState<Experience[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -29,9 +30,11 @@ export default function HostDashboardPage() {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('role')
+      .select('role, display_name')
       .eq('user_id', user.id)
       .single()
+
+    setDisplayName(profile?.display_name || '')
 
     // Obtener perfil de anfitrión
     const { data: hostData } = await supabase
@@ -144,7 +147,7 @@ export default function HostDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
         <div>
           <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-            Hola, {host?.display_name} 👋
+            Hola, {displayName || host?.display_name} 👋
           </h1>
           <p className="text-neutral-500 dark:text-neutral-400 mt-1">
             Bienvenido a tu panel de anfitrión
