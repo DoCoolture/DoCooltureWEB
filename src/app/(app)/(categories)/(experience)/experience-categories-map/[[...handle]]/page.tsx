@@ -80,6 +80,14 @@ const Page = async ({
   // Filter listings
   let filteredListings = allListings
 
+  // Filter by city when viewing a specific city category
+  if (category.handle !== 'all') {
+    const cityName = category.name.toLowerCase()
+    filteredListings = filteredListings.filter((listing) =>
+      listing.address?.toLowerCase().includes(cityName)
+    )
+  }
+
   if (activeTypes.length > 0) {
     filteredListings = filteredListings.filter((listing) =>
       activeTypes.some((type) => (TYPE_TO_CATEGORY[type] ?? []).includes(listing.listingCategory))
