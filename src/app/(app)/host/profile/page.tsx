@@ -51,14 +51,14 @@ export default function HostProfilePage() {
 
     const { data: profileData } = await supabase
       .from('profiles')
-      .select('avatar_url')
+      .select('avatar_url, display_name, city, about_me')
       .eq('user_id', user.id)
       .single()
 
     setForm({
-      display_name: hostData.display_name ?? '',
-      bio: hostData.bio ?? '',
-      city: hostData.city ?? '',
+      display_name: profileData?.display_name || hostData.display_name || '',
+      bio: hostData.bio || profileData?.about_me || '',
+      city: profileData?.city || hostData.city || '',
       country: hostData.country ?? 'Dominican Republic',
       whatsapp: hostData.whatsapp ?? '',
       instagram_url: hostData.instagram_url ?? '',
