@@ -30,8 +30,6 @@ export default function AdminPage() {
     totalRevenue: 0,
   })
 
-  const [seedStatus, setSeedStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
-  const [seedMessage, setSeedMessage] = useState('')
   const [editingExp, setEditingExp] = useState<Experience | null>(null)
   const [deletingExpId, setDeletingExpId] = useState<string | null>(null)
   const [hidingExpId, setHidingExpId] = useState<string | null>(null)
@@ -241,26 +239,6 @@ export default function AdminPage() {
     }
   }
 
-  const handleSeedExperience = async () => {
-    setSeedStatus('loading')
-    setSeedMessage('')
-    try {
-      const res = await fetch('/api/admin/seed-experience', { method: 'POST' })
-      const json = await res.json()
-      if (res.ok) {
-        setSeedStatus('ok')
-        setSeedMessage(json.message)
-        loadStats()
-      } else {
-        setSeedStatus('error')
-        setSeedMessage(json.error)
-      }
-    } catch {
-      setSeedStatus('error')
-      setSeedMessage('Error de red al ejecutar el seeding.')
-    }
-  }
-
   const handleSuspendHost = async (host: Host) => {
     const newStatus = host.status === 'active' ? 'suspended' : 'active'
     await supabase
@@ -326,24 +304,9 @@ export default function AdminPage() {
           </p>
         </div>
 
-        {/* Action buttons */}
-        <div className="flex flex-col items-start gap-y-2">
-          <ButtonPrimary onClick={() => router.push('/host/experiences/new')}>
-            + Nueva experiencia
-          </ButtonPrimary>
-          <button
-            onClick={handleSeedExperience}
-            disabled={seedStatus === 'loading'}
-            className="rounded-xl bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-60"
-          >
-            {seedStatus === 'loading' ? 'Guardando...' : '📥 Guardar experiencia base en Supabase'}
-          </button>
-          {seedMessage && (
-            <p className={`text-xs ${seedStatus === 'ok' ? 'text-green-600' : 'text-red-600'}`}>
-              {seedMessage}
-            </p>
-          )}
-        </div>
+        <ButtonPrimary onClick={() => router.push('/host/experiences/new')}>
+          + Nueva experiencia
+        </ButtonPrimary>
       </div>
 
       {/* Stats */}
