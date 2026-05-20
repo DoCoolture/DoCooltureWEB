@@ -99,7 +99,6 @@ export default function AccountPage() {
   const { t } = useLanguage()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const [profile, setProfile] = useState<any>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [successMsg, setSuccessMsg] = useState('')
@@ -129,7 +128,6 @@ export default function AccountPage() {
         .single()
 
       if (data) {
-        setProfile(data)
         setForm({
           display_name: data.display_name || data.full_name || '',
           gender: data.gender || '',
@@ -151,11 +149,27 @@ export default function AccountPage() {
 
     const ext = file.name.split('.').pop()
     const path = `${userId}/avatar.${ext}`
-    const { error } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
-    if (!error) {
-      const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
-      setForm((f) => ({ ...f, avatar_url: urlData.publicUrl }))
+    const { error: uploadError } = await supabase.storage.from('avatars').upload(path, file, { upsert: true })
+    if (uploadError) {
+      setErrorMsg('Error al subir la imagen. Intenta de nuevo.')
+      return
     }
+
+    const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
+    const avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`
+
+    const { error: dbError } = await supabase
+      .from('profiles')
+      .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+      .eq('user_id', userId)
+
+    if (dbError) {
+      setErrorMsg('Imagen subida pero no se pudo guardar. Intenta de nuevo.')
+      return
+    }
+
+    setForm((f) => ({ ...f, avatar_url: avatarUrl }))
+    setSuccessMsg('Foto de perfil actualizada.')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
