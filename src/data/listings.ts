@@ -1,4 +1,3 @@
-import avatars1 from '@/images/avatars/Image-1.png'
 import { supabase } from '@/lib/supabase'
 
 //  STAY LISTING  //
@@ -90,51 +89,6 @@ export async function getCarListings(): Promise<TCarListing[]> {
 }
 export const getCarListingByHandle = async (_handle: string): Promise<TCarListing | null> => null
 
-// ============================================================
-// ✅ DOCOOLTURE — EXPERIENCE LISTINGS
-// Solo "Taste of Dominican Culture" está en el código.
-// El resto las agregan los anfitriones desde el dashboard.
-// ============================================================
-
-const TASTE_OF_DOMINICAN = {
-  id: '11111111-1111-1111-1111-111111111111',
-  title: 'Taste of Dominican Culture',
-  handle: 'taste-of-dominican-culture',
-  host: {
-    displayName: 'DoCoolture Gastronomy',
-    avatarUrl: avatars1.src,
-    handle: 'docoolture-gastronomy',
-  },
-  listingCategory: 'Gastronomía',
-  date: 'weekendsAvailable',
-  availableDays: ['Sábado', 'Domingo'] as string[],
-  description:
-    'Descubre la esencia de la República Dominicana a través de su gastronomía. Un recorrido sensorial que combina historia, tradición y sabor — desde ingredientes taínos hasta influencias africanas y europeas. Cada plato cuenta una historia. Guiado por expertos locales en la Zona Colonial de Santo Domingo.',
-  durationTime: '3–4 horas',
-  languages: ['Español', 'English'],
-  featuredImage: '/images/experiences/taste-dominican/sancocho.jpeg',
-  galleryImgs: [
-    '/images/experiences/taste-dominican/sancocho.jpeg',
-    '/images/experiences/taste-dominican/desayuno.jpeg',
-    '/images/experiences/taste-dominican/locrio.jpeg',
-    '/images/experiences/taste-dominican/cacao.jpeg',
-    '/images/experiences/taste-dominican/chocolate.jpeg',
-    '/images/experiences/taste-dominican/cafe.jpeg',
-  ],
-  like: true,
-  address: 'Zona Colonial, Santo Domingo',
-  reviewStart: 5.0,
-  reviewCount: 0,
-  price: '$120',
-  maxGuests: 8,
-  saleOff: null as string | null,
-  isAds: null as string | null,
-  map: { lat: 18.4733, lng: -69.8833 },
-}
-
-export const HARDCODED_EXPERIENCES: Record<string, typeof TASTE_OF_DOMINICAN> = {
-  [TASTE_OF_DOMINICAN.id]: TASTE_OF_DOMINICAN,
-}
 
 export async function getExperienceListings() {
   const { data } = await supabase
@@ -174,41 +128,10 @@ export async function getExperienceListings() {
     map: { lat: exp.latitude ?? 0, lng: exp.longitude ?? 0 },
   }))
 
-  return [TASTE_OF_DOMINICAN, ...fromSupabase]
-}
-
-const TASTE_OF_DOMINICAN_DETAIL = {
-  ...TASTE_OF_DOMINICAN,
-  galleryImgs: [
-    ...TASTE_OF_DOMINICAN.galleryImgs,
-    'https://images.pexels.com/photos/4348078/pexels-photo-4348078.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/3825527/pexels-photo-3825527.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/4706134/pexels-photo-4706134.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/3825578/pexels-photo-3825578.jpeg?auto=compress&cs=tinysrgb&w=1600',
-    'https://images.pexels.com/photos/123335/pexels-photo-123335.jpeg?auto=compress&cs=tinysrgb&w=1600',
-  ],
-  host: {
-    displayName: 'Eden Smith',
-    avatarUrl: avatars1.src,
-    handle: 'eden-smith',
-    description:
-      'Somos un equipo apasionado por mostrar la República Dominicana auténtica — su cultura, su gente y sus tradiciones.',
-    listingsCount: 1,
-    reviewsCount: 0,
-    rating: 5.0,
-    responseRate: 100,
-    responseTime: 'en menos de una hora',
-    isSuperhost: true,
-    isVerified: true,
-    joinedDate: 'Enero 2025',
-  },
+  return fromSupabase
 }
 
 export const getExperienceListingByHandle = async (handle: string) => {
-  if (handle === 'taste-of-dominican-culture') {
-    return TASTE_OF_DOMINICAN_DETAIL
-  }
-
   const { data: exp } = await supabase
     .from('experiences')
     .select('*')
@@ -217,7 +140,7 @@ export const getExperienceListingByHandle = async (handle: string) => {
     .eq('is_hidden', false)
     .single()
 
-  if (!exp) return TASTE_OF_DOMINICAN_DETAIL
+  if (!exp) return null
 
   const { data: hostData } = await supabase
     .from('hosts')

@@ -56,21 +56,7 @@ export async function getAuthors() {
     }))
   }
 
-  return [
-    {
-      id: 'fallback',
-      displayName: 'Eden Smith',
-      handle: 'eden-smith',
-      avatarUrl: '',
-      bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
-      count: 1,
-      description: 'Somos un equipo apasionado por mostrar la República Dominicana auténtica — su cultura, su gente y sus tradiciones.',
-      jobName: 'Cultural Guide',
-      starRating: 0,
-      reviews: 0,
-      location: 'Santo Domingo, RD',
-    },
-  ]
+  return []
 }
 
 export async function getAuthorByHandle(handle: string) {

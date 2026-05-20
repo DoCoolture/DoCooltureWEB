@@ -54,15 +54,15 @@ const CheckoutContent = () => {
   }, [])
 
   const experiencia = {
-    titulo: searchParams.get('titulo') || 'Taste of Dominican Culture',
-    ubicacion: searchParams.get('ubicacion') || 'Zona Colonial, Santo Domingo',
-    duracion: searchParams.get('duracion') || '3–4 horas',
-    precio: searchParams.get('precio') || '$120',
+    titulo: searchParams.get('titulo') || '',
+    ubicacion: searchParams.get('ubicacion') || '',
+    duracion: searchParams.get('duracion') || '',
+    precio: searchParams.get('precio') || '$0',
     imagen: (() => {
       const img = searchParams.get('imagen') || ''
       return img.startsWith('http') ? img : FALLBACK_IMAGE
     })(),
-    anfitrion: searchParams.get('anfitrion') || 'DoCoolture Gastronomy',
+    anfitrion: searchParams.get('anfitrion') || '',
     explorers: Math.max(1, Number(searchParams.get('explorers') || 1)),
     rating: Number(searchParams.get('rating') || 0),
     reviewCount: Number(searchParams.get('reviewCount') || 0),

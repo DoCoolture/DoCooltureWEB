@@ -2,13 +2,10 @@
 
 import ExperiencesCard from '@/components/ExperiencesCard'
 import { useLanguage } from '@/context/LanguageContext'
-import { HARDCODED_EXPERIENCES } from '@/data/listings'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/shared/Button'
 import { Divider } from '@/shared/divider'
 import { useEffect, useState } from 'react'
-
-const LOCAL_KEY = 'docoolture_wishlist_hardcoded'
 
 type SavedExperience = {
   id: string
@@ -41,22 +38,8 @@ export default function SavedListingsPage() {
 
   useEffect(() => {
     const fetchSaved = async () => {
-      // Hardcoded experiences from localStorage
-      const hardcodedIds: string[] = (() => {
-        try {
-          const raw = localStorage.getItem(LOCAL_KEY)
-          return raw ? (JSON.parse(raw) as string[]) : []
-        } catch { return [] }
-      })()
-
-      const hardcodedExps: SavedExperience[] = hardcodedIds
-        .map((id) => HARDCODED_EXPERIENCES[id])
-        .filter(Boolean)
-        .map((exp) => ({ ...exp, like: true }))
-
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.user) {
-        setExperiences(hardcodedExps)
         setLoading(false)
         return
       }
@@ -68,7 +51,6 @@ export default function SavedListingsPage() {
         .single()
 
       if (!profileData) {
-        setExperiences(hardcodedExps)
         setLoading(false)
         return
       }
@@ -77,8 +59,6 @@ export default function SavedListingsPage() {
         .from('wishlists')
         .select('experience_id')
         .eq('profile_id', profileData.id)
-
-      const supabaseExps: SavedExperience[] = []
 
       if (wishlists && wishlists.length > 0) {
         const ids = wishlists.map((w) => w.experience_id)
@@ -90,8 +70,8 @@ export default function SavedListingsPage() {
           .eq('is_published', true)
 
         if (exps) {
-          supabaseExps.push(
-            ...exps.map((exp) => ({
+          setExperiences(
+            exps.map((exp) => ({
               id: exp.id,
               title: exp.title,
               handle: exp.handle,
@@ -114,13 +94,12 @@ export default function SavedListingsPage() {
               saleOff: null,
               isAds: null,
               map: { lat: exp.latitude ?? 0, lng: exp.longitude ?? 0 },
-              host: { displayName: 'Anfitrión DoCoolture', avatarUrl: '', handle: exp.host_id },
+              host: { displayName: '', avatarUrl: '', handle: exp.host_id },
             }))
           )
         }
       }
 
-      setExperiences([...hardcodedExps, ...supabaseExps])
       setLoading(false)
     }
 

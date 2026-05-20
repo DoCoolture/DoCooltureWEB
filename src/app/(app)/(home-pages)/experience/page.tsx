@@ -3,13 +3,11 @@ import BgGlassmorphism from '@/components/BgGlassmorphism'
 import ExperiencesCard from '@/components/ExperiencesCard'
 import HeroSectionWithSearchForm1 from '@/components/hero-sections/HeroSectionWithSearchForm1'
 import HeroSearchForm from '@/components/HeroSearchForm/HeroSearchForm'
-import SectionClientSay from '@/components/SectionClientSay'
 import SectionGridCategoryBox from '@/components/SectionGridCategoryBox'
 import SectionHowItWork from '@/components/SectionHowItWork'
 import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
 import { getExperienceCategories } from '@/data/categories'
 import { getExperienceListings } from '@/data/listings'
-import { getPublicTestimonials } from '@/data/reviews'
 import { getServerT } from '@/lib/locale-server'
 import heroImage from '@/images/hero-right-experience.png'
 import ButtonPrimary from '@/shared/ButtonPrimary'
@@ -28,10 +26,9 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function Home() {
-  const [categories, experienceListings, testimonials, t] = await Promise.all([
+  const [categories, experienceListings, t] = await Promise.all([
     getExperienceCategories(),
     getExperienceListings(),
-    getPublicTestimonials(),
     getServerT(),
   ])
   const hp = t.homePage
@@ -101,12 +98,6 @@ async function Home() {
           <SectionGridCategoryBox categories={categories.slice(0, 3)} />
         </div>
 
-        <Divider />
-
-        {/* Testimonios */}
-        <div className="relative py-10">
-          <SectionClientSay testimonials={testimonials.length > 0 ? testimonials : undefined} />
-        </div>
 
       </div>
     </main>

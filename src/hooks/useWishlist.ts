@@ -1,36 +1,16 @@
 'use client'
 
-import { HARDCODED_EXPERIENCES } from '@/data/listings'
 import { supabase } from '@/lib/supabase'
 import { useCallback, useEffect, useRef, useState } from 'react'
-
-const LOCAL_KEY = 'docoolture_wishlist_hardcoded'
-
-function getHardcodedLiked(): Set<string> {
-  try {
-    const raw = localStorage.getItem(LOCAL_KEY)
-    return new Set(raw ? (JSON.parse(raw) as string[]) : [])
-  } catch {
-    return new Set()
-  }
-}
-
-function saveHardcodedLiked(ids: Set<string>) {
-  try {
-    localStorage.setItem(LOCAL_KEY, JSON.stringify([...ids]))
-  } catch {}
-}
 
 export function useWishlist() {
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const profileIdRef = useRef<string | null>(null)
 
   const loadFromDb = useCallback(async () => {
-    const hardcodedLiked = getHardcodedLiked()
-
     const { data: { session } } = await supabase.auth.getSession()
     if (!session?.user) {
-      setLiked(hardcodedLiked)
+      setLiked(new Set())
       return
     }
 
@@ -41,7 +21,7 @@ export function useWishlist() {
       .single()
 
     if (!profile) {
-      setLiked(hardcodedLiked)
+      setLiked(new Set())
       return
     }
     profileIdRef.current = profile.id
@@ -53,8 +33,7 @@ export function useWishlist() {
 
     if (error) console.error('[useWishlist] load error:', error)
 
-    const supabaseLiked = new Set(rows?.map((r) => r.experience_id as string) ?? [])
-    setLiked(new Set([...supabaseLiked, ...hardcodedLiked]))
+    setLiked(new Set(rows?.map((r) => r.experience_id as string) ?? []))
   }, [])
 
   useEffect(() => {
@@ -64,7 +43,7 @@ export function useWishlist() {
       if (event === 'SIGNED_IN') loadFromDb()
       if (event === 'SIGNED_OUT') {
         profileIdRef.current = null
-        setLiked(getHardcodedLiked())
+        setLiked(new Set())
       }
     })
 
@@ -81,14 +60,6 @@ export function useWishlist() {
       isCurrentlyLiked ? next.delete(id) : next.add(id)
       return next
     })
-
-    // Experiencias hardcodeadas (no tienen registro real en Supabase todavía)
-    if (id in HARDCODED_EXPERIENCES) {
-      const current = getHardcodedLiked()
-      isCurrentlyLiked ? current.delete(id) : current.add(id)
-      saveHardcodedLiked(current)
-      return
-    }
 
     const profileId = profileIdRef.current
     if (!profileId) {
