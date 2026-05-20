@@ -34,7 +34,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
+  const [profileId, setProfileId] = useState<string | null>(null)
   const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
 
@@ -42,16 +42,16 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
     const loadUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
-      setUserId(user.id)
       setIsLoggedIn(true)
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('display_name, full_name, avatar_url')
+        .select('id, display_name, full_name, avatar_url')
         .eq('user_id', user.id)
         .single()
 
       if (profile) {
+        setProfileId(profile.id)
         setName(profile.display_name || profile.full_name || '')
         setUserAvatarUrl(profile.avatar_url ?? null)
       }
@@ -60,7 +60,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
   }, [])
 
   const handleSubmit = async () => {
-    if (!comment.trim() || !userId) return
+    if (!comment.trim() || !profileId) return
     setSubmitting(true)
     setError(null)
 
@@ -68,7 +68,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
       experience_id: experienceId,
       reviewer_name: name.trim(),
       reviewer_avatar_url: userAvatarUrl,
-      explorer_id: userId,
+      explorer_id: profileId,
       comment: comment.trim(),
       rating,
       is_visible: true,
@@ -161,7 +161,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
                 <ButtonCircle
                   className="size-12!"
                   onClick={handleSubmit}
-                  disabled={submitting || !comment.trim() || !userId}
+                  disabled={submitting || !comment.trim() || !profileId}
                 >
                   <ArrowRightIcon className="h-5 w-5 rtl:rotate-180" />
                 </ButtonCircle>
