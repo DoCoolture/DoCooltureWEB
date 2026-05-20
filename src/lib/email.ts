@@ -1,7 +1,5 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 const FROM = process.env.RESEND_FROM ?? 'DoCoolture <reservas@docoolture.com>'
 
 interface BookingEmailData {
@@ -18,6 +16,8 @@ interface BookingEmailData {
 
 export async function sendBookingNotificationEmail(data: BookingEmailData) {
   if (!process.env.RESEND_API_KEY) return
+
+  const resend = new Resend(process.env.RESEND_API_KEY)
 
   const formattedDate = new Date(data.bookingDate).toLocaleDateString('es-DO', {
     weekday: 'long',
