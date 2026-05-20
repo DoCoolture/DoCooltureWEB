@@ -63,7 +63,7 @@ export function ExperienceBookingSidebar({
           onDateChange={(d) => setHasDate(!!d)}
         />
         <div className="w-full border-b border-neutral-200 dark:border-neutral-700" />
-        <GuestsInputPopover className="flex-1" onChangeTotalGuests={setExplorerCount} />
+        <GuestsInputPopover className="flex-1" maxGuests={maxGuests} onChangeTotalGuests={setExplorerCount} />
       </Form>
 
       {/* DESGLOSE DINÁMICO */}

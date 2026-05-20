@@ -9,10 +9,11 @@ import { FC, useEffect, useState } from 'react'
 
 interface Props {
   className?: string
+  maxGuests?: number
   onChangeTotalGuests?: (total: number) => void
 }
 
-const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', onChangeTotalGuests }) => {
+const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', maxGuests = 10, onChangeTotalGuests }) => {
   const { t } = useLanguage()
   const hs = t.HeroSearchForm
   const [guestAdultsInputValue, setGuestAdultsInputValue] = useState(1)
@@ -65,7 +66,7 @@ const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', onChangeTotalGues
               defaultValue={guestAdultsInputValue}
               onChange={(value) => handleChangeData(value, 'guestAdults')}
               inputName="guestAdults"
-              max={10}
+              max={Math.max(1, maxGuests - guestChildrenInputValue)}
               min={1}
               label={hs['Adults']}
               description={hs['Ages 13 or above']}
@@ -75,7 +76,7 @@ const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', onChangeTotalGues
               defaultValue={guestChildrenInputValue}
               onChange={(value) => handleChangeData(value, 'guestChildren')}
               inputName="guestChildren"
-              max={4}
+              max={Math.max(0, maxGuests - guestAdultsInputValue)}
               min={0}
               label={hs['Children']}
               description={hs['Ages 2–12']}
@@ -85,7 +86,7 @@ const GuestsInputPopover: FC<Props> = ({ className = 'flex-1', onChangeTotalGues
               defaultValue={guestInfantsInputValue}
               onChange={(value) => handleChangeData(value, 'guestInfants')}
               inputName="guestInfants"
-              max={4}
+              max={maxGuests}
               min={0}
               label={hs['Infants']}
               description={hs['Ages 0–2']}
