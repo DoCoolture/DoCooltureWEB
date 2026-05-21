@@ -34,7 +34,7 @@ const CardCategoryBox1: FC<CardCategoryBox1Props> = ({ className = '', category 
         <h2 className="text-base font-medium">
           <span className="line-clamp-1">{name}</span>
         </h2>
-        <span className={`mt-2 block text-sm text-neutral-500 dark:text-neutral-400`}>19 minutes drive</span>
+        <span className={`mt-2 block text-sm text-neutral-500 dark:text-neutral-400`}>{count} {count === 1 ? 'experiencia' : 'experiencias'}</span>
       </div>
     </Link>
   )
