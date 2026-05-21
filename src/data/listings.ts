@@ -93,18 +93,21 @@ export const getCarListingByHandle = async (_handle: string): Promise<TCarListin
 export async function getExperienceListings() {
   const { data } = await supabase
     .from('experiences')
-    .select('*')
+    .select('*, hosts(display_name, user_id, profiles(avatar_url))')
     .eq('is_published', true)
     .eq('is_hidden', false)
     .order('created_at', { ascending: false })
 
-  const fromSupabase = (data ?? []).map((exp) => ({
+  const fromSupabase = (data ?? []).map((exp) => {
+    const host = (exp as any).hosts
+    const avatarUrl = host?.profiles?.avatar_url ?? ''
+    return ({
     id: exp.id,
     title: exp.title,
     handle: exp.handle,
     host: {
-      displayName: 'Anfitrión DoCoolture',
-      avatarUrl: '',
+      displayName: host?.display_name ?? 'Anfitrión DoCoolture',
+      avatarUrl,
       handle: exp.host_id,
     },
     listingCategory: exp.category,
@@ -126,7 +129,7 @@ export async function getExperienceListings() {
     saleOff: null as string | null,
     isAds: null as string | null,
     map: { lat: exp.latitude ?? 0, lng: exp.longitude ?? 0 },
-  }))
+  })})
 
   return fromSupabase
 }
