@@ -1,6 +1,7 @@
 'use client'
 
 import ButtonPrimary from '@/shared/ButtonPrimary'
+import LocationPickerMap from '@/components/LocationPickerMap'
 import { supabase, uploadExperienceImage } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
@@ -87,6 +88,8 @@ export default function NewExperiencePage() {
   const [address, setAddress] = useState('')
   const [addressPreset, setAddressPreset] = useState('')
   const [city, setCity] = useState('')
+  const [latitude, setLatitude] = useState<number | null>(null)
+  const [longitude, setLongitude] = useState<number | null>(null)
 
   // Paso 3
   const [priceUsd, setPriceUsd] = useState('')
@@ -254,6 +257,7 @@ export default function NewExperiencePage() {
         price_includes: priceIncludes, price_excludes: priceExcludes,
         featured_image_url: featuredImageUrl, gallery_urls: galleryUrls,
         available_days: availableDays, available_times: availableTimes,
+        latitude: latitude ?? null, longitude: longitude ?? null,
         is_published: true, is_hidden: false,
       })
       if (expError) throw expError
@@ -508,6 +512,19 @@ export default function NewExperiencePage() {
           />
         )}
         {errMsg('address')}
+      </div>
+
+      <div>
+        <label className={lc}>Ubicación en el mapa <span className="text-xs text-neutral-400">(recomendado)</span></label>
+        <p className="mb-1.5 text-xs text-neutral-400">Haz clic en el mapa para marcar exactamente dónde se realizará la experiencia.</p>
+        <LocationPickerMap
+          lat={latitude}
+          lng={longitude}
+          onChange={({ lat, lng }) => {
+            setLatitude(lat === 0 && lng === 0 ? null : lat)
+            setLongitude(lat === 0 && lng === 0 ? null : lng)
+          }}
+        />
       </div>
 
       <div>
