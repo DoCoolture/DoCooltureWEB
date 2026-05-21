@@ -56,13 +56,11 @@ export default function Footer2() {
     {
       label: f.headings.explore,
       links: [
+        { name: f.explore.viewMap,        href: '/experience-categories-map' },
         { name: f.explore.allExperiences, href: '/experience-categories/all' },
         { name: 'Punta Cana',             href: '/experience-categories/punta-cana' },
         { name: 'Santo Domingo',          href: '/experience-categories/santo-domingo' },
         { name: 'Samaná',                 href: '/experience-categories/samana' },
-        { name: 'Puerto Plata',           href: '/experience-categories/puerto-plata' },
-        { name: 'Jarabacoa',              href: '/experience-categories/jarabacoa' },
-        { name: f.explore.viewMap,        href: '/experience-categories-map' },
       ],
     },
     {
@@ -84,18 +82,17 @@ export default function Footer2() {
 
   return (
     <footer className="border-t border-neutral-100 dark:border-neutral-800">
-      <div className="container py-14 lg:py-20">
-        <div className="mx-auto max-w-5xl">
+      <div className="container py-8 lg:py-10">
 
-        <div className="grid grid-cols-1 gap-14 lg:grid-cols-[1fr_2fr]">
+        <div className="flex flex-col gap-8 lg:flex-row lg:items-start lg:justify-between">
 
           {/* Brand */}
-          <div className="flex flex-col gap-5">
-            <Logo className="w-20" />
-            <p className="max-w-[280px] text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+          <div className="flex flex-col gap-4">
+            <Logo className="w-16" />
+            <p className="max-w-[220px] text-xs leading-relaxed text-neutral-500 dark:text-neutral-400">
               {f.brand}
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {socialLinks.map((item) => (
                 <a
                   key={item.name}
@@ -105,25 +102,25 @@ export default function Footer2() {
                   className="text-neutral-400 transition-colors hover:text-neutral-700 dark:hover:text-neutral-200"
                 >
                   <span className="sr-only">{item.name}</span>
-                  <item.icon aria-hidden="true" className="size-[18px]" />
+                  <item.icon aria-hidden="true" className="size-4" />
                 </a>
               ))}
             </div>
           </div>
 
           {/* Nav columns */}
-          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+          <div className="grid grid-cols-2 gap-x-12 gap-y-6 sm:grid-cols-3 sm:gap-x-16">
             {cols.map((col) => (
               <div key={col.label}>
-                <p className="mb-5 text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
                   {col.label}
                 </p>
-                <ul className="space-y-3">
+                <ul className="space-y-2">
                   {col.links.map((link) => (
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-sm text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                        className="text-xs text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
                       >
                         {link.name}
                       </Link>
@@ -137,7 +134,7 @@ export default function Footer2() {
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-14 flex flex-col gap-1 border-t border-neutral-100 pt-8 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800">
+        <div className="mt-8 flex flex-col gap-1 border-t border-neutral-100 pt-5 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800">
           <p className="text-xs text-neutral-400 dark:text-neutral-500">
             &copy; {currentYear} DoCoolture &mdash; {f.rights}
           </p>
@@ -146,7 +143,6 @@ export default function Footer2() {
           </p>
         </div>
 
-        </div>
       </div>
     </footer>
   )
