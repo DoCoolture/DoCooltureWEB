@@ -23,14 +23,16 @@ const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings
     setCurrentHoverID(selectedID)
   }, [selectedID])
 
-  const mapCenter = listings.length > 0 ? listings[0].map : DEFAULT_CENTER
+  const validListings = listings.filter((l) => l.map.lat !== 0 && l.map.lng !== 0)
+  const firstValid = validListings[0]
+  const mapCenter = firstValid?.map ?? DEFAULT_CENTER
 
   return (
     <div className="fixed inset-0 top-0 z-40 flex-1/2 xl:static xl:z-0">
       <div className="fixed start-0 top-0 size-full overflow-hidden xl:sticky xl:top-0 xl:h-screen">
         <Map center={mapCenter} zoom={11}>
           <MapControls position="bottom-right" showZoom showFullscreen />
-          {listings.map((listing) => (
+          {validListings.map((listing) => (
             <MapMarker key={listing.id} longitude={listing.map.lng} latitude={listing.map.lat}>
               <MarkerContent>
                 <p

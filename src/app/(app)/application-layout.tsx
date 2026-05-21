@@ -17,7 +17,7 @@ const ApplicationLayout: React.FC<Props> = ({ children, header }) => {
   return (
     <Aside.Provider>
       {/* Desktop Header - Will be hidden on mobile devices  */}
-      <div className="relative z-20 hidden lg:block">{header ? header : <Header />}</div>
+      <div className="relative z-40 hidden lg:block">{header ? header : <Header />}</div>
       {/* HeroSearchFormMobile - will display on mobile devices instead of Header-desktop */}
       <div className="sticky top-0 z-20 bg-white shadow-xs lg:hidden dark:bg-neutral-900">
         <div className="container flex h-20 items-center justify-center">
