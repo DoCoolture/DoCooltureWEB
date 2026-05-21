@@ -119,7 +119,7 @@ const Page = async ({
               <span className="ms-2.5">{translatedRegion} </span>
               <span className="mx-5"></span>
               <HugeiconsIcon icon={HotAirBalloonIcon} size={20} color="currentColor" strokeWidth={1.5} />
-              <span className="ms-2.5">{convertNumbThousand(allListings.length)} {allListings.length !== 1 ? t.experienceFilters.experiences : t.experienceFilters.experience}</span>
+              <span className="ms-2.5">{convertNumbThousand(category.count)} {category.count !== 1 ? t.experienceFilters.experiences : t.experienceFilters.experience}</span>
             </div>
           }
         />
