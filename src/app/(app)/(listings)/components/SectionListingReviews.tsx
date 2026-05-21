@@ -38,6 +38,8 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
   const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [hasReviewed, setHasReviewed] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
+  const [existingReviewId, setExistingReviewId] = useState<string | null>(null)
 
   useEffect(() => {
     const loadUser = async () => {
@@ -58,52 +60,95 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
 
         const { data: existing } = await supabase
           .from('experience_reviews')
-          .select('id')
+          .select('id, rating, comment')
           .eq('experience_id', experienceId)
           .eq('explorer_id', profile.id)
           .maybeSingle()
 
-        if (existing) setHasReviewed(true)
+        if (existing) {
+          setHasReviewed(true)
+          setExistingReviewId(existing.id)
+          setRating(existing.rating)
+          setComment(existing.comment ?? '')
+        }
       }
     }
     loadUser()
   }, [experienceId])
 
   const handleSubmit = async () => {
-    if (!comment.trim() || !profileId) return
+    if (!profileId) return
     setSubmitting(true)
     setError(null)
 
-    const newReview = {
-      experience_id: experienceId,
-      reviewer_name: name.trim(),
-      reviewer_avatar_url: userAvatarUrl,
-      explorer_id: profileId,
-      comment: comment.trim(),
-      rating,
-      is_visible: true,
-    }
+    if (isEditing && existingReviewId) {
+      const { data, error: supabaseError } = await supabase
+        .from('experience_reviews')
+        .update({ comment: comment.trim(), rating })
+        .eq('id', existingReviewId)
+        .select()
+        .single()
 
-    const { data, error: supabaseError } = await supabase
-      .from('experience_reviews')
-      .insert(newReview)
-      .select()
-      .single()
+      if (supabaseError) {
+        setError(el.reviewError)
+      } else if (data) {
+        setReviews((prev) => {
+          const updated = prev.map((r) => r.id === existingReviewId ? (data as ExperienceReview) : r)
+          const avg = updated.reduce((sum, r) => sum + r.rating, 0) / updated.length
+          setCurrentReviewStart(Math.round(avg * 10) / 10)
+          return updated
+        })
+        setIsEditing(false)
+        setSubmitted(true)
+      }
+    } else {
+      const newReview = {
+        experience_id: experienceId,
+        reviewer_name: name.trim(),
+        reviewer_avatar_url: userAvatarUrl,
+        explorer_id: profileId,
+        comment: comment.trim(),
+        rating,
+        is_visible: true,
+      }
 
-    if (supabaseError) {
-      setError(el.reviewError)
-    } else if (data) {
-      setReviews((prev) => {
-        const updated = [data as ExperienceReview, ...prev]
-        const avg = updated.reduce((sum, r) => sum + r.rating, 0) / updated.length
-        setCurrentReviewStart(Math.round(avg * 10) / 10)
-        return updated
-      })
-      setSubmitted(true)
-      setHasReviewed(true)
-      setComment('')
+      const { data, error: supabaseError } = await supabase
+        .from('experience_reviews')
+        .insert(newReview)
+        .select()
+        .single()
+
+      if (supabaseError) {
+        setError(el.reviewError)
+      } else if (data) {
+        setReviews((prev) => {
+          const updated = [data as ExperienceReview, ...prev]
+          const avg = updated.reduce((sum, r) => sum + r.rating, 0) / updated.length
+          setCurrentReviewStart(Math.round(avg * 10) / 10)
+          return updated
+        })
+        setExistingReviewId((data as ExperienceReview).id)
+        setHasReviewed(true)
+        setSubmitted(true)
+      }
     }
     setSubmitting(false)
+  }
+
+  const handleDelete = async () => {
+    if (!existingReviewId || !confirm('¿Seguro que quieres eliminar tu reseña?')) return
+    await supabase.from('experience_reviews').delete().eq('id', existingReviewId)
+    setReviews((prev) => {
+      const updated = prev.filter((r) => r.id !== existingReviewId)
+      const avg = updated.length > 0 ? updated.reduce((sum, r) => sum + r.rating, 0) / updated.length : 0
+      setCurrentReviewStart(Math.round(avg * 10) / 10)
+      return updated
+    })
+    setHasReviewed(false)
+    setExistingReviewId(null)
+    setSubmitted(false)
+    setComment('')
+    setRating(5)
   }
 
   const displayRating = hovered || rating
@@ -132,21 +177,54 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
           <p className="text-sm text-neutral-500 dark:text-neutral-400">
             {el.loginToReview}
           </p>
-        ) : submitted ? (
-          <p className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
-            {el.thanksReview}
-          </p>
-        ) : hasReviewed ? (
-          <p className="rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
-            Ya dejaste una reseña para esta experiencia.
-          </p>
+        ) : submitted && !isEditing ? (
+          <div className="flex items-center justify-between rounded-xl bg-green-50 px-4 py-3 dark:bg-green-950">
+            <p className="text-sm text-green-700 dark:text-green-300">{el.thanksReview}</p>
+            <button
+              onClick={() => { setSubmitted(false); setIsEditing(true) }}
+              className="ml-4 shrink-0 text-xs font-medium text-green-700 underline dark:text-green-300"
+            >
+              Editar reseña
+            </button>
+          </div>
+        ) : hasReviewed && !isEditing ? (
+          <div className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3 dark:bg-neutral-800">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              Ya dejaste una reseña para esta experiencia.
+            </p>
+            <div className="ml-4 flex shrink-0 gap-x-3">
+              <button
+                onClick={() => setIsEditing(true)}
+                className="text-xs font-medium text-neutral-600 underline dark:text-neutral-400"
+              >
+                Editar
+              </button>
+              <button
+                onClick={handleDelete}
+                className="text-xs font-medium text-red-500 underline"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
         ) : (
           <div className="flex flex-col gap-3">
-            {name && (
-              <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                Reseñando como <span className="font-medium text-neutral-700 dark:text-neutral-200">{name}</span>
-              </p>
-            )}
+            <div className="flex items-center justify-between">
+              {name && (
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                  {isEditing ? 'Editando tu reseña' : 'Reseñando'} como{' '}
+                  <span className="font-medium text-neutral-700 dark:text-neutral-200">{name}</span>
+                </p>
+              )}
+              {isEditing && (
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="text-xs text-neutral-400 hover:text-neutral-600"
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
             {/* Star picker */}
             <div className="flex items-center gap-x-1 px-1">
               {[1, 2, 3, 4, 5].map((star) => (
