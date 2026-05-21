@@ -10,7 +10,7 @@ interface Props {
 }
 
 const ListingReview: FC<Props> = ({ className = '', review }) => {
-  const { reviewer_name, reviewer_avatar_url, comment, created_at, rating } = review
+  const { reviewer_name, reviewer_avatar_url, comment, created_at, rating, host_reply, host_replied_at } = review
   const date = new Date(created_at).toLocaleDateString('es-DO', {
     year: 'numeric',
     month: 'long',
@@ -40,6 +40,17 @@ const ListingReview: FC<Props> = ({ className = '', review }) => {
           <p className="mt-2 block max-w-xl text-sm/relaxed text-neutral-700 sm:text-base/relaxed dark:text-neutral-300">
             {comment}
           </p>
+        )}
+        {host_reply && (
+          <div className="mt-1 rounded-xl bg-neutral-50 px-4 py-3 dark:bg-neutral-800">
+            <p className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Respuesta del anfitrión</p>
+            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">{host_reply}</p>
+            {host_replied_at && (
+              <p className="mt-1 text-xs text-neutral-400">
+                {new Date(host_replied_at).toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric' })}
+              </p>
+            )}
+          </div>
         )}
       </div>
     </div>

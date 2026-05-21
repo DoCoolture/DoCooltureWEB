@@ -37,6 +37,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
   const [profileId, setProfileId] = useState<string | null>(null)
   const [userAvatarUrl, setUserAvatarUrl] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [hasReviewed, setHasReviewed] = useState(false)
 
   useEffect(() => {
     const loadUser = async () => {
@@ -54,10 +55,19 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
         setProfileId(profile.id)
         setName(profile.display_name || profile.full_name || '')
         setUserAvatarUrl(profile.avatar_url ?? null)
+
+        const { data: existing } = await supabase
+          .from('experience_reviews')
+          .select('id')
+          .eq('experience_id', experienceId)
+          .eq('explorer_id', profile.id)
+          .maybeSingle()
+
+        if (existing) setHasReviewed(true)
       }
     }
     loadUser()
-  }, [])
+  }, [experienceId])
 
   const handleSubmit = async () => {
     if (!comment.trim() || !profileId) return
@@ -90,6 +100,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
         return updated
       })
       setSubmitted(true)
+      setHasReviewed(true)
       setComment('')
     }
     setSubmitting(false)
@@ -125,8 +136,17 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
           <p className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
             {el.thanksReview}
           </p>
+        ) : hasReviewed ? (
+          <p className="rounded-xl bg-neutral-50 px-4 py-3 text-sm text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+            Ya dejaste una reseña para esta experiencia.
+          </p>
         ) : (
           <div className="flex flex-col gap-3">
+            {name && (
+              <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                Reseñando como <span className="font-medium text-neutral-700 dark:text-neutral-200">{name}</span>
+              </p>
+            )}
             {/* Star picker */}
             <div className="flex items-center gap-x-1 px-1">
               {[1, 2, 3, 4, 5].map((star) => (
@@ -161,7 +181,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
                 <ButtonCircle
                   className="size-12!"
                   onClick={handleSubmit}
-                  disabled={submitting || !comment.trim() || !profileId}
+                  disabled={submitting || !profileId}
                 >
                   <ArrowRightIcon className="h-5 w-5 rtl:rotate-180" />
                 </ButtonCircle>

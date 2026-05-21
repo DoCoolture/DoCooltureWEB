@@ -153,12 +153,18 @@ export default function HostDashboardPage() {
             Bienvenido a tu panel de anfitrión
           </p>
         </div>
-        <div className="flex gap-x-3">
+        <div className="flex flex-wrap gap-x-3 gap-y-2">
           <button
             onClick={() => router.push('/host/profile')}
             className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
           >
             Editar perfil
+          </button>
+          <button
+            onClick={() => router.push('/host/reviews')}
+            className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
+          >
+            ⭐ Ver reseñas
           </button>
           <ButtonPrimary onClick={() => router.push('/host/experiences/new')}>
             + Nueva experiencia
