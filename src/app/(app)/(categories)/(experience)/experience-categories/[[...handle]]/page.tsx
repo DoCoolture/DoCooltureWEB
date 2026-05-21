@@ -60,8 +60,10 @@ const Page = async ({
   }
 
   // Parse active filters from URL (values like 'food_drink', 'outdoor', etc.)
-  const activeTypes = (sp.experienceType as string | undefined)?.split(',').filter(Boolean) ?? []
-  const page = Math.max(1, Number(sp.page) || 1)
+  const activeTypes   = (sp.experienceType as string | undefined)?.split(',').filter(Boolean) ?? []
+  const page          = Math.max(1, Number(sp.page) || 1)
+  const locationQuery = ((sp.location as string | undefined) ?? '').trim()
+  const guestsMin     = Number(sp.guests) || 0
 
   // Filter listings
   let filteredListings = allListings
@@ -72,6 +74,20 @@ const Page = async ({
     filteredListings = filteredListings.filter((listing) =>
       listing.address?.toLowerCase().includes(cityName)
     )
+  }
+
+  // Filter by location search (from search form)
+  if (locationQuery && category.handle === 'all') {
+    const parts = locationQuery.toLowerCase().split(',').map((p) => p.trim()).filter(Boolean)
+    filteredListings = filteredListings.filter((listing) => {
+      const addr = listing.address?.toLowerCase() ?? ''
+      return parts.some((part) => addr.includes(part))
+    })
+  }
+
+  // Filter by guest count
+  if (guestsMin > 0) {
+    filteredListings = filteredListings.filter((listing) => listing.maxGuests >= guestsMin)
   }
 
   // Filter by experience type

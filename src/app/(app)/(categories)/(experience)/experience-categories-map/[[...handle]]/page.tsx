@@ -76,6 +76,8 @@ const Page = async ({
   const priceMin        = Number(sp.price_min) || 0
   const priceMax        = Number(sp.price_max) || Infinity
   const page            = Math.max(1, Number(sp.page) || 1)
+  const locationQuery   = ((sp.location as string | undefined) ?? '').trim()
+  const guestsMin       = Number(sp.guests) || 0
 
   // Filter listings
   let filteredListings = allListings
@@ -86,6 +88,20 @@ const Page = async ({
     filteredListings = filteredListings.filter((listing) =>
       listing.address?.toLowerCase().includes(cityName)
     )
+  }
+
+  // Filter by location search (from search form)
+  if (locationQuery && category.handle === 'all') {
+    const parts = locationQuery.toLowerCase().split(',').map((p) => p.trim()).filter(Boolean)
+    filteredListings = filteredListings.filter((listing) => {
+      const addr = listing.address?.toLowerCase() ?? ''
+      return parts.some((part) => addr.includes(part))
+    })
+  }
+
+  // Filter by guest count
+  if (guestsMin > 0) {
+    filteredListings = filteredListings.filter((listing) => listing.maxGuests >= guestsMin)
   }
 
   if (activeTypes.length > 0) {
