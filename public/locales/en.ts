@@ -809,17 +809,14 @@ export const en = {
     rights: 'All rights reserved.',
     madeWith: 'Made with ❤️ in the Dominican Republic',
     headings: {
-      explore: 'Explore',
+      explore: 'Destinations',
       hosts: 'Hosts',
       company: 'Company',
       legal: 'Legal',
     },
     explore: {
       allExperiences: 'All experiences',
-      food: 'Gastronomy',
-      nature: 'Nature & adventure',
-      arts: 'Art & culture',
-      history: 'Historic tours',
+      viewMap: 'View experiences map',
     },
     hosts: {
       becomeHost: 'Become a host',

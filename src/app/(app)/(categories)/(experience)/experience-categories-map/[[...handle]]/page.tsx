@@ -141,6 +141,7 @@ const Page = async ({
     <div className="container xl:max-w-none xl:pe-0 2xl:ps-10">
       <SectionGridHasMap
         listings={paginatedListings}
+        mapListings={filteredListings}
         allListingsCount={totalListings}
         category={category}
         filterOptions={augmentedFilterOptions}

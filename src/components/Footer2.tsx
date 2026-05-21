@@ -52,125 +52,100 @@ export default function Footer2() {
   const f = t.footer
   const currentYear = new Date().getFullYear()
 
-  const navigation = {
-    explorar: [
-      { name: f.explore.allExperiences, href: '/experience-categories/all' },
-      { name: f.explore.food,           href: '/experience-categories/all?category=food_drink' },
-      { name: f.explore.nature,         href: '/experience-categories/all?category=outdoor' },
-      { name: f.explore.arts,           href: '/experience-categories/all?category=arts_culture' },
-      { name: f.explore.history,        href: '/experience-categories/all?category=history' },
-    ],
-    anfitriones: [
-      { name: f.hosts.becomeHost, href: '/become-host' },
-    ],
-    compania: [
-      { name: f.company.about, href: '/about' },
-    ],
-    legal: [
-      { name: f.legal.terms,   href: '/terms' },
-      { name: f.legal.privacy, href: '/privacy' },
-      { name: f.legal.cookies, href: '/cookies' },
-    ],
-  }
+  const cols = [
+    {
+      label: f.headings.explore,
+      links: [
+        { name: f.explore.allExperiences, href: '/experience-categories/all' },
+        { name: 'Punta Cana',             href: '/experience-categories/punta-cana' },
+        { name: 'Santo Domingo',          href: '/experience-categories/santo-domingo' },
+        { name: 'Samaná',                 href: '/experience-categories/samana' },
+        { name: 'Puerto Plata',           href: '/experience-categories/puerto-plata' },
+        { name: 'Jarabacoa',              href: '/experience-categories/jarabacoa' },
+        { name: f.explore.viewMap,        href: '/experience-categories-map' },
+      ],
+    },
+    {
+      label: f.headings.hosts,
+      links: [
+        { name: f.hosts.becomeHost, href: '/become-host' },
+        { name: f.company.about,    href: '/about' },
+      ],
+    },
+    {
+      label: f.headings.legal,
+      links: [
+        { name: f.legal.terms,   href: '/terms' },
+        { name: f.legal.privacy, href: '/privacy' },
+        { name: f.legal.cookies, href: '/cookies' },
+      ],
+    },
+  ]
 
   return (
-    <footer className="border-t border-neutral-200 dark:border-neutral-700">
-      <div className="container pt-16 pb-8 sm:pt-24 lg:pt-32">
-        <div className="xl:grid xl:grid-cols-3 xl:gap-8">
+    <footer className="border-t border-neutral-100 dark:border-neutral-800">
+      <div className="container py-14 lg:py-20">
+        <div className="mx-auto max-w-5xl">
+
+        <div className="grid grid-cols-1 gap-14 lg:grid-cols-[1fr_2fr]">
 
           {/* Brand */}
-          <div className="space-y-8">
-            <Logo className="w-24" />
-            <p className="text-sm/6 text-balance text-neutral-600 dark:text-neutral-400">
+          <div className="flex flex-col gap-5">
+            <Logo className="w-20" />
+            <p className="max-w-[280px] text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
               {f.brand}
             </p>
-            <div className="flex gap-x-5">
+            <div className="flex items-center gap-4">
               {socialLinks.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-neutral-500 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200 transition-colors"
+                  className="text-neutral-400 transition-colors hover:text-neutral-700 dark:hover:text-neutral-200"
                 >
                   <span className="sr-only">{item.name}</span>
-                  <item.icon aria-hidden="true" className="size-5" />
+                  <item.icon aria-hidden="true" className="size-[18px]" />
                 </a>
               ))}
             </div>
           </div>
 
-          {/* Links */}
-          <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
-            <div className="md:grid md:grid-cols-2 md:gap-8">
-
-              <div>
-                <h3 className="text-sm/6 font-semibold text-neutral-900 dark:text-neutral-100">{f.headings.explore}</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  {navigation.explorar.map((item) => (
-                    <li key={item.href}>
-                      <Link href={item.href} className="text-sm/6 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors">
-                        {item.name}
+          {/* Nav columns */}
+          <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+            {cols.map((col) => (
+              <div key={col.label}>
+                <p className="mb-5 text-[10px] font-semibold uppercase tracking-widest text-neutral-400 dark:text-neutral-500">
+                  {col.label}
+                </p>
+                <ul className="space-y-3">
+                  {col.links.map((link) => (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        className="text-sm text-neutral-500 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                      >
+                        {link.name}
                       </Link>
                     </li>
                   ))}
                 </ul>
               </div>
-
-              <div className="mt-10 md:mt-0">
-                <h3 className="text-sm/6 font-semibold text-neutral-900 dark:text-neutral-100">{f.headings.hosts}</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  {navigation.anfitriones.map((item) => (
-                    <li key={item.href}>
-                      <Link href={item.href} className="text-sm/6 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors">
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-            </div>
-            <div className="md:grid md:grid-cols-2 md:gap-8">
-
-              <div>
-                <h3 className="text-sm/6 font-semibold text-neutral-900 dark:text-neutral-100">{f.headings.company}</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  {navigation.compania.map((item) => (
-                    <li key={item.href}>
-                      <Link href={item.href} className="text-sm/6 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors">
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-10 md:mt-0">
-                <h3 className="text-sm/6 font-semibold text-neutral-900 dark:text-neutral-100">{f.headings.legal}</h3>
-                <ul role="list" className="mt-6 space-y-4">
-                  {navigation.legal.map((item) => (
-                    <li key={item.href}>
-                      <Link href={item.href} className="text-sm/6 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100 transition-colors">
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-            </div>
+            ))}
           </div>
+
         </div>
 
         {/* Bottom bar */}
-        <div className="mt-16 border-t border-neutral-200 dark:border-neutral-700 pt-8 sm:mt-20 lg:mt-24 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <p className="text-sm/6 text-neutral-500 dark:text-neutral-400">
-            &copy; {currentYear} DoCoolture. {f.rights}
+        <div className="mt-14 flex flex-col gap-1 border-t border-neutral-100 pt-8 sm:flex-row sm:items-center sm:justify-between dark:border-neutral-800">
+          <p className="text-xs text-neutral-400 dark:text-neutral-500">
+            &copy; {currentYear} DoCoolture &mdash; {f.rights}
           </p>
-          <p className="text-sm/6 text-neutral-400 dark:text-neutral-500">
+          <p className="text-xs text-neutral-300 dark:text-neutral-600">
             {f.madeWith}
           </p>
+        </div>
+
         </div>
       </div>
     </footer>

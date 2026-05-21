@@ -5,7 +5,7 @@ import HeroSectionWithSearchForm1 from '@/components/hero-sections/HeroSectionWi
 import HeroSearchForm from '@/components/HeroSearchForm/HeroSearchForm'
 import SectionHowItWork from '@/components/SectionHowItWork'
 import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
-import { getAllExperienceDestinations } from '@/data/categories'
+import { getExperienceCategories } from '@/data/categories'
 import { getExperienceListings, TExperienceListing } from '@/data/listings'
 import { getServerT } from '@/lib/locale-server'
 import heroImage from '@/images/hero-right-experience.png'
@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function Home() {
   const [categories, experienceListings, t] = await Promise.all([
-    getAllExperienceDestinations(),
+    getExperienceCategories(),
     getExperienceListings(),
     getServerT(),
   ])

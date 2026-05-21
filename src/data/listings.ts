@@ -90,6 +90,51 @@ export async function getCarListings(): Promise<TCarListing[]> {
 export const getCarListingByHandle = async (_handle: string): Promise<TCarListing | null> => null
 
 
+const CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
+  'punta cana':               { lat: 18.5820, lng: -68.4054 },
+  'bávaro':                   { lat: 18.7171, lng: -68.4552 },
+  'bavaro':                   { lat: 18.7171, lng: -68.4552 },
+  'santo domingo':            { lat: 18.4861, lng: -69.9312 },
+  'santiago':                 { lat: 19.4517, lng: -70.6970 },
+  'puerto plata':             { lat: 19.7885, lng: -70.6889 },
+  'samaná':                   { lat: 19.2057, lng: -69.3369 },
+  'samana':                   { lat: 19.2057, lng: -69.3369 },
+  'las terrenas':             { lat: 19.3114, lng: -69.5436 },
+  'la romana':                { lat: 18.4267, lng: -68.9728 },
+  'jarabacoa':                { lat: 19.1183, lng: -70.6398 },
+  'constanza':                { lat: 18.9059, lng: -70.7468 },
+  'barahona':                 { lat: 18.2092, lng: -71.1011 },
+  'cabarete':                 { lat: 19.7584, lng: -70.4094 },
+  'sosúa':                    { lat: 19.7617, lng: -70.5178 },
+  'sosua':                    { lat: 19.7617, lng: -70.5178 },
+  'boca chica':               { lat: 18.4569, lng: -69.6105 },
+  'juan dolio':               { lat: 18.4548, lng: -69.4315 },
+  'la vega':                  { lat: 19.2244, lng: -70.5290 },
+  'higüey':                   { lat: 18.6149, lng: -68.7070 },
+  'higuey':                   { lat: 18.6149, lng: -68.7070 },
+  'nagua':                    { lat: 19.3760, lng: -69.8441 },
+  'río san juan':             { lat: 19.6360, lng: -70.0793 },
+  'rio san juan':             { lat: 19.6360, lng: -70.0793 },
+  'miches':                   { lat: 18.9786, lng: -69.0430 },
+  'pedernales':               { lat: 18.0379, lng: -71.7441 },
+  'monte cristi':             { lat: 19.8574, lng: -71.6506 },
+  'neyba':                    { lat: 18.4822, lng: -71.4171 },
+  'san pedro de macorís':     { lat: 18.4565, lng: -69.3059 },
+  'san pedro de macoris':     { lat: 18.4565, lng: -69.3059 },
+  'san francisco de macorís': { lat: 19.2990, lng: -70.2527 },
+  'san francisco de macoris': { lat: 19.2990, lng: -70.2527 },
+  'moca':                     { lat: 19.3930, lng: -70.5234 },
+  'bonao':                    { lat: 18.9389, lng: -70.4082 },
+}
+
+function cityCoordsFallback(address: string): { lat: number; lng: number } | null {
+  const lower = address.toLowerCase()
+  for (const [city, coords] of Object.entries(CITY_CENTERS)) {
+    if (lower.includes(city)) return coords
+  }
+  return null
+}
+
 export async function getExperienceListings() {
   const { data } = await supabase
     .from('experiences')
@@ -128,7 +173,9 @@ export async function getExperienceListings() {
     maxGuests: exp.max_guests,
     saleOff: null as string | null,
     isAds: null as string | null,
-    map: { lat: exp.latitude ?? 0, lng: exp.longitude ?? 0 },
+    map: exp.latitude && exp.longitude
+      ? { lat: exp.latitude, lng: exp.longitude }
+      : (cityCoordsFallback(exp.address ?? '') ?? { lat: 0, lng: 0 }),
   })})
 
   return fromSupabase

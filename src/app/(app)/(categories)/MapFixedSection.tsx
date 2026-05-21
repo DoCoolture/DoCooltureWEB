@@ -11,11 +11,12 @@ interface Props {
   currentHoverID: string
   listings: TExperienceListing[]
   closeButtonHref: string
+  isAllView?: boolean
 }
 
 const DEFAULT_CENTER = { lat: 18.4861, lng: -69.9312 }
 
-const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings }: Props) => {
+const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings, isAllView }: Props) => {
   const { t } = useLanguage()
   const [currentHoverID, setCurrentHoverID] = useState<string>('')
 
@@ -26,11 +27,12 @@ const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings
   const validListings = listings.filter((l) => l.map.lat !== 0 && l.map.lng !== 0)
   const firstValid = validListings[0]
   const mapCenter = firstValid?.map ?? DEFAULT_CENTER
+  const zoom = isAllView ? 8 : 11
 
   return (
     <div className="fixed inset-0 top-0 z-40 flex-1/2 xl:static xl:z-0">
       <div className="fixed start-0 top-0 size-full overflow-hidden xl:sticky xl:top-0 xl:h-screen">
-        <Map center={mapCenter} zoom={11}>
+        <Map center={mapCenter} zoom={zoom}>
           <MapControls position="bottom-right" showZoom showFullscreen />
           {validListings.map((listing) => (
             <MapMarker key={listing.id} longitude={listing.map.lng} latitude={listing.map.lat}>

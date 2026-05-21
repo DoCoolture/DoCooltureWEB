@@ -15,6 +15,7 @@ import MapFixedSection from '../../../MapFixedSection'
 interface Props {
   className?: string
   listings: TExperienceListing[]
+  mapListings: TExperienceListing[]
   allListingsCount: number
   category: TExperienceCategory
   filterOptions: Awaited<ReturnType<typeof getExperienceListingFilterOptions>>
@@ -25,6 +26,7 @@ interface Props {
 const SectionGridHasMap: FC<Props> = ({
   className,
   listings,
+  mapListings,
   allListingsCount,
   category,
   filterOptions,
@@ -72,7 +74,8 @@ const SectionGridHasMap: FC<Props> = ({
       <MapFixedSection
         closeButtonHref={`/experience-categories/${category.handle}#heading`}
         currentHoverID={currentHoverID}
-        listings={listings}
+        listings={mapListings}
+        isAllView={category.handle === 'all'}
       />
     </div>
   )
