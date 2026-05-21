@@ -5,8 +5,8 @@ import HeroSectionWithSearchForm1 from '@/components/hero-sections/HeroSectionWi
 import HeroSearchForm from '@/components/HeroSearchForm/HeroSearchForm'
 import SectionHowItWork from '@/components/SectionHowItWork'
 import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
-import { getExperienceCategories } from '@/data/categories'
-import { getExperienceListings } from '@/data/listings'
+import { getAllExperienceDestinations } from '@/data/categories'
+import { getExperienceListings, TExperienceListing } from '@/data/listings'
 import { getServerT } from '@/lib/locale-server'
 import heroImage from '@/images/hero-right-experience.png'
 import ButtonPrimary from '@/shared/ButtonPrimary'
@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function Home() {
   const [categories, experienceListings, t] = await Promise.all([
-    getExperienceCategories(),
+    getAllExperienceDestinations(),
     getExperienceListings(),
     getServerT(),
   ])
@@ -73,7 +73,7 @@ async function Home() {
             {hp.featuredExperiences}
           </HeadingWithSub>
           <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 md:gap-x-8 md:gap-y-12 lg:mt-10 lg:grid-cols-3 xl:grid-cols-4">
-            {experienceListings.map((listing) => (
+            {experienceListings.map((listing: TExperienceListing) => (
               <ExperiencesCard key={listing.id} data={listing} />
             ))}
           </div>
