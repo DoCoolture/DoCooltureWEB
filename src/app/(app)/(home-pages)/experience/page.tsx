@@ -3,7 +3,6 @@ import BgGlassmorphism from '@/components/BgGlassmorphism'
 import ExperiencesCard from '@/components/ExperiencesCard'
 import HeroSectionWithSearchForm1 from '@/components/hero-sections/HeroSectionWithSearchForm1'
 import HeroSearchForm from '@/components/HeroSearchForm/HeroSearchForm'
-import SectionGridCategoryBox from '@/components/SectionGridCategoryBox'
 import SectionHowItWork from '@/components/SectionHowItWork'
 import SectionSliderNewCategories from '@/components/SectionSliderNewCategories'
 import { getExperienceCategories } from '@/data/categories'
@@ -11,7 +10,6 @@ import { getExperienceListings } from '@/data/listings'
 import { getServerT } from '@/lib/locale-server'
 import heroImage from '@/images/hero-right-experience.png'
 import ButtonPrimary from '@/shared/ButtonPrimary'
-import { Divider } from '@/shared/divider'
 import HeadingWithSub from '@/shared/Heading'
 import { ArrowRight02Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
@@ -56,10 +54,10 @@ async function Home() {
           }
         />
 
-        {/* Explora por categorías */}
+        {/* Explora por destino */}
         <div>
-          <HeadingWithSub subheading={hp.exploreByCategorySubheading}>
-            {hp.exploreByCategory}
+          <HeadingWithSub subheading={hp.exploreByDestinationSubheading}>
+            {hp.exploreByDestination}
           </HeadingWithSub>
           <SectionSliderNewCategories
             itemClassName="w-[17rem] lg:w-1/3 xl:w-1/4"
@@ -89,15 +87,6 @@ async function Home() {
 
         {/* Cómo funciona */}
         <SectionHowItWork />
-
-        {/* Explora por destino */}
-        <div>
-          <HeadingWithSub isCenter subheading={hp.exploreByDestinationSubheading}>
-            {hp.exploreByDestination}
-          </HeadingWithSub>
-          <SectionGridCategoryBox categories={categories.slice(0, 3)} />
-        </div>
-
 
       </div>
     </main>

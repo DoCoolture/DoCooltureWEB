@@ -433,6 +433,7 @@ export const it = {
     termsDisclaimer: 'Confermando accetti i',
     termsLink: 'termini e condizioni di DoCoolture.',
     bookNow: 'Prenota ora',
+    selectDateToContinue: 'Seleziona una data per continuare',
     explorer: 'esploratore',
     explorers: 'esploratori',
     maxGuests: 'Massimo per gruppo:',

@@ -97,7 +97,7 @@ export async function sendBookingNotificationEmail(data: BookingEmailData) {
       </div>
 
       <div style="text-align:center;">
-        <a href="https://docoolture.com/host/dashboard" style="display:inline-block;background:#1a1a2e;color:#ffffff;padding:14px 32px;border-radius:100px;text-decoration:none;font-size:14px;font-weight:600;">
+        <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://docoolture.com'}/host/dashboard" style="display:inline-block;background:#1a1a2e;color:#ffffff;padding:14px 32px;border-radius:100px;text-decoration:none;font-size:14px;font-weight:600;">
           Ver en mi panel →
         </a>
       </div>

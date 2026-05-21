@@ -433,6 +433,7 @@ export const en = {
     termsDisclaimer: 'By confirming you accept the',
     termsLink: 'DoCoolture terms and conditions.',
     bookNow: 'Book now',
+    selectDateToContinue: 'Select a date to continue',
     explorer: 'explorer',
     explorers: 'explorers',
     maxGuests: 'Maximum per group:',

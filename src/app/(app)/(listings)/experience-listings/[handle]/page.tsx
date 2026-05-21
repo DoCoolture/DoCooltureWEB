@@ -46,15 +46,12 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
     description,
     featuredImage,
     galleryImgs,
-    isAds,
-    like,
     listingCategory,
     map,
     maxGuests,
     price,
     reviewCount,
     reviewStart,
-    saleOff,
     title,
     host,
     durationTime,
@@ -69,7 +66,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const resolvedDescription = isHardcoded ? el.tasteDescription : description
   const resolvedHost = isHardcoded
     ? { ...host, description: el.hostBio, responseTime: el.hostResponseTime, joinedDate: el.hostJoinedDate }
-    : host
+    : { ...host, responseTime: host.responseTime || el.hostResponseTime }
 
   // Translate category using the categoryMap (Spanish DB value → locale label)
   const categoryMap = el.categoryMap as Record<string, string>
@@ -91,7 +88,6 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
     const endDate = formData.get('endDate') as string
     const guestAdults = formData.get('guestAdults') as string
     const guestChildren = formData.get('guestChildren') as string
-    const guestInfants = formData.get('guestInfants') as string
 
     const totalExplorers =
       (Number(guestAdults) || 1) + (Number(guestChildren) || 0)

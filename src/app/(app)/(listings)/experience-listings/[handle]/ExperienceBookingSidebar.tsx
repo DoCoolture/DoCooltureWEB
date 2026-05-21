@@ -96,7 +96,7 @@ export function ExperienceBookingSidebar({
       {/* BOTÓN RESERVAR */}
       {!hasDate && (
         <p className="text-center text-sm text-amber-600 dark:text-amber-400">
-          📅 Selecciona una fecha para continuar
+          📅 {t.booking.selectDateToContinue}
         </p>
       )}
       <ButtonPrimary

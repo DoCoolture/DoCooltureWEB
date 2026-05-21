@@ -26,7 +26,7 @@ const CardCategory4: FC<CardCategory4Props> = ({ className = '', category }) => 
       <div className="mt-4 truncate px-2 text-center">
         <h2 className={`truncate text-base font-medium text-neutral-900 lg:text-lg dark:text-neutral-100`}>{name}</h2>
         <span className={`mt-2 block text-sm text-neutral-600 dark:text-neutral-400`}>
-          {convertNumbThousand(count || 0)}+ properties
+          {convertNumbThousand(count || 0)}+ experiencias
         </span>
       </div>
     </Link>

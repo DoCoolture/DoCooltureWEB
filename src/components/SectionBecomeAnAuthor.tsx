@@ -16,8 +16,8 @@ interface SectionBecomeAnAuthorProps {
 const SectionBecomeAnAuthor: FC<SectionBecomeAnAuthorProps> = ({
   className = '',
   rightImg = rightImgDemo,
-  heading = 'Become a host with us.',
-  subHeading = 'With DoCoolture, booking resorts, villas, hotels, private homes, and apartments becomes quick, convenient, and easy.',
+  heading = 'Conviértete en anfitrión con nosotros.',
+  subHeading = 'Con DoCoolture, comparte tus experiencias culturales únicas y conecta con explorers de todo el mundo.',
 }) => {
   return (
     <div className={`relative flex flex-col items-center lg:flex-row ${className}`}>

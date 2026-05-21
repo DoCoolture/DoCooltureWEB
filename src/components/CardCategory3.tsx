@@ -32,7 +32,7 @@ const CardCategory3: FC<CardCategory3Props> = ({ className = '', category }) => 
           <span className="line-clamp-1">{name}</span>
         </h2>
         <span className={`mt-1.5 block text-sm text-neutral-600 dark:text-neutral-400`}>
-          {convertNumbThousand(count || 0)}+ properties
+          {convertNumbThousand(count || 0)}+ experiencias
         </span>
       </div>
     </div>
