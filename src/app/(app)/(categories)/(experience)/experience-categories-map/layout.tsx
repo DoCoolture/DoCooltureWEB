@@ -1,5 +1,5 @@
 import { ApplicationLayout } from '@/app/(app)/application-layout'
-import Header3 from '@/components/Header/Header3'
+import Header3 from '@/components/Header/Header3Server'
 import { ReactNode, Suspense } from 'react'
 
 const Layout = async ({ children }: { children: ReactNode }) => {

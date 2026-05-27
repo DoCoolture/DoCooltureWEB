@@ -1,6 +1,7 @@
 'use client'
 
 import { useLanguage } from '@/context/LanguageContext'
+import { getCurrencies, getLanguages } from '@/data/navigation'
 import { useInteractOutside } from '@/hooks/useInteractOutside'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/shared/Button'
@@ -14,13 +15,15 @@ import { useSearchParams } from 'next/navigation'
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import HeroSearchFormSmall from '../HeroSearchForm/HeroSearchFormSmall'
 import AvatarDropdown from './AvatarDropdown'
-import HamburgerBtnMenu from './HamburgerBtnMenu'
+import CurrLangDropdown from './CurrLangDropdown'
 import NotifyDropdown from './NotifyDropdown'
 
 interface Header3Props {
   hasBorderBottom?: boolean
   className?: string
   initSearchFormTab: ListingType
+  currencies: Awaited<ReturnType<typeof getCurrencies>>
+  languages: Awaited<ReturnType<typeof getLanguages>>
 }
 
 const formatShortDate = (dateStr: string) => {
@@ -31,7 +34,7 @@ const formatShortDate = (dateStr: string) => {
   }
 }
 
-const Header3: FC<Header3Props> = ({ className, hasBorderBottom = true, initSearchFormTab = 'Stays' }) => {
+const Header3: FC<Header3Props> = ({ className, hasBorderBottom = true, initSearchFormTab = 'Stays', currencies, languages }) => {
   const { t } = useLanguage()
   const headerInnerRef = useRef<HTMLDivElement>(null)
   const [showHeroSearch, setShowHeroSearch] = useState<boolean>(false)
@@ -197,9 +200,9 @@ const Header3: FC<Header3Props> = ({ className, hasBorderBottom = true, initSear
                 </div>
               )}
 
+              <CurrLangDropdown currencies={currencies} languages={languages} />
               <NotifyDropdown />
               <AvatarDropdown />
-              <HamburgerBtnMenu />
             </div>
           </div>
         </div>

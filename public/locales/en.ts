@@ -461,7 +461,7 @@ export const en = {
     title: 'Contact Us',
     heading: 'Get in touch',
     address: { label: '🗺 ADDRESS', value: 'Santo Domingo, Dominican Republic' },
-    email: { label: '💌 EMAIL', value: 'hola@docoolture.com' },
+    email: { label: '💌 EMAIL', value: 'info@docoolture.com' },
     phone: { label: '☎ PHONE', value: '+1 (809) 555-0100' },
     socials: '🌏 SOCIALS',
     form: {
@@ -737,7 +737,7 @@ export const en = {
     experiences: 'experiences',
   },
   legalPages: {
-    lastUpdated: 'Last updated: May 2025',
+    lastUpdated: 'Last updated: May 2026',
     terms: {
       title: 'Terms of Service',
       metaTitle: 'Terms of Service — DoCoolture',
@@ -754,7 +754,7 @@ export const en = {
         { title: '8. Platform content', content: 'All content published on DoCoolture, including texts, images and trademarks, is protected by copyright. Reproducing, distributing or modifying this content without express authorization is not permitted. Users retain rights over content they publish, but grant DoCoolture a non-exclusive license to use it for operational and promotional purposes.' },
         { title: '9. Limitation of liability', content: 'DoCoolture will not be liable for direct, indirect, incidental or consequential damages arising from the use of the platform or participation in experiences. DoCoolture\'s maximum liability will not exceed the amount paid for the booking in question.' },
         { title: '10. Applicable law', content: 'These terms are governed by the laws of the Dominican Republic. Any dispute will be resolved before the competent courts of Santo Domingo, Dominican Republic, unless the parties expressly agree to mediation or arbitration.' },
-        { title: '11. Contact', content: 'If you have questions about these Terms of Service, you can contact us at: hola@docoolture.com' },
+        { title: '11. Contact', content: 'If you have questions about these Terms of Service, you can contact us at: info@docoolture.com' },
       ],
     },
     privacy: {
@@ -769,11 +769,11 @@ export const en = {
         { title: '4. Cookies and similar technologies', content: 'We use essential cookies to keep your session active and analytics cookies to understand how the platform is used. You can manage cookies from your browser settings. See our Cookie Policy for more details.' },
         { title: '5. Data security', content: 'We implement technical and organizational measures to protect your information, including SSL encryption, secure storage on certified servers, and restricted access to personal data. However, no system is completely secure and we cannot guarantee the absolute security of your information.' },
         { title: '6. Data retention', content: 'We retain your information as long as your account is active or as necessary to provide the service. If you delete your account, we will delete your personal data within 30 days, unless the law requires us to retain it longer (for example, transaction records).' },
-        { title: '7. Your rights', content: 'You have the right to access your personal information, correct inaccurate data, request deletion of your data, object to the processing of your data, and export your data in a portable format. To exercise these rights, contact us at hola@docoolture.com. We will respond within a maximum of 30 days.' },
+        { title: '7. Your rights', content: 'You have the right to access your personal information, correct inaccurate data, request deletion of your data, object to the processing of your data, and export your data in a portable format. To exercise these rights, contact us at info@docoolture.com. We will respond within a maximum of 30 days.' },
         { title: '8. International transfers', content: 'Our servers are managed by Supabase (with cloud infrastructure). By using DoCoolture, you agree that your information may be transferred and processed outside the Dominican Republic, always under the security guarantees described in this policy.' },
         { title: '9. Minors', content: 'DoCoolture is not directed at persons under 18 years of age. We do not intentionally collect information from minors. If we discover we have collected data from a minor without verified parental consent, we will delete that information immediately.' },
         { title: '10. Changes to this policy', content: 'We may update this policy occasionally. We will notify you of significant changes by email or through a notice on the platform with at least 15 days notice. Continued use of DoCoolture after changes constitutes your acceptance of the new policy.' },
-        { title: '11. Contact', content: 'For questions about this Privacy Policy or how we handle your data, contact us at: hola@docoolture.com' },
+        { title: '11. Contact', content: 'For questions about this Privacy Policy or how we handle your data, contact us at: info@docoolture.com' },
       ],
     },
     cookies: {
@@ -794,7 +794,7 @@ export const en = {
         { title: 'How to manage cookies?', content: 'You can control and delete cookies through your browser settings. Please note that disabling certain cookies may affect the functionality of DoCoolture. Below we explain how to do it in the main browsers:' },
         { title: 'Third-party cookies', content: 'DoCoolture uses third-party services that may set their own cookies: Supabase (authentication and database) and PayPal (payment processing). These services have their own cookie policies that we recommend you review. We have no control over third-party cookies.' },
         { title: 'Updates to this policy', content: 'We may update this Cookie Policy occasionally to reflect changes in our technology or applicable law. We will notify you of any significant changes. The date of the last update will always be visible at the top of this page.' },
-        { title: 'Contact', content: 'If you have questions about the use of cookies on DoCoolture, write to us at: hola@docoolture.com' },
+        { title: 'Contact', content: 'If you have questions about the use of cookies on DoCoolture, write to us at: info@docoolture.com' },
       ],
       browsers: [
         { name: 'Google Chrome', instruction: 'Settings → Privacy and security → Cookies and other site data' },

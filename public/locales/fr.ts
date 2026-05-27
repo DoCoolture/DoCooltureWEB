@@ -461,7 +461,7 @@ export const fr = {
     title: 'Contact',
     heading: 'Contactez-nous',
     address: { label: '🗺 ADRESSE', value: 'Saint-Domingue, République Dominicaine' },
-    email: { label: '💌 EMAIL', value: 'hola@docoolture.com' },
+    email: { label: '💌 EMAIL', value: 'info@docoolture.com' },
     phone: { label: '☎ TÉLÉPHONE', value: '+1 (809) 555-0100' },
     socials: '🌏 RÉSEAUX SOCIAUX',
     form: {
@@ -737,7 +737,7 @@ export const fr = {
     experiences: 'expériences',
   },
   legalPages: {
-    lastUpdated: 'Dernière mise à jour : mai 2025',
+    lastUpdated: 'Dernière mise à jour : mai 2026',
     terms: {
       title: 'Conditions d\'utilisation',
       metaTitle: 'Conditions d\'utilisation — DoCoolture',
@@ -754,7 +754,7 @@ export const fr = {
         { title: '8. Contenu de la plateforme', content: 'Tout le contenu publié sur DoCoolture, y compris les textes, images et marques, est protégé par le droit d\'auteur. La reproduction, la distribution ou la modification de ce contenu sans autorisation expresse n\'est pas permise. Les utilisateurs conservent leurs droits sur le contenu qu\'ils publient, mais accordent à DoCoolture une licence non exclusive pour l\'utiliser à des fins opérationnelles et promotionnelles.' },
         { title: '9. Limitation de responsabilité', content: 'DoCoolture ne sera pas responsable des dommages directs, indirects, accessoires ou consécutifs découlant de l\'utilisation de la plateforme ou de la participation à des expériences. La responsabilité maximale de DoCoolture ne dépassera pas le montant payé pour la réservation en question.' },
         { title: '10. Droit applicable', content: 'Ces conditions sont régies par les lois de la République Dominicaine. Tout litige sera résolu devant les tribunaux compétents de Saint-Domingue, République Dominicaine, sauf accord exprès des parties pour recourir à la médiation ou à l\'arbitrage.' },
-        { title: '11. Contact', content: 'Si vous avez des questions sur ces Conditions d\'utilisation, vous pouvez nous contacter à : hola@docoolture.com' },
+        { title: '11. Contact', content: 'Si vous avez des questions sur ces Conditions d\'utilisation, vous pouvez nous contacter à : info@docoolture.com' },
       ],
     },
     privacy: {
@@ -769,11 +769,11 @@ export const fr = {
         { title: '4. Cookies et technologies similaires', content: 'Nous utilisons des cookies essentiels pour maintenir votre session active et des cookies analytiques pour comprendre comment la plateforme est utilisée. Vous pouvez gérer les cookies depuis les paramètres de votre navigateur. Consultez notre Politique de cookies pour plus de détails.' },
         { title: '5. Sécurité des données', content: 'Nous mettons en œuvre des mesures techniques et organisationnelles pour protéger vos informations, notamment le chiffrement SSL, le stockage sécurisé sur des serveurs certifiés et l\'accès restreint aux données personnelles. Cependant, aucun système n\'est complètement sécurisé.' },
         { title: '6. Conservation des données', content: 'Nous conservons vos informations tant que votre compte est actif ou nécessaire pour vous fournir le service. Si vous supprimez votre compte, nous supprimerons vos données personnelles dans un délai de 30 jours, sauf obligation légale de conservation plus longue.' },
-        { title: '7. Vos droits', content: 'Vous avez le droit d\'accéder à vos informations personnelles, de corriger des données inexactes, de demander la suppression de vos données, de vous opposer au traitement de vos données et d\'exporter vos données dans un format portable. Pour exercer ces droits, contactez-nous à hola@docoolture.com.' },
+        { title: '7. Vos droits', content: 'Vous avez le droit d\'accéder à vos informations personnelles, de corriger des données inexactes, de demander la suppression de vos données, de vous opposer au traitement de vos données et d\'exporter vos données dans un format portable. Pour exercer ces droits, contactez-nous à info@docoolture.com.' },
         { title: '8. Transferts internationaux', content: 'Nos serveurs sont gérés par Supabase (avec une infrastructure cloud). En utilisant DoCoolture, vous acceptez que vos informations puissent être transférées et traitées en dehors de la République Dominicaine, toujours sous les garanties de sécurité décrites dans cette politique.' },
         { title: '9. Mineurs', content: 'DoCoolture n\'est pas destiné aux personnes de moins de 18 ans. Nous ne collectons pas intentionnellement d\'informations auprès des mineurs. Si nous découvrons que nous avons collecté des données d\'un mineur sans consentement parental vérifié, nous supprimerons ces informations immédiatement.' },
         { title: '10. Modifications de cette politique', content: 'Nous pouvons mettre à jour cette politique occasionnellement. Nous vous informerons des changements importants par email ou via un avis sur la plateforme avec au moins 15 jours de préavis. L\'utilisation continue de DoCoolture après les modifications constitue votre acceptation de la nouvelle politique.' },
-        { title: '11. Contact', content: 'Pour toute question sur cette Politique de confidentialité, contactez-nous à : hola@docoolture.com' },
+        { title: '11. Contact', content: 'Pour toute question sur cette Politique de confidentialité, contactez-nous à : info@docoolture.com' },
       ],
     },
     cookies: {
@@ -794,7 +794,7 @@ export const fr = {
         { title: 'Comment gérer les cookies ?', content: 'Vous pouvez contrôler et supprimer les cookies via les paramètres de votre navigateur. Notez que la désactivation de certains cookies peut affecter les fonctionnalités de DoCoolture. Voici comment procéder dans les principaux navigateurs :' },
         { title: 'Cookies tiers', content: 'DoCoolture utilise des services tiers qui peuvent définir leurs propres cookies : Supabase (authentification et base de données) et PayPal (traitement des paiements). Ces services ont leurs propres politiques de cookies que nous vous recommandons de consulter.' },
         { title: 'Mises à jour de cette politique', content: 'Nous pouvons mettre à jour cette Politique de cookies occasionnellement. Nous vous informerons de tout changement significatif. La date de dernière mise à jour sera toujours visible en haut de cette page.' },
-        { title: 'Contact', content: 'Si vous avez des questions sur l\'utilisation des cookies sur DoCoolture, écrivez-nous à : hola@docoolture.com' },
+        { title: 'Contact', content: 'Si vous avez des questions sur l\'utilisation des cookies sur DoCoolture, écrivez-nous à : info@docoolture.com' },
       ],
       browsers: [
         { name: 'Google Chrome', instruction: 'Paramètres → Confidentialité et sécurité → Cookies et autres données de sites' },
