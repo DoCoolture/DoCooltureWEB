@@ -68,10 +68,12 @@ const Header3: FC<Header3Props> = ({ className, hasBorderBottom = true, initSear
     ? `${guests} Explorer${Number(guests) !== 1 ? 's' : ''}`
     : t.HeroSearchForm['Add guests']
 
-  // Close form whenever the URL search params change (i.e. after a search submit)
+  // Close form when a search is submitted (fires even if the URL params don't change)
   useEffect(() => {
-    setShowHeroSearch(false)
-  }, [searchParams])
+    const close = () => setShowHeroSearch(false)
+    window.addEventListener('hero-search-submitted', close)
+    return () => window.removeEventListener('hero-search-submitted', close)
+  }, [])
 
   // for memoization of the close function
   const closeHeroSearch = useCallback(() => {

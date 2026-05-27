@@ -36,6 +36,7 @@ export const ExperiencesSearchForm = ({ className, formStyle = 'default' }: Prop
     if (checkout) params.set('checkout', checkout)
     params.set('guests', String(guests))
 
+    window.dispatchEvent(new Event('hero-search-submitted'))
     router.push(`/experience-categories-map/all?${params.toString()}`)
   }
 
