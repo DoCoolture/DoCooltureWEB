@@ -55,13 +55,10 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       }
       setIsLoading(true)
       try {
-        const apiKey = process.env.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY
-        const res = await fetch(
-          `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`
-        )
+        const res = await fetch('/api/exchange-rates')
         const data = await res.json()
-        if (data.result === 'success') {
-          setRates(data.conversion_rates)
+        if (res.ok) {
+          setRates(data)
         }
       } catch (error) {
         console.error('Error fetching exchange rates:', error)
