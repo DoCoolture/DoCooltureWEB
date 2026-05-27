@@ -1,6 +1,7 @@
 'use client'
 
 import EditExperienceModal from '@/components/EditExperienceModal'
+import { useLanguage } from '@/context/LanguageContext'
 import { supabase } from '@/lib/supabase'
 import type { Host, Booking, Experience } from '@/lib/supabase'
 import ButtonPrimary from '@/shared/ButtonPrimary'
@@ -9,6 +10,8 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
 export default function HostDashboardPage() {
+  const { t } = useLanguage()
+  const d = t.hostDashboard
   const router = useRouter()
   const [host, setHost] = useState<Host | null>(null)
   const [displayName, setDisplayName] = useState<string>('')
@@ -85,7 +88,7 @@ export default function HostDashboardPage() {
   }
 
   const handleDeleteExperience = async (id: string) => {
-    if (!confirm('¿Estás seguro de que quieres eliminar esta experiencia?')) return
+    if (!confirm(d.deleteConfirm)) return
     await supabase.from('experiences').delete().eq('id', id)
     loadDashboard()
   }
@@ -96,13 +99,13 @@ export default function HostDashboardPage() {
         <div className="rounded-3xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 p-16 text-center">
           <p className="text-5xl mb-4">🛡️</p>
           <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2">
-            Admin sin perfil de anfitrión
+            {d.adminNoHost}
           </h2>
           <p className="text-neutral-500 mb-6">
-            Crea un perfil de anfitrión para poder publicar y gestionar experiencias directamente.
+            {d.adminNoHostDesc}
           </p>
           <ButtonPrimary onClick={() => router.push('/become-host')}>
-            Crear perfil de anfitrión
+            {d.createProfile}
           </ButtonPrimary>
         </div>
       </main>
@@ -133,11 +136,11 @@ export default function HostDashboardPage() {
   }
 
   const bookingStatusLabels: Record<string, string> = {
-    pending: 'Pendiente',
-    confirmed: 'Confirmada',
-    completed: 'Completada',
-    cancelled: 'Cancelada',
-    no_show: 'No se presentó',
+    pending: d.statusPending,
+    confirmed: d.statusConfirmed,
+    completed: d.statusCompleted,
+    cancelled: d.statusCancelled,
+    no_show: d.statusNoShow,
   }
 
   return (
@@ -147,10 +150,10 @@ export default function HostDashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
         <div>
           <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
-            Hola, {displayName || host?.display_name} 👋
+            {d.greeting} {displayName || host?.display_name} 👋
           </h1>
           <p className="text-neutral-500 dark:text-neutral-400 mt-1">
-            Bienvenido a tu panel de anfitrión
+            {d.welcome}
           </p>
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-2">
@@ -158,16 +161,16 @@ export default function HostDashboardPage() {
             onClick={() => router.push('/host/profile')}
             className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
           >
-            Editar perfil
+            {d.editProfile}
           </button>
           <button
             onClick={() => router.push('/host/reviews')}
             className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
           >
-            ⭐ Ver reseñas
+            {d.viewReviews}
           </button>
           <ButtonPrimary onClick={() => router.push('/host/experiences/new')}>
-            + Nueva experiencia
+            {d.newExperience}
           </ButtonPrimary>
         </div>
       </div>
@@ -178,10 +181,10 @@ export default function HostDashboardPage() {
           <span className="text-2xl">⏳</span>
           <div>
             <p className="font-semibold text-amber-800 dark:text-amber-200">
-              Verificación de identidad pendiente
+              {d.verificationPending}
             </p>
             <p className="text-sm text-amber-700 dark:text-amber-300 mt-0.5">
-              Estamos revisando tus documentos. Este proceso toma entre 24 y 48 horas.
+              {d.verificationPendingDesc}
             </p>
           </div>
         </div>
@@ -191,7 +194,7 @@ export default function HostDashboardPage() {
         <div className="mb-8 rounded-2xl bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 p-4 flex items-center gap-x-3">
           <span className="text-2xl">✅</span>
           <p className="font-semibold text-green-800 dark:text-green-200">
-            Identidad verificada — Los explorers confiarán más en ti
+            {d.verificationApproved}
           </p>
         </div>
       )}
@@ -199,29 +202,12 @@ export default function HostDashboardPage() {
       {/* Estadísticas */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         {[
+          { label: d.statExperiences, value: host?.total_listings || 0, icon: '🗺️', color: 'bg-blue-50 dark:bg-blue-950' },
+          { label: d.statBookings, value: host?.total_bookings || 0, icon: '📅', color: 'bg-green-50 dark:bg-green-950' },
+          { label: d.statReviews, value: host?.total_reviews || 0, icon: '⭐', color: 'bg-yellow-50 dark:bg-yellow-950' },
           {
-            label: 'Experiencias',
-            value: host?.total_listings || 0,
-            icon: '🗺️',
-            color: 'bg-blue-50 dark:bg-blue-950',
-          },
-          {
-            label: 'Reservas totales',
-            value: host?.total_bookings || 0,
-            icon: '📅',
-            color: 'bg-green-50 dark:bg-green-950',
-          },
-          {
-            label: 'Reseñas',
-            value: host?.total_reviews || 0,
-            icon: '⭐',
-            color: 'bg-yellow-50 dark:bg-yellow-950',
-          },
-          {
-            label: 'Calificación',
-            value: host?.average_rating
-              ? `${host.average_rating.toFixed(1)} / 5`
-              : 'Sin reseñas',
+            label: d.statRating,
+            value: host?.average_rating ? `${host.average_rating.toFixed(1)} / 5` : d.noRating,
             icon: '🏆',
             color: 'bg-purple-50 dark:bg-purple-950',
           },
@@ -245,13 +231,13 @@ export default function HostDashboardPage() {
       <div className="mb-10">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
-            Mis experiencias
+            {d.myExperiences}
           </h2>
           <ButtonPrimary
             onClick={() => router.push('/host/experiences/new')}
             className="text-sm!"
           >
-            + Agregar
+            {d.addExperience}
           </ButtonPrimary>
         </div>
 
@@ -259,13 +245,13 @@ export default function HostDashboardPage() {
           <div className="rounded-2xl border-2 border-dashed border-neutral-200 dark:border-neutral-700 p-12 text-center">
             <p className="text-4xl mb-4">🗺️</p>
             <p className="font-semibold text-neutral-700 dark:text-neutral-300">
-              Aún no tienes experiencias
+              {d.noExperiences}
             </p>
             <p className="text-sm text-neutral-500 mt-1 mb-5">
-              Crea tu primera experiencia y empieza a recibir explorers.
+              {d.noExperiencesDesc}
             </p>
             <ButtonPrimary onClick={() => router.push('/host/experiences/new')}>
-              Crear primera experiencia
+              {d.createFirst}
             </ButtonPrimary>
           </div>
         ) : (
@@ -305,10 +291,10 @@ export default function HostDashboardPage() {
                         : 'bg-neutral-100 text-neutral-800 dark:bg-neutral-700 dark:text-neutral-300'
                     }`}>
                       {exp.is_hidden
-                        ? '🚫 Oculta por DoCoolture'
+                        ? d.statusHidden
                         : exp.is_published
-                        ? '✅ Publicada'
-                        : '📝 Borrador'}
+                        ? d.statusPublished
+                        : d.statusDraft}
                     </span>
                     <span className="text-xs text-neutral-400">
                       ⭐ {exp.average_rating.toFixed(1)} ({exp.total_reviews})
@@ -323,19 +309,19 @@ export default function HostDashboardPage() {
                     disabled={exp.is_hidden}
                     className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
-                    {exp.is_published ? 'Despublicar' : 'Publicar'}
+                    {exp.is_published ? d.unpublish : d.publish}
                   </button>
                   <button
                     onClick={() => setEditingExp(exp)}
                     className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs font-medium hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-colors"
                   >
-                    Editar
+                    {d.edit}
                   </button>
                   <button
                     onClick={() => handleDeleteExperience(exp.id)}
                     className="rounded-lg border border-red-200 dark:border-red-800 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
                   >
-                    Eliminar
+                    {d.delete}
                   </button>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+import { useLanguage } from '@/context/LanguageContext'
 import { ExperienceReview } from '@/data/reviews'
 import Avatar from '@/shared/Avatar'
 import { StarIcon } from '@heroicons/react/24/solid'
@@ -10,6 +11,8 @@ interface Props {
 }
 
 const ListingReview: FC<Props> = ({ className = '', review }) => {
+  const { t } = useLanguage()
+  const el = t.experienceListing
   const { reviewer_name, reviewer_avatar_url, comment, created_at, rating, host_reply, host_replied_at } = review
   const date = new Date(created_at).toLocaleDateString('es-DO', {
     year: 'numeric',
@@ -43,7 +46,7 @@ const ListingReview: FC<Props> = ({ className = '', review }) => {
         )}
         {host_reply && (
           <div className="mt-1 rounded-xl bg-neutral-50 px-4 py-3 dark:bg-neutral-800">
-            <p className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">Respuesta del anfitrión</p>
+            <p className="text-xs font-semibold text-neutral-700 dark:text-neutral-300">{el.hostReply}</p>
             <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">{host_reply}</p>
             {host_replied_at && (
               <p suppressHydrationWarning className="mt-1 text-xs text-neutral-400">

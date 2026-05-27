@@ -4,7 +4,7 @@ import BackgroundSection from '@/components/BackgroundSection'
 import BgGlassmorphism from '@/components/BgGlassmorphism'
 import CardTalent from '@/components/CardTalent'
 import TalentFilterChips from '@/components/TalentFilterChips'
-import { TTalent, SPECIALTY_BG_IMAGES } from '@/data/hosts'
+import { TTalent, SPECIALTY_BG_IMAGES, toHandle } from '@/data/hosts'
 import { getServerT } from '@/lib/locale-server'
 import BecomeHostCta from '@/components/BecomeHostCta'
 import Heading from '@/shared/Heading'
@@ -44,7 +44,7 @@ async function getHostsDirect(): Promise<TTalent[]> {
     return {
       id: h.id,
       displayName: h.display_name,
-      handle: (h.display_name as string).toLowerCase().replace(/\s+/g, '-'),
+      handle: toHandle(h.display_name as string),
       avatarUrl: (() => { const p = h.profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? '',
       bgImage: SPECIALTY_BG_IMAGES[primaryCategory] ?? DEFAULT_BG,
       specialties: h.specialties ?? [],

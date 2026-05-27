@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
+import { toHandle } from '@/data/hosts'
 import { createClient } from '@supabase/supabase-js'
 
 // Server-side anon client (createClient, not createBrowserClient)
@@ -10,10 +11,6 @@ const supabaseAnon = createClient(
 )
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-function toHandle(displayName: string) {
-  return displayName.toLowerCase().replace(/\s+/g, '-')
-}
 
 function mapHost(host: Record<string, unknown>, handle: string) {
   const p = host.profiles

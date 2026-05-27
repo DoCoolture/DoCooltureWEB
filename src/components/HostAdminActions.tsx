@@ -70,7 +70,7 @@ export default function HostAdminActions({ hostId, hostName }: Props) {
       <div className="flex flex-wrap gap-2">
         <a
           href="/admin"
-          className="inline-flex items-center rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-700 dark:bg-white dark:text-neutral-900"
+          className="inline-flex items-center rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-700 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
         >
           Ver en panel admin
         </a>

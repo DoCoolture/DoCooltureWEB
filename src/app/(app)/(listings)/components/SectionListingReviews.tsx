@@ -184,26 +184,26 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
               onClick={() => { setSubmitted(false); setIsEditing(true) }}
               className="ml-4 shrink-0 text-xs font-medium text-green-700 underline dark:text-green-300"
             >
-              Editar reseña
+              {el.editReview}
             </button>
           </div>
         ) : hasReviewed && !isEditing ? (
           <div className="flex items-center justify-between rounded-xl bg-neutral-50 px-4 py-3 dark:bg-neutral-800">
             <p className="text-sm text-neutral-600 dark:text-neutral-400">
-              Ya dejaste una reseña para esta experiencia.
+              {el.alreadyReviewed}
             </p>
             <div className="ml-4 flex shrink-0 gap-x-3">
               <button
                 onClick={() => setIsEditing(true)}
                 className="text-xs font-medium text-neutral-600 underline dark:text-neutral-400"
               >
-                Editar
+                {el.editBtn}
               </button>
               <button
                 onClick={handleDelete}
                 className="text-xs font-medium text-red-500 underline"
               >
-                Eliminar
+                {el.deleteBtn}
               </button>
             </div>
           </div>
@@ -212,7 +212,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
             <div className="flex items-center justify-between">
               {name && (
                 <p className="text-sm text-neutral-500 dark:text-neutral-400">
-                  {isEditing ? 'Editando tu reseña' : 'Reseñando'} como{' '}
+                  {isEditing ? el.editingReview : el.reviewingAs}{' '}
                   <span className="font-medium text-neutral-700 dark:text-neutral-200">{name}</span>
                 </p>
               )}
@@ -221,7 +221,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
                   onClick={() => setIsEditing(false)}
                   className="text-xs text-neutral-400 hover:text-neutral-600"
                 >
-                  Cancelar
+                  {el.cancelEdit}
                 </button>
               )}
             </div>

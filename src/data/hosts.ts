@@ -6,7 +6,7 @@ function getProfileAvatar(profiles: unknown): string | null {
   return (p as any)?.avatar_url ?? null
 }
 
-function toHandle(displayName: string) {
+export function toHandle(displayName: string) {
   return displayName.toLowerCase().replace(/\s+/g, '-')
 }
 
