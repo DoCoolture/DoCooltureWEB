@@ -34,9 +34,10 @@ function parseDurationDays(durationTime: string): number {
 interface Props {
   availableDays?: string[]
   durationTime?: string
+  onDateSelect?: (date: Date | null) => void
 }
 
-const SectionDateRange = ({ availableDays = [], durationTime = '' }: Props) => {
+const SectionDateRange = ({ availableDays = [], durationTime = '', onDateSelect }: Props) => {
   const { t } = useLanguage()
   const el = t.experienceListing
 
@@ -59,6 +60,7 @@ const SectionDateRange = ({ availableDays = [], durationTime = '' }: Props) => {
   const handleChange = (date: Date | null) => {
     setStartDate(date)
     setEndDate(date ? addDays(date, durationDays - 1) : null)
+    onDateSelect?.(date)
   }
 
   const fmt = (d: Date | null) =>

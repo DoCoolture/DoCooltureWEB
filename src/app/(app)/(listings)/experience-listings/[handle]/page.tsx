@@ -7,13 +7,12 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import ExperienceAdminActions from '../../components/ExperienceAdminActions'
 import HeaderGallery from '../../components/HeaderGallery'
-import SectionDateRange from '../../components/SectionDateRange'
 import SectionHeader from '../../components/SectionHeader'
 import { SectionHeading } from '../../components/SectionHeading'
 import SectionHost from '../../components/SectionHost'
 import SectionListingReviews from '../../components/SectionListingReviews'
 import SectionMap from '../../components/SectionMap'
-import { ExperienceBookingSidebar } from './ExperienceBookingSidebar'
+import { ExperienceDateBridge } from './ExperienceDateBridge'
 
 export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
   const { handle } = await params
@@ -195,31 +194,17 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
       <HeaderGallery gridType="grid4" images={galleryImgs} />
 
       {/* MAIN */}
-      <main className="relative z-1 mt-10 flex flex-col gap-8 lg:flex-row xl:gap-10">
-        {/* CONTENIDO */}
-        <div className="flex w-full flex-col gap-y-8 lg:w-3/5 xl:w-[64%] xl:gap-y-10">
-          {renderSectionHeader()}
-          {renderSectionInfo()}
-          {renderSectionIncludes()}
-          <SectionDateRange availableDays={availableDays} durationTime={durationTime} />
-        </div>
-
-        {/* SIDEBAR */}
-        <div className="grow">
-          <div className="sticky top-5">
-            <ExperienceBookingSidebar
-              price={price}
-              maxGuests={maxGuests}
-              date={resolvedDate}
-              reviewStart={reviewStart}
-              reviewCount={reviewCount}
-              availableDays={availableDays}
-              durationTime={durationTime}
-              action={handleSubmitForm}
-            />
-          </div>
-        </div>
-      </main>
+      <ExperienceDateBridge
+        leftTopContent={<>{renderSectionHeader()}{renderSectionInfo()}{renderSectionIncludes()}</>}
+        availableDays={availableDays}
+        durationTime={durationTime}
+        price={price}
+        maxGuests={maxGuests}
+        date={resolvedDate}
+        reviewStart={reviewStart}
+        reviewCount={reviewCount}
+        action={handleSubmitForm}
+      />
 
       <Divider className="my-16" />
 

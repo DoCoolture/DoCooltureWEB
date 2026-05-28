@@ -18,6 +18,7 @@ interface Props {
   reviewCount: number
   availableDays: string[]
   durationTime: string
+  selectedDate?: Date | null
   action: (formData: FormData) => Promise<void>
 }
 
@@ -29,6 +30,7 @@ export function ExperienceBookingSidebar({
   reviewCount,
   availableDays,
   durationTime,
+  selectedDate,
   action,
 }: Props) {
   const { t } = useLanguage()
@@ -60,6 +62,7 @@ export function ExperienceBookingSidebar({
           className="z-11 flex-1"
           availableDays={availableDays}
           durationTime={durationTime}
+          externalDate={selectedDate}
           onDateChange={(d) => setHasDate(!!d)}
         />
         <div className="w-full border-b border-neutral-200 dark:border-neutral-700" />

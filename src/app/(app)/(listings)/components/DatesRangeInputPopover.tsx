@@ -9,7 +9,7 @@ import { CalendarIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
 import { addDays, format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { FC, useState } from 'react'
+import { FC, useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
 const DAY_NUMBERS: Record<string, number> = {
@@ -38,6 +38,7 @@ interface Props {
   inputDescription?: string
   availableDays?: string[]
   durationTime?: string
+  externalDate?: Date | null
   onDateChange?: (date: Date | null) => void
 }
 
@@ -47,6 +48,7 @@ const DatesRangeInputPopover: FC<Props> = ({
   inputDescription,
   availableDays = [],
   durationTime = '',
+  externalDate,
   onDateChange,
 }) => {
   const { t } = useLanguage()
@@ -61,6 +63,14 @@ const DatesRangeInputPopover: FC<Props> = ({
 
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
+
+  useEffect(() => {
+    if (externalDate !== undefined) {
+      setStartDate(externalDate)
+      setEndDate(externalDate ? addDays(externalDate, durationDays - 1) : null)
+      onDateChange?.(externalDate)
+    }
+  }, [externalDate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (date: Date | null) => {
     setStartDate(date)
