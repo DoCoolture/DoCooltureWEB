@@ -70,6 +70,12 @@ const CheckoutContent = () => {
     hostId: searchParams.get('hostId') || null,
   }
 
+  const parseDurationDays = (duracion: string): number => {
+    const match = duracion.match(/(\d+)\s*d[íi]a/)
+    return match ? parseInt(match[1], 10) : 1
+  }
+  const durationDays = parseDurationDays(experiencia.duracion)
+
   const precioNum = Number(experiencia.precio.replace('$', '').replace(',', ''))
   const subtotal = precioNum * currentExplorers
   const cargoProcesamiento = subtotal * 0.18
@@ -162,6 +168,7 @@ const CheckoutContent = () => {
       <YourTrip
         initialExplorers={experiencia.explorers}
         initialStartDate={searchParams.get('startDate') ? new Date(searchParams.get('startDate')!) : null}
+        durationDays={durationDays}
         onGuestsChange={setCurrentExplorers}
         onDateChange={(d) =>
           setBookingDate(d ? d.toISOString().split('T')[0] : new Date().toISOString().split('T')[0])

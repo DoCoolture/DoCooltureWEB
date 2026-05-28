@@ -5,7 +5,6 @@ import DatePickerCustomHeaderTwoMonth from '@/components/DatePickerCustomHeaderT
 import { excludeDateIntervals } from '@/contains/contants'
 import { useLanguage } from '@/context/LanguageContext'
 import clsx from 'clsx'
-import { addDays } from 'date-fns'
 import { FC, useState } from 'react'
 import DatePicker from 'react-datepicker'
 
@@ -18,8 +17,8 @@ interface Props {
 
 const StayDatesRangeInput: FC<Props> = ({ className, defaultEndDate, defaultStartDate, onChange }) => {
   const { t } = useLanguage()
-  const [startDate, setStartDate] = useState<Date | null>(defaultStartDate || new Date())
-  const [endDate, setEndDate] = useState<Date | null>(defaultEndDate || addDays(new Date(), 3))
+  const [startDate, setStartDate] = useState<Date | null>(defaultStartDate ?? null)
+  const [endDate, setEndDate] = useState<Date | null>(defaultEndDate ?? null)
 
   const onChangeDate = (dates: [Date | null, Date | null]) => {
     const [start, end] = dates

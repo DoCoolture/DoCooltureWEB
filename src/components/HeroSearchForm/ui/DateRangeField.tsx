@@ -7,7 +7,6 @@ import { useLanguage } from '@/context/LanguageContext'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { CalendarIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
-import { addDays } from 'date-fns'
 import { FC, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { ClearDataButton } from './ClearDataButton'
@@ -49,8 +48,8 @@ export const DateRangeField: FC<Props> = ({
 }) => {
   const { t } = useLanguage()
   const resolvedDescription = description ?? `${t.HeroSearchForm['CheckIn']} - ${t.HeroSearchForm['CheckOut']}`
-  const [startDate, setStartDate] = useState<Date | null>(new Date())
-  const [endDate, setEndDate] = useState<Date | null>(addDays(new Date(), 3))
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
 
   return (
     <>

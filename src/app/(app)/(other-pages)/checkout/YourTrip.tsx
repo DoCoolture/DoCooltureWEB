@@ -11,14 +11,22 @@ import { useEffect, useState } from 'react'
 interface YourTripProps {
   initialExplorers?: number
   initialStartDate?: Date | null
+  durationDays?: number
   onGuestsChange?: (total: number) => void
   onDateChange?: (date: Date | null) => void
 }
 
-const YourTrip = ({ initialExplorers = 1, initialStartDate = null, onGuestsChange, onDateChange }: YourTripProps) => {
+const computeEndDate = (start: Date | null, days: number): Date | null => {
+  if (!start || days <= 1) return null
+  const end = new Date(start)
+  end.setDate(end.getDate() + days - 1)
+  return end
+}
+
+const YourTrip = ({ initialExplorers = 1, initialStartDate = null, durationDays = 1, onGuestsChange, onDateChange }: YourTripProps) => {
   const { t } = useLanguage()
   const [startDate, setStartDate] = useState<Date | null>(initialStartDate ?? new Date())
-  const [endDate, setEndDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(() => computeEndDate(initialStartDate ?? new Date(), durationDays))
   const [guests, setGuests] = useState<GuestsObject>({
     guestAdults: initialExplorers,
     guestChildren: 0,
@@ -36,9 +44,10 @@ const YourTrip = ({ initialExplorers = 1, initialStartDate = null, onGuestsChang
       <div className="z-10 mt-6 flex flex-col divide-y divide-neutral-200 overflow-hidden rounded-3xl border border-neutral-200 sm:flex-row sm:divide-x sm:divide-y-0 sm:rtl:divide-x-reverse dark:divide-neutral-700 dark:border-neutral-700">
         <ModalSelectDate
           onChange={(dates) => {
-            const [start, end] = dates
+            const [start] = dates
+            const computedEnd = computeEndDate(start, durationDays)
             setStartDate(start)
-            setEndDate(end)
+            setEndDate(computedEnd)
             onDateChange?.(start)
           }}
           triggerButton={({ openModal }) => (

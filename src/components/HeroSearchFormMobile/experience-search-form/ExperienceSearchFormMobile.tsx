@@ -21,8 +21,8 @@ const ExperienceSearchFormMobile = () => {
     guestChildren: 0,
     guestInfants: 0,
   })
-  const [startDate, setStartDate] = useState<Date | null>(new Date('2025/10/05'))
-  const [endDate, setEndDate] = useState<Date | null>(new Date('2025/10/09'))
+  const [startDate, setStartDate] = useState<Date | null>(null)
+  const [endDate, setEndDate] = useState<Date | null>(null)
   const router = useRouter()
 
   const onChangeDate = (dates: [Date | null, Date | null]) => {
