@@ -6,7 +6,7 @@ import { useLanguage } from '@/context/LanguageContext'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { DescriptionDetails, DescriptionList, DescriptionTerm } from '@/shared/description-list'
 import Form from 'next/form'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DatesRangeInputPopover from '../../components/DatesRangeInputPopover'
 import GuestsInputPopover from '../../components/GuestsInputPopover'
 
@@ -19,6 +19,7 @@ interface Props {
   availableDays: string[]
   durationTime: string
   selectedDate?: Date | null
+  onDateSelect?: (date: Date | null) => void
   action: (formData: FormData) => Promise<void>
 }
 
@@ -31,12 +32,17 @@ export function ExperienceBookingSidebar({
   availableDays,
   durationTime,
   selectedDate,
+  onDateSelect,
   action,
 }: Props) {
   const { t } = useLanguage()
   const { convertPrice } = useCurrency()
   const [explorerCount, setExplorerCount] = useState(1)
-  const [hasDate, setHasDate] = useState(false)
+  const [hasDate, setHasDate] = useState(!!selectedDate)
+
+  useEffect(() => {
+    setHasDate(!!selectedDate)
+  }, [selectedDate])
   const precioNum = Number(price.replace(/[^0-9.]/g, ''))
 
   return (
@@ -63,7 +69,10 @@ export function ExperienceBookingSidebar({
           availableDays={availableDays}
           durationTime={durationTime}
           externalDate={selectedDate}
-          onDateChange={(d) => setHasDate(!!d)}
+          onDateChange={(d) => {
+            setHasDate(!!d)
+            onDateSelect?.(d)
+          }}
         />
         <div className="w-full border-b border-neutral-200 dark:border-neutral-700" />
         <GuestsInputPopover className="flex-1" maxGuests={maxGuests} onChangeTotalGuests={setExplorerCount} />

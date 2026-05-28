@@ -36,6 +36,7 @@ export function ExperienceDateBridge({
         <SectionDateRange
           availableDays={availableDays}
           durationTime={durationTime}
+          externalDate={selectedDate}
           onDateSelect={setSelectedDate}
         />
       </div>
@@ -51,6 +52,7 @@ export function ExperienceDateBridge({
             availableDays={availableDays}
             durationTime={durationTime}
             selectedDate={selectedDate}
+            onDateSelect={setSelectedDate}
             action={action}
           />
         </div>

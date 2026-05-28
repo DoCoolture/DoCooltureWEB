@@ -65,11 +65,9 @@ const DatesRangeInputPopover: FC<Props> = ({
   const [endDate, setEndDate] = useState<Date | null>(null)
 
   useEffect(() => {
-    if (externalDate !== undefined) {
-      setStartDate(externalDate)
-      setEndDate(externalDate ? addDays(externalDate, durationDays - 1) : null)
-      onDateChange?.(externalDate)
-    }
+    if (externalDate === undefined) return
+    setStartDate(externalDate)
+    setEndDate(externalDate ? addDays(externalDate, durationDays - 1) : null)
   }, [externalDate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleChange = (date: Date | null) => {

@@ -7,7 +7,7 @@ import { useLanguage } from '@/context/LanguageContext'
 import { Divider } from '@/shared/divider'
 import { addDays, format } from 'date-fns'
 import { es } from 'date-fns/locale'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import DatePicker from 'react-datepicker'
 import { SectionHeading, SectionSubheading } from './SectionHeading'
 
@@ -34,10 +34,11 @@ function parseDurationDays(durationTime: string): number {
 interface Props {
   availableDays?: string[]
   durationTime?: string
+  externalDate?: Date | null
   onDateSelect?: (date: Date | null) => void
 }
 
-const SectionDateRange = ({ availableDays = [], durationTime = '', onDateSelect }: Props) => {
+const SectionDateRange = ({ availableDays = [], durationTime = '', externalDate, onDateSelect }: Props) => {
   const { t } = useLanguage()
   const el = t.experienceListing
 
@@ -50,6 +51,12 @@ const SectionDateRange = ({ availableDays = [], durationTime = '', onDateSelect 
 
   const [startDate, setStartDate] = useState<Date | null>(null)
   const [endDate, setEndDate] = useState<Date | null>(null)
+
+  useEffect(() => {
+    if (externalDate === undefined) return
+    setStartDate(externalDate)
+    setEndDate(externalDate ? addDays(externalDate, durationDays - 1) : null)
+  }, [externalDate]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const filterDate = (date: Date) => {
     if (!allowedDayNums) return true
