@@ -81,30 +81,72 @@ const DatesRangeInputPopover: FC<Props> = ({
     return allowedDayNums.includes(date.getDay())
   }
 
-  const fmt = (d: Date | null) =>
-    d?.toLocaleDateString('es-DO', { month: 'short', day: '2-digit' }) ?? ''
+  const renderInput = () => {
+    const icon = (
+      <div className="shrink-0 text-neutral-400 dark:text-neutral-500">
+        <CalendarIcon className="h-5 w-5" />
+      </div>
+    )
 
-  const renderInput = () => (
-    <>
-      <div className="text-neutral-300 dark:text-neutral-400">
-        <CalendarIcon className="h-5 w-5 lg:h-7 lg:w-7" />
-      </div>
-      <div className="grow text-start">
-        <span className="block font-semibold xl:text-lg">
-          {startDate
-            ? isMultiDay && endDate
-              ? `${fmt(startDate)} – ${fmt(endDate)}`
-              : fmt(startDate)
-            : isMultiDay
-            ? `${t.HeroSearchForm['CheckIn']} – ${t.HeroSearchForm['CheckOut']}`
-            : t.HeroSearchForm['CheckIn']}
-        </span>
-        <span className="mt-1 block text-sm leading-none font-light text-neutral-400">
-          {resolvedDescription}
-        </span>
-      </div>
-    </>
-  )
+    if (startDate && isMultiDay && endDate) {
+      return (
+        <>
+          {icon}
+          <div className="grid grow grid-cols-[1fr_auto_1fr] items-center gap-x-2 min-w-0">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                {t.HeroSearchForm['CheckIn']}
+              </p>
+              <p className="truncate font-semibold capitalize">
+                {format(startDate, "EEE d MMM", { locale: es })}
+              </p>
+            </div>
+            <span className="text-neutral-300 dark:text-neutral-600">→</span>
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+                {t.HeroSearchForm['CheckOut']}
+              </p>
+              <p className="truncate font-semibold capitalize">
+                {format(endDate, "EEE d MMM", { locale: es })}
+              </p>
+            </div>
+          </div>
+        </>
+      )
+    }
+
+    if (startDate) {
+      return (
+        <>
+          {icon}
+          <div className="grow min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+              {t.HeroSearchForm['CheckIn']}
+            </p>
+            <p className="truncate font-semibold capitalize">
+              {format(startDate, "EEEE, d 'de' MMMM", { locale: es })}
+            </p>
+          </div>
+        </>
+      )
+    }
+
+    return (
+      <>
+        {icon}
+        <div className="grow">
+          <span className="block font-semibold">
+            {isMultiDay
+              ? `${t.HeroSearchForm['CheckIn']} – ${t.HeroSearchForm['CheckOut']}`
+              : t.HeroSearchForm['CheckIn']}
+          </span>
+          <span className="mt-0.5 block text-xs font-light text-neutral-400">
+            {resolvedDescription}
+          </span>
+        </div>
+      </>
+    )
+  }
 
   return (
     <>

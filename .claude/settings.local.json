@@ -13,7 +13,24 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\\\\supabase\\\\migrations\")"
+      "PowerShell(New-Item -ItemType Directory -Force -Path \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\\\\supabase\\\\migrations\")",
+      "Bash(Get-ChildItem -Path . -Directory)",
+      "Bash(Select-String -Pattern \"error TS\")",
+      "Bash(Select-Object -First 30)",
+      "PowerShell(cd \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\"; \\(Get-Content \"public\\\\locales\\\\en.ts\" | Measure-Object -Line\\).Lines; \\(Get-Content \"public\\\\locales\\\\fr.ts\" | Measure-Object -Line\\).Lines; \\(Get-Content \"public\\\\locales\\\\it.ts\" | Measure-Object -Line\\).Lines)",
+      "Bash(dir \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\\\\public\")",
+      "PowerShell(Rename-Item \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\\\\src\\\\app\\\\icon.png.png\" \"icon.png\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\\\\src\" -Recurse -File)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\" -Force)",
+      "Bash(Select-Object Name, FullName)",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\\\\src\" -Recurse -Directory)",
+      "WebFetch(domain:www.pexels.com)",
+      "WebSearch",
+      "Bash(mkdir -p \"c:/Users/jjuan/OneDrive/Desktop/docoolture-nextjs/docoolture-nextjs/public/images/cities\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\jjuan\\OneDrive\\Desktop\\docoolture-nextjs\\docoolture-nextjs\\public\\images"
     ]
   }
 }
