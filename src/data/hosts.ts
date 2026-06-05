@@ -1,4 +1,4 @@
-import { cache } from 'react'
+﻿import { cache } from 'react'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 function getProfileAvatar(profiles: unknown): string | null {
@@ -8,7 +8,11 @@ function getProfileAvatar(profiles: unknown): string | null {
 }
 
 export function toHandle(displayName: string) {
-  return displayName.toLowerCase().replace(/\s+/g, '-')
+  return displayName
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/\s+/g, '-')
 }
 
 export type TTalent = {
@@ -30,12 +34,12 @@ export type TTalent = {
 }
 
 export const SPECIALTY_BG_IMAGES: Record<string, string> = {
-  'Gastronomía': 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
+  'GastronomÃ­a': 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
   'Historia y Cultura': 'https://images.pexels.com/photos/1674666/pexels-photo-1674666.jpeg?auto=compress&cs=tinysrgb&w=500',
-  'Arte y Artesanía': 'https://images.pexels.com/photos/1532771/pexels-photo-1532771.jpeg?auto=compress&cs=tinysrgb&w=500',
-  'Música y Baile': 'https://images.pexels.com/photos/1864641/pexels-photo-1864641.jpeg?auto=compress&cs=tinysrgb&w=500',
+  'Arte y ArtesanÃ­a': 'https://images.pexels.com/photos/1532771/pexels-photo-1532771.jpeg?auto=compress&cs=tinysrgb&w=500',
+  'MÃºsica y Baile': 'https://images.pexels.com/photos/1864641/pexels-photo-1864641.jpeg?auto=compress&cs=tinysrgb&w=500',
   'Naturaleza y Aventura': 'https://images.pexels.com/photos/1308881/pexels-photo-1308881.jpeg?auto=compress&cs=tinysrgb&w=500',
-  'Fotografía': 'https://images.pexels.com/photos/1203805/pexels-photo-1203805.jpeg?auto=compress&cs=tinysrgb&w=500',
+  'FotografÃ­a': 'https://images.pexels.com/photos/1203805/pexels-photo-1203805.jpeg?auto=compress&cs=tinysrgb&w=500',
   'Idiomas': 'https://images.pexels.com/photos/4560143/pexels-photo-4560143.jpeg?auto=compress&cs=tinysrgb&w=500',
   'Bienestar': 'https://images.pexels.com/photos/3822622/pexels-photo-3822622.jpeg?auto=compress&cs=tinysrgb&w=500',
   'Deportes': 'https://images.pexels.com/photos/863988/pexels-photo-863988.jpeg?auto=compress&cs=tinysrgb&w=500',
@@ -60,7 +64,8 @@ export const getTalents = cache(async () => {
       .eq('is_hidden', false),
   ])
 
-  if (hostsResult.error) console.error('[getTalents] error:', JSON.stringify(hostsResult.error))
+  if (hostsResult.error) console.error('[getTalents] hosts error:', JSON.stringify(hostsResult.error))
+  if (expsResult.error) console.error('[getTalents] experiences error:', JSON.stringify(expsResult.error))
   if (!hostsResult.data || hostsResult.data.length === 0) {
     console.error('[getTalents] no active hosts found')
     return []

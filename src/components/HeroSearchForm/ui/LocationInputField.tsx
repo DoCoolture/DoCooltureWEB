@@ -15,6 +15,7 @@ import {
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon, IconSvgElement } from '@hugeicons/react'
 import clsx from 'clsx'
+import { debounceWithCancel } from '@/lib/debounce'
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { ClearDataButton } from './ClearDataButton'
 
@@ -102,16 +103,6 @@ interface Props {
   initSuggests?: Suggest[]
   searchingSuggests?: Suggest[]
   fieldStyle: 'default' | 'small'
-}
-
-function debounceWithCancel<T extends (...args: never[]) => void>(fn: T, delay: number) {
-  let timer: ReturnType<typeof setTimeout>
-  const debounced = (...args: Parameters<T>) => {
-    clearTimeout(timer)
-    timer = setTimeout(() => fn(...args), delay)
-  }
-  debounced.cancel = () => clearTimeout(timer)
-  return debounced
 }
 
 export const LocationInputField: FC<Props> = ({

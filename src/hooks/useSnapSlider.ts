@@ -1,12 +1,5 @@
+import { debounce } from '@/lib/debounce'
 import { useEffect, useState } from 'react'
-
-function debounce<T extends (...args: never[]) => void>(fn: T, delay: number) {
-  let timer: ReturnType<typeof setTimeout>
-  return (...args: Parameters<T>) => {
-    clearTimeout(timer)
-    timer = setTimeout(() => fn(...args), delay)
-  }
-}
 
 export default function useSnapSlider({ sliderRef }: { sliderRef: React.RefObject<HTMLDivElement | null> }) {
   const [isAtEnd, setIsAtEnd] = useState(false)

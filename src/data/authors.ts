@@ -57,8 +57,8 @@ export const getAuthors = unstable_cache(
 
     return []
   },
-  ['authors'],
-  { revalidate: 300, tags: ['authors'] }
+  ['authors:getAuthors'],
+  { revalidate: 300, tags: ['authors:getAuthors'] }
 )
 
 export async function getAuthorByHandle(handle: string) {
@@ -92,10 +92,13 @@ export async function getAuthorByHandle(handle: string) {
   const fromList = authors.find((a) => a.handle === handle)
   if (fromList) return { ...fromList, reviewsCount: fromList.reviews }
 
-  // 3. Not active — search all hosts using admin client (bypasses RLS)
+  // 3. Not active — filter by first word of handle to avoid full table scan
+  const [firstWord] = handle.split('-')
   const { data: hosts } = await supabaseAdmin
     .from('hosts')
     .select(SELECT)
+    .ilike('display_name', `%${firstWord}%`)
+    .limit(100)
 
   const host = (hosts ?? []).find(
     (h) => h.display_name && toHandle(h.display_name as string) === handle
