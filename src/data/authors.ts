@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { toHandle } from '@/data/hosts'
+import { unstable_cache } from 'next/cache'
 import { createClient } from '@supabase/supabase-js'
 
 // Server-side anon client (createClient, not createBrowserClient)
@@ -31,30 +32,34 @@ function mapHost(host: Record<string, unknown>, handle: string) {
   }
 }
 
-export async function getAuthors() {
-  const { data: hosts } = await supabaseAnon
-    .from('hosts')
-    .select('id, display_name, bio, total_reviews, average_rating, total_listings, city, country, profiles(avatar_url)')
-    .eq('status', 'active')
+export const getAuthors = unstable_cache(
+  async () => {
+    const { data: hosts } = await supabaseAnon
+      .from('hosts')
+      .select('id, display_name, bio, total_reviews, average_rating, total_listings, city, country, profiles(avatar_url)')
+      .eq('status', 'active')
 
-  if (hosts && hosts.length > 0) {
-    return hosts.map((host) => ({
-      id: host.id as string,
-      displayName: host.display_name as string,
-      handle: toHandle(host.display_name as string),
-      avatarUrl: (() => { const p = (host as any).profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? '',
-      bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
-      count: (host.total_listings as number) ?? 0,
-      description: (host.bio as string | null) ?? '',
-      jobName: 'Cultural Guide',
-      starRating: (host.average_rating as number) ?? 0,
-      reviews: (host.total_reviews as number) ?? 0,
-      location: [host.city, host.country].filter(Boolean).join(', '),
-    }))
-  }
+    if (hosts && hosts.length > 0) {
+      return hosts.map((host) => ({
+        id: host.id as string,
+        displayName: host.display_name as string,
+        handle: toHandle(host.display_name as string),
+        avatarUrl: (() => { const p = (host as any).profiles; const v = Array.isArray(p) ? p[0] : p; return v?.avatar_url ?? null })() ?? '',
+        bgImage: 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500',
+        count: (host.total_listings as number) ?? 0,
+        description: (host.bio as string | null) ?? '',
+        jobName: 'Cultural Guide',
+        starRating: (host.average_rating as number) ?? 0,
+        reviews: (host.total_reviews as number) ?? 0,
+        location: [host.city, host.country].filter(Boolean).join(', '),
+      }))
+    }
 
-  return []
-}
+    return []
+  },
+  ['authors'],
+  { revalidate: 300, tags: ['authors'] }
+)
 
 export async function getAuthorByHandle(handle: string) {
   const SELECT = 'id, display_name, bio, total_reviews, average_rating, total_listings, city, country, profiles(avatar_url)'

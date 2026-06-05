@@ -42,7 +42,7 @@ export default function HostDashboardPage() {
     // Obtener perfil de anfitrión
     const { data: hostData } = await supabase
       .from('hosts')
-      .select('*')
+      .select('id, display_name, verification_status, total_listings, total_bookings, total_reviews, average_rating')
       .eq('user_id', user.id)
       .single()
 
@@ -56,26 +56,26 @@ export default function HostDashboardPage() {
       return
     }
 
-    setHost(hostData)
+    setHost(hostData as Host)
 
     // Obtener experiencias
     const { data: experiencesData } = await supabase
       .from('experiences')
-      .select('*')
+      .select('id, host_id, title, description, category, price_usd, duration_time, max_guests, address, city, is_published, is_hidden, featured_image_url, gallery_urls, average_rating, total_reviews')
       .eq('host_id', hostData.id)
       .order('created_at', { ascending: false })
 
-    setExperiences(experiencesData || [])
+    setExperiences((experiencesData || []) as Experience[])
 
     // Obtener reservas recientes
     const { data: bookingsData } = await supabase
       .from('bookings')
-      .select('*')
+      .select('id, booking_code, customer_name, customer_email, booking_date, guests, status')
       .eq('host_id', hostData.id)
       .order('created_at', { ascending: false })
       .limit(5)
 
-    setBookings(bookingsData || [])
+    setBookings((bookingsData || []) as Booking[])
     setIsLoading(false)
   }
 

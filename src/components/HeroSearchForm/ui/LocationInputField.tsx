@@ -15,7 +15,6 @@ import {
 } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon, IconSvgElement } from '@hugeicons/react'
 import clsx from 'clsx'
-import _ from 'lodash'
 import { FC, useCallback, useEffect, useRef, useState } from 'react'
 import { ClearDataButton } from './ClearDataButton'
 
@@ -105,6 +104,16 @@ interface Props {
   fieldStyle: 'default' | 'small'
 }
 
+function debounceWithCancel<T extends (...args: never[]) => void>(fn: T, delay: number) {
+  let timer: ReturnType<typeof setTimeout>
+  const debounced = (...args: Parameters<T>) => {
+    clearTimeout(timer)
+    timer = setTimeout(() => fn(...args), delay)
+  }
+  debounced.cancel = () => clearTimeout(timer)
+  return debounced
+}
+
 export const LocationInputField: FC<Props> = ({
   placeholder,
   description,
@@ -142,7 +151,7 @@ export const LocationInputField: FC<Props> = ({
   useInteractOutside(containerRef, closePopover)
 
   const handleInputChange = useCallback(
-    _.debounce((e: React.ChangeEvent<HTMLInputElement>) => {
+    debounceWithCancel((e: React.ChangeEvent<HTMLInputElement>) => {
       setShowPopover(true)
       // If the input is empty, Combobox will automatically setSelected
       if (e.target.value) {

@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { createSupabaseServerClient } from '@/lib/supabase-server'
 
 function getProfileAvatar(profiles: unknown): string | null {
@@ -43,7 +44,7 @@ export const SPECIALTY_BG_IMAGES: Record<string, string> = {
 
 const DEFAULT_BG = 'https://images.pexels.com/photos/1640774/pexels-photo-1640774.jpeg?auto=compress&cs=tinysrgb&w=500'
 
-export async function getTalents(): Promise<TTalent[]> {
+export const getTalents = cache(async () => {
   const supabase = await createSupabaseServerClient()
 
   const [hostsResult, expsResult] = await Promise.all([
@@ -92,4 +93,4 @@ export async function getTalents(): Promise<TTalent[]> {
       yearsExperience: (host.years_experience as number) ?? 0,
     }
   })
-}
+})
