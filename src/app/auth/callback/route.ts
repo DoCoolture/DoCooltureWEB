@@ -11,7 +11,14 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     const cookieStore = await cookies()
-    const role = searchParams.get('role')
+    // Only allow known user-selectable roles — never accept admin from URL
+    const ALLOWED_SIGNUP_ROLES = ['explorer', 'host'] as const
+    type SignupRole = typeof ALLOWED_SIGNUP_ROLES[number]
+    const rawRole = searchParams.get('role')
+    const role: SignupRole | null =
+      rawRole && (ALLOWED_SIGNUP_ROLES as readonly string[]).includes(rawRole)
+        ? (rawRole as SignupRole)
+        : null
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

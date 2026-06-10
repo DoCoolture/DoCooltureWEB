@@ -1,4 +1,5 @@
 import AdminBar from '@/components/AdminBar'
+import ChatWidget from '@/components/ChatWidget/ChatWidget'
 import Footer2 from '@/components/Footer2'
 import FooterQuickNavigation from '@/components/FooterQuickNavigation'
 import Header from '@/components/Header/Header'
@@ -33,6 +34,7 @@ const ApplicationLayout: React.FC<Props> = ({ children, header }) => {
       <Footer2 /> {/* <Footer /> or <Footer2 /> or <Footer3 /> or <Footer4 />*/}
       {/*  */}
       <AsideSidebarNavigation />
+      <ChatWidget />
     </Aside.Provider>
   )
 }

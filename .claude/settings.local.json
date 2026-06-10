@@ -27,7 +27,15 @@
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\jjuan\\\\OneDrive\\\\Desktop\\\\docoolture-nextjs\\\\docoolture-nextjs\\\\src\" -Recurse -Directory)",
       "WebFetch(domain:www.pexels.com)",
       "WebSearch",
-      "Bash(mkdir -p \"c:/Users/jjuan/OneDrive/Desktop/docoolture-nextjs/docoolture-nextjs/public/images/cities\")"
+      "Bash(mkdir -p \"c:/Users/jjuan/OneDrive/Desktop/docoolture-nextjs/docoolture-nextjs/public/images/cities\")",
+      "Skill(code-review)",
+      "Skill(code-review:*)",
+      "Read(//c/c/Users/jjuan/OneDrive/Desktop/docoolture-nextjs/docoolture-nextjs/src/app/\\(auth\\)/login/**)",
+      "Read(//c/c/Users/jjuan/OneDrive/Desktop/docoolture-nextjs/docoolture-nextjs/src/app/\\(auth\\)/signup/**)",
+      "Bash(cd \"/c/Users/jjuan/OneDrive/Desktop/docoolture-nextjs/docoolture-nextjs\" && cat src/app/\\\\\\(app\\\\\\)/admin/page.tsx | head -60 && echo \"===\" && cat src/app/\\\\\\(app\\\\\\)/host/dashboard/page.tsx | head -100)",
+      "Bash(cd \"/c/Users/jjuan/OneDrive/Desktop/docoolture-nextjs/docoolture-nextjs\" && cat src/app/\\\\\\(app\\\\\\)/\\\\\\(listings\\\\\\)/experience-listings/\\\\[handle\\\\]/page.tsx | head -120)",
+      "Bash(cd \"/c/Users/jjuan/OneDrive/Desktop/docoolture-nextjs/docoolture-nextjs\" && cat src/data/listings.ts | grep -A 30 \"hostId\\\\|host_id\\\\|host:\" | head -60)",
+      "Bash(cd \"/c/Users/jjuan/OneDrive/Desktop/docoolture-nextjs/docoolture-nextjs\" && grep -rn \"next.*searchParams\\\\|router\\\\.push.*next\\\\|redirect.*next\" src/ --include=\"*.ts\" --include=\"*.tsx\" | grep -v node_modules | head -20)"
     ],
     "additionalDirectories": [
       "c:\\Users\\jjuan\\OneDrive\\Desktop\\docoolture-nextjs\\docoolture-nextjs\\public\\images"

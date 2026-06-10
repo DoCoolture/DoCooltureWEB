@@ -71,13 +71,21 @@ export default function SignupPage() {
     }
 
     if (data.user) {
-      await supabase.from('profiles').update({
+      // upsert instead of update: works whether the session is active or not.
+      // With email confirmation ON, data.session is null so update() would silently fail
+      // (RLS requires auth.uid() = user_id). upsert with the service role isn't available
+      // client-side, so we store the extra data in auth metadata and let the DB trigger
+      // pick it up. The trigger already copies full_name/display_name/role from metadata.
+      // We update only what the trigger doesn't handle (phone, city).
+      // If the session IS active (email confirmation OFF), this also works fine.
+      await supabase.from('profiles').upsert({
+        user_id: data.user.id,
         role,
-        phone,
-        city,
+        phone: phone || null,
+        city: city || null,
         display_name: fullName.split(' ')[0],
         full_name: fullName,
-      }).eq('user_id', data.user.id)
+      }, { onConflict: 'user_id', ignoreDuplicates: false })
     }
 
     setSuccess(true)

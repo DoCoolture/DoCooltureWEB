@@ -46,7 +46,9 @@ export default function LoginPage() {
       .eq('user_id', data.user.id)
       .single()
 
-    const next = searchParams.get('next')
+    const rawNext = searchParams.get('next')
+    // Only allow relative paths to prevent open-redirect attacks
+    const next = rawNext?.startsWith('/') && !rawNext.startsWith('//') ? rawNext : null
     if (next) {
       router.push(next)
     } else if (profile?.role === 'admin') {

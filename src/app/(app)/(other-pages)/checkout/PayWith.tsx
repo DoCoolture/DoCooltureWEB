@@ -2,7 +2,6 @@
 
 import CardnetDirectForm from '@/components/CardnetDirectForm'
 import { useLanguage } from '@/context/LanguageContext'
-import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import React from 'react'
@@ -68,53 +67,24 @@ const PayWith: React.FC<PayWithProps> = ({
     const res = await fetch('/api/paypal/capture-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderID }),
-    })
-    const data = await res.json()
-
-    if (!res.ok || data.status !== 'COMPLETED') {
-      setPaypalError(b.bookingError)
-      return
-    }
-
-    const { error: dbError } = await supabase.from('bookings').insert({
-      experience_id: experienceId,
-      host_id: hostId,
-      customer_name: customerName,
-      customer_email: customerEmail || data.payerEmail,
-      explorer_id: customerId,
-      customer_phone: '',
-      tour_name: tourName,
-      booking_date: bookingDate,
-      guests,
-      notes,
-      status: 'confirmed',
-      payment_method: 'paypal',
-      payment_status: 'paid',
-      payment_reference: data.transactionId,
-      total_amount: totalUsd,
-    })
-
-    if (dbError) {
-      console.error('Booking save error:', dbError)
-      setPaypalError(b.bookingError)
-      return
-    }
-
-    fetch('/api/notify-booking', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        orderID,
+        experienceId,
         hostId,
         tourName,
         bookingDate,
         guests,
+        notes,
         customerName,
-        customerEmail: customerEmail || data.payerEmail,
-        totalAmount: totalUsd,
-        currency: 'USD',
+        customerEmail,
       }),
-    }).catch(() => {})
+    })
+    const data = await res.json()
+
+    if (!res.ok || data.status !== 'COMPLETED') {
+      setPaypalError(data.error ?? b.bookingError)
+      return
+    }
 
     router.push('/pay-done')
   }

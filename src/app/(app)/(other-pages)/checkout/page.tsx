@@ -30,6 +30,9 @@ const CheckoutContent = () => {
   const [notes, setNotes] = useState('')
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; fullName: string } | null>(null)
   const [userLoading, setUserLoading] = useState(true)
+  // Authoritative price fetched from DB — never trust the URL param for payment amounts
+  const [verifiedPricePerExplorer, setVerifiedPricePerExplorer] = useState<number | null>(null)
+  const [priceVerificationFailed, setPriceVerificationFailed] = useState(false)
 
   React.useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -52,6 +55,28 @@ const CheckoutContent = () => {
   React.useEffect(() => {
     document.documentElement.scrollTo({ top: 0, behavior: 'instant' })
   }, [])
+
+  React.useEffect(() => {
+    const id = searchParams.get('experienceId')
+    if (!id) {
+      setPriceVerificationFailed(true)
+      return
+    }
+    supabase
+      .from('experiences')
+      .select('price_usd')
+      .eq('id', id)
+      .eq('is_published', true)
+      .single()
+      .then(({ data }) => {
+        if (data?.price_usd) {
+          setVerifiedPricePerExplorer(Number(data.price_usd))
+        } else {
+          // Experience not found or unpublished — block payment
+          setPriceVerificationFailed(true)
+        }
+      })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const experiencia = {
     titulo: searchParams.get('titulo') || '',
@@ -76,7 +101,8 @@ const CheckoutContent = () => {
   }
   const durationDays = parseDurationDays(experiencia.duracion)
 
-  const precioNum = Number(experiencia.precio.replace('$', '').replace(',', ''))
+  // Use DB-verified price if available; URL param is only for display before fetch resolves
+  const precioNum = verifiedPricePerExplorer ?? Number(experiencia.precio.replace('$', '').replace(',', ''))
   const subtotal = precioNum * currentExplorers
   const cargoProcesamiento = subtotal * 0.18
   const total = subtotal + cargoProcesamiento
@@ -187,7 +213,11 @@ const CheckoutContent = () => {
         />
       </Field>
 
-      {userLoading ? (
+      {priceVerificationFailed ? (
+        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+          Esta experiencia ya no está disponible. Por favor vuelve al catálogo y selecciona otra.
+        </p>
+      ) : userLoading || verifiedPricePerExplorer === null ? (
         <div className="h-12 animate-pulse rounded-xl bg-neutral-100 dark:bg-neutral-800" />
       ) : !currentUser ? (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300">

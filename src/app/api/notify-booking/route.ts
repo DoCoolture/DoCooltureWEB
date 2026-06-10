@@ -2,7 +2,15 @@ import { supabaseAdmin } from '@/lib/supabase-admin'
 import { sendBookingNotificationEmail } from '@/lib/email'
 import { NextRequest, NextResponse } from 'next/server'
 
+const INTERNAL_SECRET = process.env.INTERNAL_API_SECRET
+
 export async function POST(request: NextRequest) {
+  // Only allow calls from internal server routes via shared secret
+  const authHeader = request.headers.get('x-internal-secret')
+  if (!INTERNAL_SECRET || authHeader !== INTERNAL_SECRET) {
+    return NextResponse.json({ ok: false }, { status: 401 })
+  }
+
   try {
     const {
       hostId,
