@@ -127,7 +127,14 @@ export default function ChatWidget() {
             ))}
 
             {error && (
-              <p className="text-center text-xs text-red-500">{error}</p>
+              error.includes('401') || error.toLowerCase().includes('unauthorized') ? (
+                <p className="text-center text-xs text-neutral-500 dark:text-neutral-400">
+                  Inicia sesión para chatear con Coco.{' '}
+                  <a href="/login" className="text-primary-600 hover:underline">Iniciar sesión</a>
+                </p>
+              ) : (
+                <p className="text-center text-xs text-red-500">{error}</p>
+              )
             )}
 
             <div ref={messagesEndRef} />

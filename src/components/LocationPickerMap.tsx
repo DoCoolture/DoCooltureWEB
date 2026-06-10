@@ -3,11 +3,12 @@
 import { Map, MapMarker, MarkerContent, useMap } from '@/components/ui/map'
 import type MapLibreGL from 'maplibre-gl'
 import { useCallback, useEffect } from 'react'
+import { useLanguage } from '@/context/LanguageContext'
 
 interface Props {
   lat: number | null
   lng: number | null
-  onChange: (coords: { lat: number; lng: number }) => void
+  onChange: (coords: { lat: number; lng: number } | null) => void
 }
 
 const DR_CENTER = { lat: 18.7357, lng: -70.1627 }
@@ -29,6 +30,7 @@ function ClickHandler({ onClick }: { onClick: (e: MapLibreGL.MapMouseEvent) => v
 }
 
 export default function LocationPickerMap({ lat, lng, onChange }: Props) {
+  const { t } = useLanguage()
   const hasMarker = lat !== null && lng !== null && (lat !== 0 || lng !== 0)
 
   const handleClick = useCallback(
@@ -62,7 +64,7 @@ export default function LocationPickerMap({ lat, lng, onChange }: Props) {
           )}
         </Map>
         <div className="pointer-events-none absolute bottom-2 left-2 rounded-md bg-white/90 px-2.5 py-1 text-xs text-neutral-600 shadow dark:bg-neutral-900/90 dark:text-neutral-400">
-          Haz clic en el mapa para fijar la ubicación
+          {t.locationPicker.clickToPin}
         </div>
       </div>
       {hasMarker ? (
@@ -70,14 +72,14 @@ export default function LocationPickerMap({ lat, lng, onChange }: Props) {
           📍 {lat?.toFixed(5)}, {lng?.toFixed(5)}
           <button
             type="button"
-            onClick={() => onChange({ lat: 0, lng: 0 })}
+            onClick={() => onChange(null)}
             className="ml-3 text-red-500 hover:text-red-600"
           >
-            × Quitar marcador
+            {t.locationPicker.removeMarker}
           </button>
         </p>
       ) : (
-        <p className="text-xs text-neutral-400">Sin ubicación seleccionada</p>
+        <p className="text-xs text-neutral-400">{t.locationPicker.noLocation}</p>
       )}
     </div>
   )

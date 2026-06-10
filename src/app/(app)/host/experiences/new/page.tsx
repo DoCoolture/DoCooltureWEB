@@ -5,6 +5,7 @@ import LocationPickerMap from '@/components/LocationPickerMap'
 import { supabase, uploadExperienceImage } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import { useLanguage } from '@/context/LanguageContext'
 import {
   EXPERIENCE_CATEGORIES,
   AVAILABLE_LANGUAGES,
@@ -52,6 +53,7 @@ const MINUTES = ['00', '15', '30', '45']
 
 export default function NewExperiencePage() {
   const router = useRouter()
+  const { t } = useLanguage()
   const [step, setStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -110,6 +112,7 @@ export default function NewExperiencePage() {
   const [availableDays, setAvailableDays] = useState<string[]>([])
   const [availableTimes, setAvailableTimes] = useState<string[]>([])
   const [timeHour, setTimeHour] = useState('')
+  const [publishImmediately, setPublishImmediately] = useState(true)
   const [timeMinute, setTimeMinute] = useState('00')
 
   const toggleItem = (item: string, list: string[], setList: (l: string[]) => void) => {
@@ -131,10 +134,7 @@ export default function NewExperiencePage() {
   const addTime = () => {
     if (!timeHour) return
     const time = `${timeHour}:${timeMinute}`
-    if (!availableTimes.includes(time)) {
-      setAvailableTimes([...availableTimes, time])
-      setFieldErrors((p) => ({ ...p, availableDays: '' }))
-    }
+    if (!availableTimes.includes(time)) setAvailableTimes([...availableTimes, time])
   }
 
   const handleFeaturedImage = (file: File) => {
@@ -216,9 +216,12 @@ export default function NewExperiencePage() {
   }
 
   const handleSubmit = async () => {
-    const errs = validateStep(step)
-    setFieldErrors(errs)
-    if (Object.keys(errs).length > 0) return
+    const allErrs = [1, 2, 3, 4, 5].reduce<FieldErrors>(
+      (acc, s) => ({ ...acc, ...validateStep(s) }),
+      {}
+    )
+    setFieldErrors(allErrs)
+    if (Object.keys(allErrs).length > 0) return
 
     setIsLoading(true)
     setError(null)
@@ -237,16 +240,36 @@ export default function NewExperiencePage() {
         )
       }
 
-      const galleryUrls: string[] = []
-      for (const img of galleryImages) {
-        const url = await uploadExperienceImage(
-          user.id, img,
-          `gallery-${Date.now()}-${Math.random().toString(36).slice(2)}.${img.name.split('.').pop()}`
+      const galleryResults = await Promise.all(
+        galleryImages.map((img) =>
+          uploadExperienceImage(
+            user.id, img,
+            `gallery-${Date.now()}-${Math.random().toString(36).slice(2)}.${img.name.split('.').pop()}`
+          )
         )
-        if (url) galleryUrls.push(url)
+      )
+      const galleryUrls = galleryResults.filter(Boolean) as string[]
+      const failedUploads = galleryResults.filter((r) => !r).length
+      if (failedUploads > 0) {
+        setError(`${failedUploads} foto(s) de galería no se pudieron subir. Puedes agregarlas después desde tu panel.`)
+        // Continue — partial gallery is better than aborting the whole submission
       }
 
-      const handle = generateHandle(title)
+      let handle = generateHandle(title)
+      // Resolve handle collisions by appending a counter suffix
+      const { data: existingHandles } = await supabase
+        .from('experiences')
+        .select('handle')
+        .like('handle', `${handle}%`)
+      if (existingHandles && existingHandles.length > 0) {
+        const taken = new Set(existingHandles.map((e: { handle: string }) => e.handle))
+        if (taken.has(handle)) {
+          let n = 2
+          while (taken.has(`${handle}-${n}`)) n++
+          handle = `${handle}-${n}`
+        }
+      }
+
       const { error: expError } = await supabase.from('experiences').insert({
         host_id: host.id, title, handle, description,
         short_description: shortDescription, category, tags,
@@ -258,9 +281,14 @@ export default function NewExperiencePage() {
         featured_image_url: featuredImageUrl, gallery_urls: galleryUrls,
         available_days: availableDays, available_times: availableTimes,
         latitude: latitude ?? null, longitude: longitude ?? null,
-        is_published: true, is_hidden: false,
+        is_published: publishImmediately, is_hidden: false,
       })
-      if (expError) throw expError
+      if (expError) {
+        if ((expError as any).code === '23505') {
+          throw new Error('Ya existe una experiencia con un nombre muy similar. Cambia el título e intenta de nuevo.')
+        }
+        throw expError
+      }
 
       router.push('/host/dashboard')
     } catch (err: any) {
@@ -271,7 +299,7 @@ export default function NewExperiencePage() {
   }
 
   const canProceed = () => {
-    if (step === 1) return title && description && category
+    if (step === 1) return !!(title && shortDescription && description && category)
     if (step === 2) return durationTime && languages.length > 0 && address && city && meetingPoint
     if (step === 3) return Number(priceUsd) > 0 && priceIncludes.length > 0
     if (step === 4) return featuredImage !== null
@@ -520,9 +548,9 @@ export default function NewExperiencePage() {
         <LocationPickerMap
           lat={latitude}
           lng={longitude}
-          onChange={({ lat, lng }) => {
-            setLatitude(lat === 0 && lng === 0 ? null : lat)
-            setLongitude(lat === 0 && lng === 0 ? null : lng)
+          onChange={(coords) => {
+            setLatitude(coords?.lat ?? null)
+            setLongitude(coords?.lng ?? null)
           }}
         />
       </div>
@@ -819,6 +847,26 @@ export default function NewExperiencePage() {
         <p className="text-neutral-600 dark:text-neutral-400">⏱️ {durationTime} · hasta {maxGuests} explorers</p>
         <p className="text-neutral-600 dark:text-neutral-400">💵 ${priceUsd} USD por persona</p>
         <p className="text-neutral-600 dark:text-neutral-400">📅 {availableDays.join(', ')}</p>
+      </div>
+
+      <div className="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-4 flex items-start gap-x-3">
+        <input
+          id="publish_immediately"
+          type="checkbox"
+          checked={publishImmediately}
+          onChange={(e) => setPublishImmediately(e.target.checked)}
+          className="mt-0.5 size-4 rounded border-neutral-300"
+        />
+        <div>
+          <label htmlFor="publish_immediately" className="text-sm font-medium text-neutral-700 dark:text-neutral-300 cursor-pointer">
+            {t.hostDashboard.publishImmediately}
+          </label>
+          <p className="text-xs text-neutral-400 mt-0.5">
+            {publishImmediately
+              ? t.hostDashboard.publishImmediatelyDesc
+              : t.hostDashboard.saveDraftDesc}
+          </p>
+        </div>
       </div>
     </div>
   )

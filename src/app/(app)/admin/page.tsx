@@ -36,6 +36,7 @@ export default function AdminPage() {
   const [hideReason, setHideReason] = useState('')
   const [rejectingVerificationId, setRejectingVerificationId] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+  const [mutationError, setMutationError] = useState<string | null>(null)
 
   useEffect(() => {
     checkAdmin()
@@ -113,6 +114,7 @@ export default function AdminPage() {
         .from('experiences')
         .select('*')
         .order('created_at', { ascending: false })
+        .limit(100)
       setExperiences(data || [])
     }
 
@@ -121,6 +123,7 @@ export default function AdminPage() {
         .from('hosts')
         .select('*, identity_verifications(id, status, document_type, document_number, document_front_url, document_back_url, selfie_url, created_at)')
         .order('created_at', { ascending: false })
+        .limit(100)
       setHosts((data || []) as any[])
     }
 
@@ -138,6 +141,7 @@ export default function AdminPage() {
         .from('identity_verifications')
         .select('*, hosts(display_name, user_id)')
         .order('created_at', { ascending: false })
+        .limit(100)
       setVerifications(data || [])
     }
 
@@ -145,7 +149,8 @@ export default function AdminPage() {
   }
 
   const handleHideExperience = async (exp: Experience, reason: string) => {
-    await supabase
+    setMutationError(null)
+    const { error } = await supabase
       .from('experiences')
       .update({
         is_hidden: !exp.is_hidden,
@@ -154,7 +159,8 @@ export default function AdminPage() {
       })
       .eq('id', exp.id)
 
-    // Notificar al anfitrión
+    if (error) { setMutationError(`Error al ${exp.is_hidden ? 'mostrar' : 'pausar'} la experiencia: ${error.message}`); return }
+
     if (!exp.is_hidden) {
       const { data: host } = await supabase
         .from('hosts')
@@ -183,25 +189,19 @@ export default function AdminPage() {
     status: 'approved' | 'rejected',
     reason?: string
   ) => {
-    await supabase
-      .from('identity_verifications')
-      .update({
-        status,
-        reviewed_at: new Date().toISOString(),
-        rejection_reason: reason || null,
-      })
-      .eq('id', id)
+    setMutationError(null)
 
-    await supabase
-      .from('hosts')
-      .update({
-        verification_status: status,
-        is_verified: status === 'approved',
-        verified_at: status === 'approved' ? new Date().toISOString() : null,
-      })
-      .eq('id', hostId)
+    // Single atomic DB call — both tables update in the same transaction
+    const { error: rpcError } = await supabase.rpc('approve_or_reject_verification', {
+      p_verification_id: id,
+      p_host_id: hostId,
+      p_status: status,
+      p_reason: reason ?? null,
+    })
 
-    // Notificar al anfitrión
+    if (rpcError) { setMutationError(`Error al procesar verificación: ${rpcError.message}`); return }
+
+    // Notify the host (best-effort, non-blocking)
     const { data: host } = await supabase
       .from('hosts')
       .select('user_id')
@@ -211,12 +211,8 @@ export default function AdminPage() {
     if (host) {
       await supabase.from('notifications').insert({
         user_id: host.user_id,
-        type: status === 'approved'
-          ? 'verification_approved'
-          : 'verification_rejected',
-        title: status === 'approved'
-          ? '✅ Identidad verificada'
-          : '❌ Verificación rechazada',
+        type: status === 'approved' ? 'verification_approved' : 'verification_rejected',
+        title: status === 'approved' ? '✅ Identidad verificada' : '❌ Verificación rechazada',
         message: status === 'approved'
           ? '¡Tu identidad ha sido verificada! Los explorers verán tu insignia de verificación.'
           : `Tu verificación fue rechazada. Razón: ${reason}`,
@@ -229,27 +225,32 @@ export default function AdminPage() {
   }
 
   const handleDeleteExperience = async (exp: Experience) => {
+    setMutationError(null)
     const { error } = await supabase.from('experiences').delete().eq('id', exp.id)
-    if (!error) {
+    if (error) {
+      setMutationError(`Error al eliminar la experiencia: ${error.message}`)
+    } else {
       setDeletingExpId(null)
       loadData()
       loadStats()
-    } else {
-      console.error('Delete error:', error)
     }
   }
 
   const handleSuspendHost = async (host: Host) => {
+    setMutationError(null)
     const newStatus = host.status === 'active' ? 'suspended' : 'active'
-    await supabase
+    const { error } = await supabase
       .from('hosts')
       .update({ status: newStatus })
       .eq('id', host.id)
+    if (error) { setMutationError(`Error al ${newStatus === 'suspended' ? 'suspender' : 'activar'} el anfitrión: ${error.message}`); return }
     loadData()
+    loadStats()
   }
 
   const handleVerifyHost = async (host: Host) => {
-    await supabase
+    setMutationError(null)
+    const { error } = await supabase
       .from('hosts')
       .update({
         is_verified: true,
@@ -257,6 +258,7 @@ export default function AdminPage() {
         verified_at: new Date().toISOString(),
       })
       .eq('id', host.id)
+    if (error) { setMutationError(`Error al verificar el anfitrión: ${error.message}`); return }
     loadData()
     loadStats()
   }
@@ -292,6 +294,13 @@ export default function AdminPage() {
 
   return (
     <main className="container max-w-6xl mx-auto py-10 px-4 mb-24">
+
+      {mutationError && (
+        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
+          ⚠️ {mutationError}
+          <button onClick={() => setMutationError(null)} className="ml-3 text-red-600 hover:underline dark:text-red-400">Cerrar</button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="mb-8 flex flex-col gap-y-3 sm:flex-row sm:items-start sm:justify-between">

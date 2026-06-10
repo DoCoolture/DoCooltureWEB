@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseServerClient, getProfileId } from '@/lib/supabase-server'
 import { CARDNET_REST_BASE } from '@/lib/cardnet'
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
@@ -8,6 +8,9 @@ export async function POST(request: NextRequest) {
     const supabase = await createSupabaseServerClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const profileId = await getProfileId(supabase, user.id)
+    if (!profileId) return NextResponse.json({ error: 'Tu perfil aún se está configurando. Espera un momento e intenta de nuevo.' }, { status: 400 })
 
     const {
       cardNumber,
@@ -91,7 +94,7 @@ export async function POST(request: NextRequest) {
         host_id: hostId,
         customer_name: customerName,
         customer_email: customerEmail,
-        explorer_id: user.id,
+        explorer_id: profileId,
         customer_phone: '',
         tour_name: tourName,
         booking_date: bookingDate,

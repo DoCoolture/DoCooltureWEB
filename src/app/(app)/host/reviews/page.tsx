@@ -73,10 +73,16 @@ export default function HostReviewsPage() {
     if (!reply) return
     setSubmitting(reviewId)
 
-    await supabase
+    const { error } = await supabase
       .from('experience_reviews')
       .update({ host_reply: reply, host_replied_at: new Date().toISOString() })
       .eq('id', reviewId)
+
+    if (error) {
+      console.error('[handleReply] update failed:', error)
+      setSubmitting(null)
+      return
+    }
 
     setReviews((prev) =>
       prev.map((r) =>

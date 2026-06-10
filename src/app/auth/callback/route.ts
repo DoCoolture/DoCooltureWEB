@@ -37,7 +37,15 @@ export async function GET(request: NextRequest) {
       }
     )
 
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    if (exchangeError) {
+      // Code already consumed (e.g. double-click) — check if a session already exists
+      const { data: { user: existingUser } } = await supabase.auth.getUser()
+      if (!existingUser) {
+        return NextResponse.redirect(`${origin}/login?error=link_expired`)
+      }
+      // Session is already active — fall through to role-based routing below
+    }
 
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {

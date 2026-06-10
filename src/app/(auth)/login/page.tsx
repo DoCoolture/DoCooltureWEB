@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { useLanguage } from '@/context/LanguageContext'
 import { supabase } from '@/lib/supabase'
@@ -25,7 +26,18 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(
+    searchParams.get('error') === 'link_expired'
+      ? 'El enlace expiró o ya fue usado. Por favor inicia sesión normalmente.'
+      : null
+  )
+
+  // Remove ?error=link_expired from the URL so bookmarking this page doesn't persist the message
+  React.useEffect(() => {
+    if (searchParams.get('error') === 'link_expired') {
+      router.replace('/login')
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()

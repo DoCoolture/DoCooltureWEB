@@ -8,14 +8,14 @@ import { SectionHeading, SectionSubheading } from './SectionHeading'
 
 interface Props {
   className?: string
-  lat?: number
-  lng?: number
+  lat?: number | null
+  lng?: number | null
   address?: string
 }
 
 const SectionMap = ({ className, lat, lng, address }: Props) => {
   const { t } = useLanguage()
-  if (!lat || !lng) return null
+  if (lat == null || lng == null || (lat === 0 && lng === 0)) return null
 
   return (
     <div className={`listingSection__wrap ${className ?? ''}`}>

@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { supabase } from '@/lib/supabase'
 
 //  STAY LISTING  //
@@ -181,7 +182,7 @@ export async function getExperienceListings() {
   return fromSupabase
 }
 
-export const getExperienceListingByHandle = async (handle: string) => {
+export const getExperienceListingByHandle = cache(async (handle: string) => {
   const { data: exp } = await supabase
     .from('experiences')
     .select('*')
@@ -192,21 +193,14 @@ export const getExperienceListingByHandle = async (handle: string) => {
 
   if (!exp) return null
 
+  // Fetch host and their profile avatar in a single query via FK join
   const { data: hostData } = await supabase
     .from('hosts')
-    .select('*')
+    .select('*, profiles!profile_id(avatar_url)')
     .eq('id', exp.host_id)
     .single()
 
-  let avatarUrl = ''
-  if (hostData) {
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('avatar_url')
-      .eq('id', hostData.profile_id)
-      .single()
-    avatarUrl = profileData?.avatar_url ?? ''
-  }
+  const avatarUrl = (hostData as any)?.profiles?.avatar_url ?? ''
 
   return {
     id: exp.id,
@@ -231,7 +225,7 @@ export const getExperienceListingByHandle = async (handle: string) => {
     availableDays: (exp.available_days as string[] | null) ?? [],
     saleOff: null as string | null,
     isAds: null as string | null,
-    map: { lat: exp.latitude ?? 0, lng: exp.longitude ?? 0 },
+    map: { lat: exp.latitude ?? null, lng: exp.longitude ?? null },
     host: {
       displayName: hostData?.display_name ?? 'Anfitrión DoCoolture',
       avatarUrl,
@@ -249,7 +243,7 @@ export const getExperienceListingByHandle = async (handle: string) => {
         : '',
     },
   }
-}
+})
 export type TExperienceListing = Awaited<ReturnType<typeof getExperienceListings>>[number]
 
 //  REAL-ESTATE LISTING  //

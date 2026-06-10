@@ -253,6 +253,7 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
                 rounded="rounded-full"
                 placeholder={el.shareExperience}
                 value={comment}
+                maxLength={2000}
                 onChange={(e) => setComment(e.target.value)}
               />
               <div className="absolute end-2 top-1/2 -translate-y-1/2">

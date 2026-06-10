@@ -410,16 +410,27 @@ export default function HostDashboardPage() {
           experience={{
             id: editingExp.id,
             title: editingExp.title,
+            short_description: editingExp.short_description,
             description: editingExp.description,
             category: editingExp.category,
+            tags: editingExp.tags,
             price_usd: editingExp.price_usd ?? 0,
             duration_time: editingExp.duration_time,
             max_guests: editingExp.max_guests,
+            min_guests: editingExp.min_guests,
+            meeting_point: editingExp.meeting_point,
             address: editingExp.address,
             city: editingExp.city,
             is_published: editingExp.is_published,
             featured_image_url: editingExp.featured_image_url,
             gallery_urls: editingExp.gallery_urls,
+            languages: editingExp.languages,
+            price_includes: editingExp.price_includes,
+            price_excludes: editingExp.price_excludes,
+            available_days: editingExp.available_days,
+            available_times: editingExp.available_times,
+            latitude: editingExp.latitude,
+            longitude: editingExp.longitude,
           }}
           onClose={() => setEditingExp(null)}
           onSaved={() => { loadDashboard(); setEditingExp(null) }}

@@ -1,5 +1,5 @@
 import { getAccessToken, PAYPAL_BASE } from '@/lib/paypal'
-import { createSupabaseServerClient } from '@/lib/supabase-server'
+import { createSupabaseServerClient, getProfileId } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(request: NextRequest) {
@@ -7,6 +7,9 @@ export async function POST(request: NextRequest) {
     const supabase = await createSupabaseServerClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const profileId = await getProfileId(supabase, user.id)
+    if (!profileId) return NextResponse.json({ error: 'Tu perfil aún se está configurando. Espera un momento e intenta de nuevo.' }, { status: 400 })
 
     const {
       orderID,
@@ -40,7 +43,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Experience not found' }, { status: 404 })
     }
 
-    const expectedTotal = Number((experience.price_usd * guests * 1.18).toFixed(2))
+    const expectedTotal = Number((experience.price_usd * (guests ?? 1) * 1.18).toFixed(2))
 
     const accessToken = await getAccessToken()
 
@@ -77,7 +80,7 @@ export async function POST(request: NextRequest) {
       host_id: hostId,
       customer_name: customerName,
       customer_email: customerEmail || payerEmail,
-      explorer_id: user.id,
+      explorer_id: profileId,
       customer_phone: '',
       tour_name: tourName,
       booking_date: bookingDate,

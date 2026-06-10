@@ -33,6 +33,8 @@ const CheckoutContent = () => {
   // Authoritative price fetched from DB — never trust the URL param for payment amounts
   const [verifiedPricePerExplorer, setVerifiedPricePerExplorer] = useState<number | null>(null)
   const [priceVerificationFailed, setPriceVerificationFailed] = useState(false)
+  // Extract once at render time so it's a stable dep for the price effect
+  const experienceIdParam = searchParams.get('experienceId')
 
   React.useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
@@ -57,26 +59,27 @@ const CheckoutContent = () => {
   }, [])
 
   React.useEffect(() => {
-    const id = searchParams.get('experienceId')
-    if (!id) {
+    if (!experienceIdParam) {
       setPriceVerificationFailed(true)
       return
     }
+    // Reset state when navigating between different experiences in the same tab
+    setVerifiedPricePerExplorer(null)
+    setPriceVerificationFailed(false)
     supabase
       .from('experiences')
       .select('price_usd')
-      .eq('id', id)
+      .eq('id', experienceIdParam)
       .eq('is_published', true)
       .single()
       .then(({ data }) => {
         if (data?.price_usd) {
           setVerifiedPricePerExplorer(Number(data.price_usd))
         } else {
-          // Experience not found or unpublished — block payment
           setPriceVerificationFailed(true)
         }
       })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [experienceIdParam])
 
   const experiencia = {
     titulo: searchParams.get('titulo') || '',
