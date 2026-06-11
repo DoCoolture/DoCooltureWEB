@@ -1,9 +1,5 @@
 import 'server-only'
 
-if (process.env.NODE_ENV === 'production' && !process.env.PAYPAL_BASE_URL) {
-  throw new Error('PAYPAL_BASE_URL must be set in production — default points to sandbox')
-}
-
 export const PAYPAL_BASE = process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox.paypal.com'
 
 // Module-level token cache: PayPal tokens are valid for ~9 hours.
@@ -11,6 +7,10 @@ export const PAYPAL_BASE = process.env.PAYPAL_BASE_URL ?? 'https://api-m.sandbox
 let _cachedToken: { value: string; expiresAt: number } | null = null
 
 export async function getAccessToken(): Promise<string> {
+  if (process.env.NODE_ENV === 'production' && !process.env.PAYPAL_BASE_URL) {
+    throw new Error('PAYPAL_BASE_URL must be set in production — default points to sandbox')
+  }
+
   if (_cachedToken && Date.now() < _cachedToken.expiresAt - 60_000) {
     return _cachedToken.value
   }

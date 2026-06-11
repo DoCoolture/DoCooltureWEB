@@ -1,7 +1,10 @@
 import { Resend } from 'resend'
 
-export const resend = new Resend(process.env.RESEND_API_KEY)
 export const FROM = process.env.RESEND_FROM ?? 'DoCoolture <reservas@docoolture.com>'
+
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY)
+}
 
 function escapeHtml(str: string): string {
   return str
@@ -129,7 +132,7 @@ export async function sendBookingNotificationEmail(data: BookingEmailData) {
 </body>
 </html>`
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to: data.hostEmail,
     subject: `✅ Nueva reserva: ${data.tourName.replace(/[\r\n]/g, ' ')}`,

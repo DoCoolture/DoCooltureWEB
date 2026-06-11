@@ -1,32 +1,22 @@
 'use client'
 
 import ExperiencesCard from '@/components/ExperiencesCard'
-import { getExperienceListings, TExperienceListing } from '@/data/listings'
+import { TExperienceListing } from '@/data/listings'
 import { useLanguage } from '@/context/LanguageContext'
-import { useEffect, useState } from 'react'
 
 interface Props {
-  hostId: string
+  listings: TExperienceListing[]
 }
 
-const ListingTabs = ({ hostId }: Props) => {
+const ListingTabs = ({ listings }: Props) => {
   const { t } = useLanguage()
   const sh = t.sectionHost
 
-  const [experienceListings, setExperienceListings] = useState<TExperienceListing[]>([])
-
-  useEffect(() => {
-    getExperienceListings().then((listings) => {
-      const filtered = listings.filter((exp) => exp.host.handle === hostId)
-      setExperienceListings(filtered)
-    })
-  }, [hostId])
-
   return (
     <div className="w-full">
-      {experienceListings.length > 0 ? (
+      {listings.length > 0 ? (
         <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:gap-7">
-          {experienceListings.slice(0, 4).map((exp) => (
+          {listings.slice(0, 4).map((exp) => (
             <ExperiencesCard key={exp.id} data={exp} />
           ))}
         </div>

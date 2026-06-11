@@ -4,6 +4,7 @@ import { getServerT } from '@/lib/locale-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
 import { toHandle } from '@/lib/handle'
 import { extractAvatarUrl, type ProfileJoin } from '@/lib/supabase-joins'
+import { getExperienceListings } from '@/data/listings'
 import Avatar from '@/shared/Avatar'
 import { Divider } from '@/shared/divider'
 import { Link } from '@/shared/link'
@@ -72,7 +73,7 @@ export async function generateMetadata({ params }: { params: Promise<{ handle: s
 
 const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const { handle } = await params
-  const [host, t] = await Promise.all([getHost(handle), getServerT()])
+  const [host, t, allListings] = await Promise.all([getHost(handle), getServerT(), getExperienceListings()])
   const sh = t.sectionHost
   const tp = t.talentPage
 
@@ -97,6 +98,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   }
 
   const hostId = host.id
+  const hostListings = allListings.filter((exp) => exp.host.handle === handle)
   const displayName = host.display_name
   const avatarUrl = extractAvatarUrl(host.profiles)
   const count = host.total_listings ?? 0
@@ -183,7 +185,7 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
               <span className="mt-2 block text-neutral-500 dark:text-neutral-400">{sh.listingsDesc}</span>
             </div>
             <Divider className="w-14!" />
-            <ListingTabs hostId={hostId} />
+            <ListingTabs listings={hostListings} />
           </div>
 
           <div className="listingSection__wrap">

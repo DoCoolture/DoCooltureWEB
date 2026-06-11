@@ -1,6 +1,7 @@
 'use server'
 
-import { resend, FROM } from '@/lib/email'
+import { Resend } from 'resend'
+import { FROM } from '@/lib/email'
 
 function escapeHtml(str: string): string {
   return str
@@ -32,6 +33,7 @@ export async function sendContactMessage(
   }
 
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
       from: FROM,
       to,
