@@ -7,6 +7,7 @@ import {
   AVAILABLE_LANGUAGES, DAYS_OF_WEEK, EXPERIENCE_CATEGORIES,
 } from '@/types'
 import LocationPickerMap from '@/components/LocationPickerMap'
+import { geocodeAddress } from '@/lib/geocode'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
@@ -85,6 +86,24 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
   // Map state
   const [latitude, setLatitude] = useState<number | null>(experience.latitude ?? null)
   const [longitude, setLongitude] = useState<number | null>(experience.longitude ?? null)
+  const [geocoding, setGeocoding] = useState(false)
+  const [geocodeError, setGeocodeError] = useState('')
+
+  const handleGeocode = async () => {
+    const addr = form.address?.trim()
+    if (!addr) return
+    setGeocoding(true)
+    setGeocodeError('')
+    const result = await geocodeAddress(addr)
+    setGeocoding(false)
+    if (result) {
+      setLatitude(result.lat)
+      setLongitude(result.lng)
+      markDirty()
+    } else {
+      setGeocodeError('No se encontró la dirección. Intenta ser más específico o marca el pin manualmente.')
+    }
+  }
 
   // Array field state
   const [tags, setTags] = useState<string[]>(experience.tags ?? [])
@@ -173,8 +192,15 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
   const handleAddressPreset = (val: string) => {
     markDirty()
     setAddressPreset(val)
-    if (val !== CUSTOM) setForm((prev) => ({ ...prev, address: val }))
-    else setForm((prev) => ({ ...prev, address: '' }))
+    if (val !== CUSTOM) {
+      setForm((prev) => ({ ...prev, address: val }))
+      // Auto-pin when a preset address is chosen
+      geocodeAddress(val).then((result) => {
+        if (result) { setLatitude(result.lat); setLongitude(result.lng) }
+      })
+    } else {
+      setForm((prev) => ({ ...prev, address: '' }))
+    }
   }
 
   const toggleItem = (item: string, list: string[], setList: (l: string[]) => void) => {
@@ -451,14 +477,29 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
                     <option value={CUSTOM}>{te.customOption}</option>
                   </select>
                   {addressPreset === CUSTOM && (
-                    <input type="text" placeholder={te.fieldAddressPlaceholder} value={form.address}
-                      onChange={(e) => set('address', e.target.value)} className={`${inputCls} mt-2`} />
+                    <div className="mt-2 flex gap-2">
+                      <input type="text" placeholder={te.fieldAddressPlaceholder} value={form.address}
+                        onChange={(e) => { set('address', e.target.value); setGeocodeError('') }}
+                        className={`${inputCls} flex-1`} />
+                      <button type="button" onClick={handleGeocode} disabled={geocoding || !form.address?.trim()}
+                        className="shrink-0 rounded-xl border border-neutral-200 dark:border-neutral-700 px-3 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50 transition-colors">
+                        {geocoding ? '...' : '📍 Buscar'}
+                      </button>
+                    </div>
                   )}
                 </>
               ) : (
-                <input type="text" placeholder={te.fieldAddressPlaceholder} value={form.address}
-                  onChange={(e) => set('address', e.target.value)} className={inputCls} />
+                <div className="flex gap-2">
+                  <input type="text" placeholder={te.fieldAddressPlaceholder} value={form.address}
+                    onChange={(e) => { set('address', e.target.value); setGeocodeError('') }}
+                    className={`${inputCls} flex-1`} />
+                  <button type="button" onClick={handleGeocode} disabled={geocoding || !form.address?.trim()}
+                    className="shrink-0 rounded-xl border border-neutral-200 dark:border-neutral-700 px-3 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800 disabled:opacity-50 transition-colors">
+                    {geocoding ? '...' : '📍 Buscar'}
+                  </button>
+                </div>
               )}
+              {geocodeError && <p className="mt-1 text-xs text-red-500">{geocodeError}</p>}
             </div>
 
             <div>

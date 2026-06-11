@@ -2,6 +2,7 @@
 
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import LocationPickerMap from '@/components/LocationPickerMap'
+import { geocodeAddress } from '@/lib/geocode'
 import { supabase, uploadExperienceImage } from '@/lib/supabase'
 import { createExperience } from '@/app/actions/experiences'
 import { useRouter } from 'next/navigation'
@@ -94,6 +95,22 @@ export default function NewExperiencePage() {
   const [city, setCity] = useState('')
   const [latitude, setLatitude] = useState<number | null>(null)
   const [longitude, setLongitude] = useState<number | null>(null)
+  const [geocoding, setGeocoding] = useState(false)
+  const [geocodeError, setGeocodeError] = useState('')
+
+  const handleGeocode = async (addr: string) => {
+    if (!addr.trim()) return
+    setGeocoding(true)
+    setGeocodeError('')
+    const result = await geocodeAddress(addr)
+    setGeocoding(false)
+    if (result) {
+      setLatitude(result.lat)
+      setLongitude(result.lng)
+    } else {
+      setGeocodeError('No se encontró la dirección. Intenta ser más específico o marca el pin manualmente.')
+    }
+  }
 
   // Paso 3
   const [priceUsd, setPriceUsd] = useState('')
@@ -496,6 +513,8 @@ export default function NewExperiencePage() {
               if (val !== 'custom') {
                 setAddress(val)
                 setFieldErrors((p) => ({ ...p, address: '' }))
+                // Auto-pin the preset address on the map
+                handleGeocode(val)
               } else {
                 setAddress('')
               }
@@ -510,13 +529,20 @@ export default function NewExperiencePage() {
           </select>
         )}
         {(!city || addressPreset === 'custom' || !(CITY_ADDRESSES[city]?.length)) && (
-          <input type="text" value={address}
-            onChange={(e) => { setAddress(e.target.value); setFieldErrors((p) => ({ ...p, address: '' })) }}
-            placeholder="Ej: Calle Las Damas #1, Zona Colonial"
-            className={ic('address')}
-          />
+          <div className="flex gap-2">
+            <input type="text" value={address}
+              onChange={(e) => { setAddress(e.target.value); setFieldErrors((p) => ({ ...p, address: '' })); setGeocodeError('') }}
+              placeholder="Ej: Calle Las Damas #1, Zona Colonial"
+              className={`${ic('address')} flex-1`}
+            />
+            <button type="button" onClick={() => handleGeocode(address)} disabled={geocoding || !address.trim()}
+              className="shrink-0 rounded-xl border border-neutral-200 px-3 py-2 text-sm font-medium hover:bg-neutral-50 disabled:opacity-50 transition-colors">
+              {geocoding ? '...' : '📍 Buscar'}
+            </button>
+          </div>
         )}
         {errMsg('address')}
+        {geocodeError && <p className="mt-1 text-xs text-red-500">{geocodeError}</p>}
       </div>
 
       <div>

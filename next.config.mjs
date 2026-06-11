@@ -50,7 +50,7 @@ const nextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https:",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://www.paypal.com https://api.paypal.com https://basemaps.cartocdn.com https://*.cartocdn.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.resend.com https://www.paypal.com https://api.paypal.com https://basemaps.cartocdn.com https://*.cartocdn.com https://nominatim.openstreetmap.org",
       "worker-src blob: 'self'",
       "frame-src https://www.paypal.com https://www.sandbox.paypal.com",
       "object-src 'none'",
