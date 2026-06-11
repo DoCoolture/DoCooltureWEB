@@ -11,7 +11,7 @@ import { Divider } from '@/shared/divider'
 import { ClockIcon, MapPinIcon, UserGroupIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
-import React, { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import PayWith from './PayWith'
 import YourTrip from './YourTrip'
 
@@ -30,13 +30,14 @@ const CheckoutContent = () => {
   const [notes, setNotes] = useState('')
   const [currentUser, setCurrentUser] = useState<{ id: string; email: string; fullName: string } | null>(null)
   const [userLoading, setUserLoading] = useState(true)
-  // Authoritative price fetched from DB — never trust the URL param for payment amounts
+  // Authoritative price and host name fetched from DB — never trust URL params for payment amounts or identity
   const [verifiedPricePerExplorer, setVerifiedPricePerExplorer] = useState<number | null>(null)
+  const [verifiedHostName, setVerifiedHostName] = useState<string | null>(null)
   const [priceVerificationFailed, setPriceVerificationFailed] = useState(false)
   // Extract once at render time so it's a stable dep for the price effect
   const experienceIdParam = searchParams.get('experienceId')
 
-  React.useEffect(() => {
+  useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (user) {
         const { data: profile } = await supabase
@@ -54,11 +55,11 @@ const CheckoutContent = () => {
     })
   }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     document.documentElement.scrollTo({ top: 0, behavior: 'instant' })
   }, [])
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!experienceIdParam) {
       setPriceVerificationFailed(true)
       return
@@ -68,13 +69,15 @@ const CheckoutContent = () => {
     setPriceVerificationFailed(false)
     supabase
       .from('experiences')
-      .select('price_usd')
+      .select('price_usd, hosts(display_name)')
       .eq('id', experienceIdParam)
       .eq('is_published', true)
       .single()
       .then(({ data }) => {
         if (data?.price_usd) {
           setVerifiedPricePerExplorer(Number(data.price_usd))
+          const hostName = (data as { hosts?: { display_name?: string } | null }).hosts?.display_name ?? null
+          setVerifiedHostName(hostName)
         } else {
           setPriceVerificationFailed(true)
         }
@@ -95,7 +98,6 @@ const CheckoutContent = () => {
     rating: Number(searchParams.get('rating') || 0),
     reviewCount: Number(searchParams.get('reviewCount') || 0),
     experienceId: searchParams.get('experienceId') || null,
-    hostId: searchParams.get('hostId') || null,
   }
 
   const parseDurationDays = (duracion: string): number => {
@@ -107,8 +109,11 @@ const CheckoutContent = () => {
   // Use DB-verified price if available; URL param is only for display before fetch resolves
   const precioNum = verifiedPricePerExplorer ?? Number(experiencia.precio.replace('$', '').replace(',', ''))
   const subtotal = precioNum * currentExplorers
-  const cargoProcesamiento = subtotal * 0.18
-  const total = subtotal + cargoProcesamiento
+  // Use the same env var and logic as calculateTotal() on the server — one source of truth
+  const FEE_PERCENTAGE = Number(process.env.NEXT_PUBLIC_SERVICE_FEE_PERCENTAGE ?? 18)
+  const feeFactor = Number.isFinite(FEE_PERCENTAGE) && FEE_PERCENTAGE > 0 ? FEE_PERCENTAGE : 18
+  const total = Number((subtotal * (1 + feeFactor / 100)).toFixed(2))
+  const cargoProcesamiento = Number((total - subtotal).toFixed(2))
 
   const subtotalConvertido = convertPrice(subtotal)
   const cargoConvertido = convertPrice(cargoProcesamiento)
@@ -162,7 +167,7 @@ const CheckoutContent = () => {
         <DescriptionDetails className="sm:text-right">
           {subtotalConvertido}
         </DescriptionDetails>
-        <DescriptionTerm>{t.booking.processingFee} (18%)</DescriptionTerm>
+        <DescriptionTerm>{t.booking.processingFee} ({feeFactor}%)</DescriptionTerm>
         <DescriptionDetails className="sm:text-right">
           {cargoConvertido}
         </DescriptionDetails>
@@ -180,7 +185,7 @@ const CheckoutContent = () => {
         <div className="flex items-center gap-x-2 text-sm text-neutral-600 dark:text-neutral-400">
           <UserGroupIcon className="size-4" />
           <span>
-            {t.booking.host}: <strong>{experiencia.anfitrion}</strong>
+            {t.booking.host}: <strong>{verifiedHostName ?? experiencia.anfitrion}</strong>
           </span>
         </div>
         <p className="mt-1.5 text-xs text-neutral-500">
@@ -218,7 +223,7 @@ const CheckoutContent = () => {
 
       {priceVerificationFailed ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
-          Esta experiencia ya no está disponible. Por favor vuelve al catálogo y selecciona otra.
+          {t.booking.experienceNotAvailable}
         </p>
       ) : userLoading || verifiedPricePerExplorer === null ? (
         <div className="h-12 animate-pulse rounded-xl bg-neutral-100 dark:bg-neutral-800" />
@@ -237,7 +242,6 @@ const CheckoutContent = () => {
           customerName={currentUser.fullName}
           notes={notes || null}
           experienceId={experiencia.experienceId}
-          hostId={experiencia.hostId}
         />
       )}
     </div>

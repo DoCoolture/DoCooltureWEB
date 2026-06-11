@@ -25,7 +25,7 @@ export type Profile = {
   city: string | null
   country: string
   role: 'explorer' | 'host' | 'admin'
-  preferred_language: 'es' | 'en' | 'fr'
+  preferred_language: 'es' | 'en' | 'fr' | 'it'
   preferred_currency: 'DOP' | 'USD' | 'EUR' | 'COP' | 'ARS'
   is_active: boolean
   email_verified: boolean
@@ -124,7 +124,8 @@ export type Booking = {
   subtotal_usd: number | null
   processing_fee_usd: number
   total_usd: number | null
-  payment_method: 'paypal' | 'cardnet' | 'cash'
+  payment_method: 'paypal' | 'cardnet' | 'cardnet_direct' | 'cardnet_redirect' | 'cash'
+  payment_currency: string | null
   payment_status: 'pending' | 'paid' | 'failed' | 'refunded' | 'partially_refunded'
   payment_reference: string | null
   paid_at: string | null
@@ -166,7 +167,7 @@ export type Notification = {
   message: string
   is_read: boolean
   read_at: string | null
-  data: Record<string, any> | null
+  data: Record<string, unknown> | null
   action_url: string | null
 }
 
@@ -352,14 +353,8 @@ export const uploadIdentityDocument = async (
     return null
   }
 
-  const { data, error: urlError } = await supabase.storage
-    .from('identity-documents')
-    .createSignedUrl(filePath, 3600)
-
-  if (urlError || !data) {
-    console.error('Error creating signed URL:', urlError)
-    return null
-  }
-
-  return data.signedUrl
+  // Return the storage path, not a signed URL.
+  // Signed URLs expire in 1h and are useless after that if stored in the DB.
+  // Generate signed URLs on demand via adminGetDocumentSignedUrls() when needed.
+  return filePath
 }

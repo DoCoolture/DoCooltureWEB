@@ -11,7 +11,7 @@ import DatesRangeInputPopover from '../../components/DatesRangeInputPopover'
 import GuestsInputPopover from '../../components/GuestsInputPopover'
 
 interface Props {
-  price: string
+  priceUsd: number
   maxGuests: number
   date?: string | null
   reviewStart: number
@@ -24,7 +24,7 @@ interface Props {
 }
 
 export function ExperienceBookingSidebar({
-  price,
+  priceUsd,
   maxGuests,
   date,
   reviewStart,
@@ -43,7 +43,7 @@ export function ExperienceBookingSidebar({
   useEffect(() => {
     setHasDate(!!selectedDate)
   }, [selectedDate])
-  const precioNum = Number(price.replace(/[^0-9.]/g, ''))
+  const precioNum = priceUsd
 
   return (
     <div className="listingSection__wrap sm:shadow-xl">

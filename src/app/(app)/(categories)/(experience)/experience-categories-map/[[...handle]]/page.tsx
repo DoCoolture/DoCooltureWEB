@@ -34,9 +34,6 @@ function parseDurationHours(durationTime: string): number {
   return 0
 }
 
-function parsePrice(price: string): number {
-  return parseFloat(price.replace(/[^0-9.]/g, '')) || 0
-}
 
 export async function generateMetadata({ params }: { params: Promise<{ handle?: string[] }> }): Promise<Metadata> {
   const { handle } = await params
@@ -122,8 +119,7 @@ const Page = async ({
 
   if (priceMin > 0 || priceMax < Infinity) {
     filteredListings = filteredListings.filter((listing) => {
-      const price = parsePrice(listing.price)
-      return price >= priceMin && price <= priceMax
+      return listing.priceUsd >= priceMin && listing.priceUsd <= priceMax
     })
   }
 
@@ -141,17 +137,12 @@ const Page = async ({
     duration: activeDurations,
   }
 
-  const augmentedFilterOptions: any[] = filterOptions.map((fo) => {
-    if (!fo || fo.tabUIType !== 'checkbox') return fo
+  const augmentedFilterOptions = filterOptions.map((fo) => {
+    if (!fo || fo.tabUIType !== 'checkbox' || !('options' in fo)) return fo
+    const options = (fo.options as { name: string; value?: string; description?: string; defaultChecked?: boolean }[])
     const active = activeCheckboxMap[fo.name] ?? []
-    return {
-      ...fo,
-      options: (fo as any).options?.map((opt: any) => ({
-        ...opt,
-        defaultChecked: active.includes(opt.value ?? opt.name),
-      })) ?? [],
-    }
-  })
+    return { ...fo, options: options.map((opt) => ({ ...opt, defaultChecked: active.includes(opt.value ?? opt.name) })) }
+  }) as Awaited<ReturnType<typeof getExperienceListingFilterOptions>>
 
   return (
     <div className="container xl:max-w-none xl:pe-0 2xl:ps-10">

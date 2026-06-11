@@ -1,4 +1,5 @@
 import { getAccessToken, PAYPAL_BASE } from '@/lib/paypal'
+import { calculateTotal } from '@/lib/pricing'
 import { createSupabaseServerClient, getProfileId } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -14,7 +15,6 @@ export async function POST(request: NextRequest) {
     const {
       orderID,
       experienceId,
-      hostId,
       tourName,
       bookingDate,
       guests,
@@ -27,14 +27,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing orderID' }, { status: 400 })
     }
 
-    if (!experienceId || !hostId) {
+    if (!experienceId) {
       return NextResponse.json({ error: 'Missing booking details' }, { status: 400 })
     }
 
-    // Fetch the authoritative price from the database — never trust the client
+    // Fetch the authoritative price, title, host, and max_guests from the database.
     const { data: experience } = await supabase
       .from('experiences')
-      .select('price_usd')
+      .select('price_usd, title, host_id, max_guests')
       .eq('id', experienceId)
       .eq('is_published', true)
       .single()
@@ -43,7 +43,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Experience not found' }, { status: 404 })
     }
 
-    const expectedTotal = Number((experience.price_usd * (guests ?? 1) * 1.18).toFixed(2))
+    const hostId = experience.host_id
+    const authoritativeTourName = experience.title ?? tourName
+
+    // Clamp guests server-side — same as Cardnet route
+    const numGuests = Math.max(1, Math.min(Number(guests) || 1, experience.max_guests ?? 20))
+    const expectedTotal = calculateTotal(experience.price_usd, numGuests)
 
     const accessToken = await getAccessToken()
 
@@ -74,7 +79,9 @@ export async function POST(request: NextRequest) {
     const payerEmail = capture.payer?.email_address ?? null
     const transactionId = capture.purchase_units?.[0]?.payments?.captures?.[0]?.id ?? null
 
-    // Save booking server-side — never rely on the client to do this
+    const subtotalUsd = Number((experience.price_usd * numGuests).toFixed(2))
+    const processingFeeUsd = Number((capturedAmount - subtotalUsd).toFixed(2))
+
     const { error: dbError } = await supabase.from('bookings').insert({
       experience_id: experienceId,
       host_id: hostId,
@@ -82,30 +89,40 @@ export async function POST(request: NextRequest) {
       customer_email: customerEmail || payerEmail,
       explorer_id: profileId,
       customer_phone: '',
-      tour_name: tourName,
+      tour_name: authoritativeTourName,
       booking_date: bookingDate,
-      guests,
+      guests: numGuests,
       notes,
       status: 'confirmed',
       payment_method: 'paypal',
       payment_status: 'paid',
+      payment_currency: 'USD',
       payment_reference: transactionId,
+      price_per_person: experience.price_usd,
+      subtotal_usd: subtotalUsd,
+      processing_fee_usd: processingFeeUsd,
       total_usd: capturedAmount,
     })
 
     if (dbError) {
-      console.error('[paypal] booking save error:', dbError)
+      console.error('[paypal] CRITICAL: payment captured but booking save failed', {
+        transactionId,
+        experienceId,
+        customerEmail: customerEmail || payerEmail,
+        capturedAmount,
+        error: dbError,
+      })
       return NextResponse.json({ error: 'Payment captured but booking save failed. Contact support.' }, { status: 500 })
     }
 
-    // Notify host (non-blocking)
+    // Notify host (non-blocking) — log on failure so silent errors don't hide missed notifications
     const internalSecret = process.env.INTERNAL_API_SECRET
     if (internalSecret) {
       fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify-booking`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-internal-secret': internalSecret },
-        body: JSON.stringify({ hostId, tourName, bookingDate, guests, customerName, customerEmail: customerEmail || payerEmail, totalAmount: capturedAmount, currency: 'USD' }),
-      }).catch(() => {})
+        body: JSON.stringify({ hostId, tourName: authoritativeTourName, bookingDate, guests: numGuests, customerName, customerEmail: customerEmail || payerEmail, totalAmount: capturedAmount, currency: 'USD' }),
+      }).catch((err) => console.error('[paypal] notify-booking failed:', err))
     }
 
     return NextResponse.json({ status: capture.status, payerEmail, transactionId })

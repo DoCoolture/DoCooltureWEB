@@ -2,7 +2,8 @@ import { Calendar01Icon, Comment01Icon } from '@/components/Icons'
 import StartRating from '@/components/StartRating'
 import { getServerT } from '@/lib/locale-server'
 import { supabaseAdmin } from '@/lib/supabase-admin'
-import { createClient } from '@supabase/supabase-js'
+import { toHandle } from '@/lib/handle'
+import { extractAvatarUrl, type ProfileJoin } from '@/lib/supabase-joins'
 import Avatar from '@/shared/Avatar'
 import { Divider } from '@/shared/divider'
 import { Link } from '@/shared/link'
@@ -19,67 +20,53 @@ import ListingTabs from './ListingTabs'
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const SELECT = 'id, display_name, bio, total_reviews, average_rating, total_listings, city, country, profiles(avatar_url)'
 
-async function getHost(handle: string) {
-  // Try admin client first (bypasses all RLS)
-  try {
-    if (UUID_RE.test(handle)) {
-      const { data, error } = await supabaseAdmin
-        .from('hosts')
-        .select(SELECT)
-        .eq('id', handle)
-        .single()
-      if (error) console.error('[talento] admin UUID error:', JSON.stringify(error))
-      if (data) return data
-    } else {
-      const { data, error } = await supabaseAdmin
-        .from('hosts')
-        .select(SELECT)
-        .ilike('display_name', handle.replace(/-/g, ' '))
-        .single()
-      if (error) console.error('[talento] admin name error:', JSON.stringify(error))
-      if (data) return data
-    }
-  } catch (e) {
-    console.error('[talento] admin client exception:', e)
+type HostRow = {
+  id: string
+  display_name: string
+  bio: string | null
+  total_reviews: number
+  average_rating: number
+  total_listings: number
+  city: string | null
+  country: string | null
+  profiles: ProfileJoin
+}
+
+async function getHost(handle: string): Promise<HostRow | null> {
+  if (UUID_RE.test(handle)) {
+    const { data, error } = await supabaseAdmin
+      .from('hosts')
+      .select(SELECT)
+      .eq('id', handle)
+      .single()
+    if (error) console.error('[talento] UUID lookup error:', JSON.stringify(error))
+    return (data as HostRow | null) ?? null
   }
 
-  // Fallback: anon client (works for active hosts)
-  try {
-    const anon = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-    if (UUID_RE.test(handle)) {
-      const { data, error } = await anon
-        .from('hosts')
-        .select(SELECT)
-        .eq('id', handle)
-        .single()
-      if (error) console.error('[talento] anon UUID error:', JSON.stringify(error))
-      if (data) return data
-    } else {
-      const { data } = await anon.from('hosts').select(SELECT).eq('status', 'active')
-      const match = (data ?? []).find(
-        (h: any) => h.display_name?.toLowerCase().replace(/\s+/g, '-') === handle
-      )
-      if (match) return match
-    }
-  } catch (e) {
-    console.error('[talento] anon client exception:', e)
-  }
+  // Name-based handle: fetch candidates by first word, then match via toHandle()
+  // This correctly handles accented names (José → jose-) that ilike alone can't reverse.
+  const [firstWord] = handle.split('-')
+  const { data, error } = await supabaseAdmin
+    .from('hosts')
+    .select(SELECT)
+    .ilike('display_name', `%${firstWord}%`)
+    .limit(100)
 
-  console.error('[talento] host not found for handle:', handle)
-  return null
+  if (error) console.error('[talento] name lookup error:', JSON.stringify(error))
+
+  const match = (data ?? []).find(
+    (h) => h.display_name && toHandle(h.display_name as string) === handle
+  )
+  return (match as HostRow | null) ?? null
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ handle: string }> }): Promise<Metadata> {
   const { handle } = await params
   const host = await getHost(handle)
-  if (!host) return { title: 'Host not found', description: '' }
+  if (!host) return { title: 'Anfitrión no encontrado — DoCoolture', description: '' }
   return {
     title: `${host.display_name} — DoCoolture`,
-    description: host.bio ?? '',
+    description: host.bio ?? `Conoce a ${host.display_name}, anfitrión en DoCoolture.`,
   }
 }
 
@@ -109,14 +96,13 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
     )
   }
 
-  const hostId = host.id as string
-  const displayName = host.display_name as string
-  const profilesData = (host as any).profiles
-  const avatarUrl = (Array.isArray(profilesData) ? profilesData[0]?.avatar_url : profilesData?.avatar_url) ?? ''
-  const count = (host.total_listings as number) ?? 0
-  const starRating = (host.average_rating as number) ?? 0
-  const reviewsCount = (host.total_reviews as number) ?? 0
-  const description = (host.bio as string | null) || t.experienceListing.hostBio
+  const hostId = host.id
+  const displayName = host.display_name
+  const avatarUrl = extractAvatarUrl(host.profiles)
+  const count = host.total_listings ?? 0
+  const starRating = host.average_rating ?? 0
+  const reviewsCount = host.total_reviews ?? 0
+  const description = host.bio || t.experienceListing.hostBio
   const location = [host.city, host.country].filter(Boolean).join(', ')
   const address = location || sh.hostAddress
   const languages = sh.hostLanguages

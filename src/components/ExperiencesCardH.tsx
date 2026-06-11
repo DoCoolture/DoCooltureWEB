@@ -24,7 +24,7 @@ const ExperiencesCardH: FC<Props> = ({ className = '', data }) => {
     like,
     saleOff,
     isAds,
-    price,
+    priceUsd,
     reviewStart,
     reviewCount,
     host: author,
@@ -99,7 +99,7 @@ const ExperiencesCardH: FC<Props> = ({ className = '', data }) => {
             </span>
           </div>
           <span className="text-base font-semibold text-secondary-700">
-            {price}
+            ${priceUsd}
             {` `}
             <span className="text-sm font-normal text-neutral-500 dark:text-neutral-400">/{T['common']['person']}</span>
           </span>

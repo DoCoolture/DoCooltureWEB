@@ -17,9 +17,10 @@ export default function ChatWidget() {
   }, [messages, isOpen])
 
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100)
-    }
+    if (!isOpen) return
+    // requestAnimationFrame defers until the panel is painted — no arbitrary delay needed
+    const id = requestAnimationFrame(() => inputRef.current?.focus())
+    return () => cancelAnimationFrame(id)
   }, [isOpen])
 
   const handleSend = async () => {

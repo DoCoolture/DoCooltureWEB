@@ -2,12 +2,12 @@ import { Metadata } from 'next'
 import { ApplicationLayout } from '../application-layout'
 
 export const metadata: Metadata = {
-  title: 'Home',
+  title: 'Experiencias auténticas en República Dominicana',
   description:
-    'DoCoolture is a modern and elegant template for Next.js, Tailwind CSS, and TypeScript. It is designed to be simple and easy to use, with a focus on performance and accessibility.',
-  keywords: ['Next.js', 'Tailwind CSS', 'TypeScript', 'DoCoolture', 'Travel', 'E-commerce', 'Booking', 'Cars'],
+    'Descubre y reserva experiencias únicas en la República Dominicana — gastronomía, aventura, cultura, música y más, con anfitriones locales verificados.',
+  keywords: ['experiencias', 'República Dominicana', 'turismo', 'actividades', 'aventura', 'gastronomía', 'cultura dominicana', 'DoCoolture'],
 }
 
-export default function Layout({ children, params }: { children: React.ReactNode; params: any }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
   return <ApplicationLayout>{children}</ApplicationLayout>
 }

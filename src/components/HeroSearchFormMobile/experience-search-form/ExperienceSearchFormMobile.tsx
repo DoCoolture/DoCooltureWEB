@@ -31,15 +31,10 @@ const ExperienceSearchFormMobile = () => {
     setEndDate(end)
   }
   const handleFormSubmit = (formData: FormData) => {
-    const formDataEntries = Object.fromEntries(formData.entries())
-    console.log('Form submitted', formDataEntries)
-    // You can also redirect or perform other actions based on the form data
-
-    // example: add location to the URL
-    const location = formDataEntries['location'] as string
+    const location = formData.get('location') as string | null
     let url = '/experience-categories/all'
     if (location) {
-      url = url + `?location=${encodeURIComponent(location)}`
+      url = `${url}?location=${encodeURIComponent(location)}`
     }
     router.push(url)
   }

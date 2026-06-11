@@ -1,10 +1,25 @@
 'use client'
 
 import EditExperienceModal from '@/components/EditExperienceModal'
+import { adminHideExperience, adminDeleteExperience } from '@/app/actions/admin'
 import { supabase } from '@/lib/supabase'
 import { EyeIcon, EyeSlashIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+
+type ExpEditData = {
+  id: string
+  title: string
+  description: string
+  category: string
+  price_usd: number
+  duration_time: string
+  max_guests: number
+  address: string
+  city: string
+  is_published: boolean
+  host_id: string
+}
 
 interface Props {
   experienceId: string
@@ -15,12 +30,13 @@ export default function ExperienceAdminActions({ experienceId, experienceTitle }
   const router = useRouter()
   const [isAdmin, setIsAdmin] = useState(false)
   const [isHidden, setIsHidden] = useState<boolean | null>(null)
-  const [expData, setExpData] = useState<any>(null)
+  const [expData, setExpData] = useState<ExpEditData | null>(null)
   const [showReasonInput, setShowReasonInput] = useState(false)
   const [reason, setReason] = useState('')
   const [loading, setLoading] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     const init = async () => {
@@ -31,10 +47,13 @@ export default function ExperienceAdminActions({ experienceId, experienceTitle }
       if (profile?.role !== 'admin') return
       setIsAdmin(true)
       const { data: exp } = await supabase
-        .from('experiences').select('*').eq('id', experienceId).single()
+        .from('experiences')
+        .select('id, title, description, category, price_usd, duration_time, max_guests, address, city, is_published, is_hidden, host_id')
+        .eq('id', experienceId)
+        .single()
       if (exp) {
         setIsHidden(exp.is_hidden ?? false)
-        setExpData(exp)
+        setExpData(exp as ExpEditData)
       }
     }
     init()
@@ -42,53 +61,38 @@ export default function ExperienceAdminActions({ experienceId, experienceTitle }
 
   const handleShow = async () => {
     setLoading(true)
-    await supabase.from('experiences').update({
-      is_hidden: false, hidden_reason: null, hidden_at: null,
-    }).eq('id', experienceId)
-    setIsHidden(false)
+    setActionError(null)
+    const result = await adminHideExperience(experienceId, experienceTitle, expData?.host_id ?? '', true, '')
+    if (result.error) setActionError(result.error)
+    else setIsHidden(false)
     setLoading(false)
   }
 
   const handleHide = async () => {
     if (!reason.trim()) { setShowReasonInput(true); return }
     setLoading(true)
-    await supabase.from('experiences').update({
-      is_hidden: true,
-      hidden_reason: reason.trim(),
-      hidden_at: new Date().toISOString(),
-    }).eq('id', experienceId)
-
-    const { data: exp } = await supabase
-      .from('experiences').select('host_id').eq('id', experienceId).single()
-    if (exp) {
-      const { data: host } = await supabase
-        .from('hosts').select('user_id').eq('id', exp.host_id).single()
-      if (host) {
-        await supabase.from('notifications').insert({
-          user_id: host.user_id,
-          type: 'experience_hidden',
-          title: 'Tu experiencia fue pausada',
-          message: `"${experienceTitle}" fue pausada. Razón: ${reason.trim()}`,
-          action_url: '/host/dashboard',
-        })
-      }
+    setActionError(null)
+    const result = await adminHideExperience(experienceId, experienceTitle, expData?.host_id ?? '', false, reason.trim())
+    if (result.error) {
+      setActionError(result.error)
+    } else {
+      setIsHidden(true)
+      setShowReasonInput(false)
+      setReason('')
     }
-
-    setIsHidden(true)
-    setShowReasonInput(false)
-    setReason('')
     setLoading(false)
   }
 
   const handleDelete = async () => {
     setLoading(true)
-    const { error } = await supabase.from('experiences').delete().eq('id', experienceId)
-    if (!error) {
-      router.push('/experience-categories/all')
-    } else {
-      console.error('Delete error:', error)
+    setActionError(null)
+    const result = await adminDeleteExperience(experienceId)
+    if (result.error) {
+      setActionError(result.error)
       setLoading(false)
       setShowDeleteConfirm(false)
+    } else {
+      router.push('/experience-categories/all')
     }
   }
 
@@ -105,6 +109,10 @@ export default function ExperienceAdminActions({ experienceId, experienceTitle }
             {isHidden ? '🙈 Oculta' : '✅ Visible'}
           </span>
         </div>
+
+        {actionError && (
+          <p className="mb-2 text-xs text-red-600 dark:text-red-400">{actionError}</p>
+        )}
 
         <div className="flex flex-wrap gap-2">
           {/* Edit */}
@@ -180,7 +188,7 @@ export default function ExperienceAdminActions({ experienceId, experienceTitle }
         {showDeleteConfirm && (
           <div className="mt-3 rounded-lg border border-red-300 bg-red-100 dark:border-red-800 dark:bg-red-950 p-3">
             <p className="text-xs font-medium text-red-800 dark:text-red-300 mb-2">
-              ¿Eliminar permanentemente "{experienceTitle}"? Esta acción no se puede deshacer.
+              ¿Eliminar permanentemente &ldquo;{experienceTitle}&rdquo;? Esta acción no se puede deshacer.
             </p>
             <div className="flex gap-2">
               <button

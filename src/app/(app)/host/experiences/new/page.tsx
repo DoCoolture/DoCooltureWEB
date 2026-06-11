@@ -3,8 +3,9 @@
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import LocationPickerMap from '@/components/LocationPickerMap'
 import { supabase, uploadExperienceImage } from '@/lib/supabase'
+import { createExperience } from '@/app/actions/experiences'
 import { useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
 import {
   EXPERIENCE_CATEGORIES,
@@ -70,6 +71,7 @@ export default function NewExperiencePage() {
       setHostChecked(true)
     }
     checkHost()
+    return () => { blobUrls.current.forEach((u) => URL.revokeObjectURL(u)) }
   }, [])
 
   // Paso 1
@@ -107,6 +109,7 @@ export default function NewExperiencePage() {
   const [galleryPreviews, setGalleryPreviews] = useState<string[]>([])
   const [isDraggingFeatured, setIsDraggingFeatured] = useState(false)
   const [isDraggingGallery, setIsDraggingGallery] = useState(false)
+  const blobUrls = useRef<string[]>([])
 
   // Paso 5 — hora con selects personalizados
   const [availableDays, setAvailableDays] = useState<string[]>([])
@@ -139,15 +142,19 @@ export default function NewExperiencePage() {
 
   const handleFeaturedImage = (file: File) => {
     setFeaturedImage(file)
-    setFeaturedImagePreview(URL.createObjectURL(file))
+    const url = URL.createObjectURL(file)
+    blobUrls.current.push(url)
+    setFeaturedImagePreview(url)
     setFieldErrors((p) => ({ ...p, featuredImage: '' }))
   }
 
   const handleGalleryImages = (files: FileList | File[]) => {
     const newFiles = Array.from(files).filter(f => f.type.startsWith('image/')).slice(0, 10 - galleryImages.length)
     if (!newFiles.length) return
+    const newUrls = newFiles.map((f) => URL.createObjectURL(f))
+    blobUrls.current.push(...newUrls)
     setGalleryImages((prev) => [...prev, ...newFiles])
-    setGalleryPreviews((prev) => [...prev, ...newFiles.map((f) => URL.createObjectURL(f))])
+    setGalleryPreviews((prev) => [...prev, ...newUrls])
   }
 
   // Drag & drop handlers
@@ -165,10 +172,6 @@ export default function NewExperiencePage() {
     setIsDraggingGallery(false)
     handleGalleryImages(Array.from(e.dataTransfer.files))
   }
-
-  const generateHandle = (t: string) =>
-    t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
-     .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '').slice(0, 60)
 
   // ── Validación ───────────────────────────────────────────────────────────
   const validateStep = (s: number): FieldErrors => {
@@ -212,7 +215,7 @@ export default function NewExperiencePage() {
   const handleNext = () => {
     const errs = validateStep(step)
     setFieldErrors(errs)
-    if (Object.keys(errs).length === 0) setStep((s) => (s + 1) as any)
+    if (Object.keys(errs).length === 0) setStep((s) => Math.min(s + 1, TOTAL_STEPS) as typeof s)
   }
 
   const handleSubmit = async () => {
@@ -229,9 +232,6 @@ export default function NewExperiencePage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('No autenticado')
 
-      const { data: host } = await supabase.from('hosts').select('id').eq('user_id', user.id).single()
-      if (!host) throw new Error('Necesitas un perfil de anfitrión. Ve a /become-host para crearlo.')
-
       let featuredImageUrl = null
       if (featuredImage) {
         featuredImageUrl = await uploadExperienceImage(
@@ -239,73 +239,50 @@ export default function NewExperiencePage() {
           `featured-${Date.now()}.${featuredImage.name.split('.').pop()}`
         )
       }
+      if (!featuredImageUrl) {
+        throw new Error('No se pudo subir la imagen principal. Verifica el archivo e intenta de nuevo.')
+      }
 
       const galleryResults = await Promise.all(
-        galleryImages.map((img) =>
+        galleryImages.map((img, i) =>
           uploadExperienceImage(
             user.id, img,
-            `gallery-${Date.now()}-${Math.random().toString(36).slice(2)}.${img.name.split('.').pop()}`
+            `gallery-${Date.now()}-${i}-${Math.random().toString(36).slice(2)}.${img.name.split('.').pop() ?? 'jpg'}`
           )
         )
       )
       const galleryUrls = galleryResults.filter(Boolean) as string[]
       const failedUploads = galleryResults.filter((r) => !r).length
-      if (failedUploads > 0) {
-        setError(`${failedUploads} foto(s) de galería no se pudieron subir. Puedes agregarlas después desde tu panel.`)
-        // Continue — partial gallery is better than aborting the whole submission
-      }
 
-      let handle = generateHandle(title)
-      // Resolve handle collisions by appending a counter suffix
-      const { data: existingHandles } = await supabase
-        .from('experiences')
-        .select('handle')
-        .like('handle', `${handle}%`)
-      if (existingHandles && existingHandles.length > 0) {
-        const taken = new Set(existingHandles.map((e: { handle: string }) => e.handle))
-        if (taken.has(handle)) {
-          let n = 2
-          while (taken.has(`${handle}-${n}`)) n++
-          handle = `${handle}-${n}`
-        }
-      }
-
-      const { error: expError } = await supabase.from('experiences').insert({
-        host_id: host.id, title, handle, description,
-        short_description: shortDescription, category, tags,
-        duration_time: durationTime, languages,
-        max_guests: maxGuests, min_guests: minGuests,
-        meeting_point: meetingPoint, address, city,
-        price_usd: Number(priceUsd),
-        price_includes: priceIncludes, price_excludes: priceExcludes,
-        featured_image_url: featuredImageUrl, gallery_urls: galleryUrls,
-        available_days: availableDays, available_times: availableTimes,
+      // Server-side validation, handle resolution and insert — never trust the client
+      const result = await createExperience({
+        title, shortDescription, description, category, tags,
+        durationTime, languages, maxGuests, minGuests,
+        meetingPoint, address, city,
         latitude: latitude ?? null, longitude: longitude ?? null,
-        is_published: publishImmediately, is_hidden: false,
+        priceUsd: Number(priceUsd),
+        priceIncludes, priceExcludes,
+        featuredImageUrl, galleryUrls,
+        availableDays, availableTimes,
+        publishImmediately,
       })
-      if (expError) {
-        if ((expError as any).code === '23505') {
-          throw new Error('Ya existe una experiencia con un nombre muy similar. Cambia el título e intenta de nuevo.')
-        }
-        throw expError
+
+      if (result.error) {
+        setError(result.error)
+        return
       }
 
-      router.push('/host/dashboard')
-    } catch (err: any) {
-      setError(err.message || 'Error al crear la experiencia.')
+      // Surface partial gallery failures to the user on the destination page
+      const suffix = failedUploads > 0 ? `?notice=gallery_partial&failed=${failedUploads}` : ''
+      router.push(`/host/dashboard${suffix}`)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al crear la experiencia.')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const canProceed = () => {
-    if (step === 1) return !!(title && shortDescription && description && category)
-    if (step === 2) return durationTime && languages.length > 0 && address && city && meetingPoint
-    if (step === 3) return Number(priceUsd) > 0 && priceIncludes.length > 0
-    if (step === 4) return featuredImage !== null
-    if (step === 5) return availableDays.length > 0
-    return false
-  }
+  const canProceed = () => Object.keys(validateStep(step)).length === 0
 
   // ── Clases ───────────────────────────────────────────────────────────────
   const base = 'w-full rounded-xl border bg-white dark:bg-neutral-900 px-4 py-3 text-sm focus:outline-none focus:ring-2'
@@ -713,7 +690,7 @@ export default function NewExperiencePage() {
         {hint('Formato JPG, PNG o WEBP · Máx. 10 MB · Recomendado: 1200×800 px en horizontal. Arrastra o haz clic.')}
         {featuredImagePreview ? (
           <div className="relative">
-            <img src={featuredImagePreview} alt="Preview" className="w-full h-52 object-cover rounded-xl" />
+            <img src={featuredImagePreview} alt="Preview" loading="lazy" decoding="async" className="w-full h-52 object-cover rounded-xl" />
             <button
               onClick={() => { setFeaturedImage(null); setFeaturedImagePreview(null) }}
               className="absolute top-2 right-2 rounded-full bg-white/80 p-1.5 text-sm hover:bg-white shadow"
@@ -765,7 +742,7 @@ export default function NewExperiencePage() {
           <div className="grid grid-cols-3 gap-2">
             {galleryPreviews.map((src, i) => (
               <div key={i} className="relative">
-                <img src={src} alt={`Gallery ${i + 1}`} className="w-full h-24 object-cover rounded-lg" />
+                <img src={src} alt={`Gallery ${i + 1}`} loading="lazy" decoding="async" className="w-full h-24 object-cover rounded-lg" />
                 <button
                   onClick={() => { setGalleryImages(galleryImages.filter((_, idx) => idx !== i)); setGalleryPreviews(galleryPreviews.filter((_, idx) => idx !== i)) }}
                   className="absolute top-1 right-1 rounded-full bg-white/80 px-1.5 py-0.5 text-xs hover:bg-white shadow"
@@ -916,7 +893,7 @@ export default function NewExperiencePage() {
 
         <div className="flex items-center justify-between mt-8 pt-6 border-t border-neutral-200 dark:border-neutral-700">
           {step > 1 ? (
-            <button onClick={() => { setStep((s) => (s - 1) as any); setFieldErrors({}) }}
+            <button onClick={() => { setStep((s) => Math.max(s - 1, 1) as typeof s); setFieldErrors({}) }}
               className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
               ← Volver
             </button>
@@ -933,7 +910,9 @@ export default function NewExperiencePage() {
             </ButtonPrimary>
           ) : (
             <ButtonPrimary onClick={handleSubmit} disabled={isLoading || !canProceed()} className="disabled:opacity-50">
-              {isLoading ? 'Publicando...' : '🚀 Publicar experiencia'}
+              {isLoading
+                ? (publishImmediately ? 'Publicando...' : 'Guardando borrador...')
+                : (publishImmediately ? '🚀 Publicar experiencia' : '💾 Guardar como borrador')}
             </ButtonPrimary>
           )}
         </div>

@@ -1,6 +1,18 @@
 import { Resend } from 'resend'
 
-const FROM = process.env.RESEND_FROM ?? 'DoCoolture <reservas@docoolture.com>'
+export const resend = new Resend(process.env.RESEND_API_KEY)
+export const FROM = process.env.RESEND_FROM ?? 'DoCoolture <reservas@docoolture.com>'
+
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
+const LOCALE_MAP: Record<string, string> = { es: 'es-DO', en: 'en-US', fr: 'fr-FR', it: 'it-IT' }
 
 interface BookingEmailData {
   hostEmail: string
@@ -12,19 +24,24 @@ interface BookingEmailData {
   customerEmail: string
   totalAmount: number
   currency: string
+  locale?: string
 }
 
 export async function sendBookingNotificationEmail(data: BookingEmailData) {
   if (!process.env.RESEND_API_KEY) return
 
-  const resend = new Resend(process.env.RESEND_API_KEY)
-
-  const formattedDate = new Date(data.bookingDate).toLocaleDateString('es-DO', {
+  const dateLocale = LOCALE_MAP[data.locale ?? 'es'] ?? 'es-DO'
+  const formattedDate = new Date(data.bookingDate).toLocaleDateString(dateLocale, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
     day: 'numeric',
   })
+
+  const safeHostName = escapeHtml(data.hostName)
+  const safeTourName = escapeHtml(data.tourName)
+  const safeCustomerName = escapeHtml(data.customerName)
+  const safeCustomerEmail = escapeHtml(data.customerEmail)
 
   const html = `
 <!DOCTYPE html>
@@ -48,7 +65,7 @@ export async function sendBookingNotificationEmail(data: BookingEmailData) {
         </div>
       </div>
 
-      <p style="color:#374151;font-size:15px;margin:0 0 24px;">Hola <strong>${data.hostName}</strong>, tienes una nueva reserva en tu experiencia.</p>
+      <p style="color:#374151;font-size:15px;margin:0 0 24px;">Hola <strong>${safeHostName}</strong>, tienes una nueva reserva en tu experiencia.</p>
 
       <!-- Booking card -->
       <div style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;margin-bottom:28px;">
@@ -59,7 +76,7 @@ export async function sendBookingNotificationEmail(data: BookingEmailData) {
           <table style="width:100%;border-collapse:collapse;">
             <tr>
               <td style="padding:8px 0;color:#6b7280;font-size:14px;width:45%;">Experiencia</td>
-              <td style="padding:8px 0;color:#111827;font-size:14px;font-weight:600;">${data.tourName}</td>
+              <td style="padding:8px 0;color:#111827;font-size:14px;font-weight:600;">${safeTourName}</td>
             </tr>
             <tr style="border-top:1px solid #f3f4f6;">
               <td style="padding:8px 0;color:#6b7280;font-size:14px;">Fecha</td>
@@ -86,18 +103,18 @@ export async function sendBookingNotificationEmail(data: BookingEmailData) {
           <table style="width:100%;border-collapse:collapse;">
             <tr>
               <td style="padding:8px 0;color:#6b7280;font-size:14px;width:45%;">Nombre</td>
-              <td style="padding:8px 0;color:#111827;font-size:14px;">${data.customerName}</td>
+              <td style="padding:8px 0;color:#111827;font-size:14px;">${safeCustomerName}</td>
             </tr>
             <tr style="border-top:1px solid #f3f4f6;">
               <td style="padding:8px 0;color:#6b7280;font-size:14px;">Correo</td>
-              <td style="padding:8px 0;color:#111827;font-size:14px;">${data.customerEmail}</td>
+              <td style="padding:8px 0;color:#111827;font-size:14px;">${safeCustomerEmail}</td>
             </tr>
           </table>
         </div>
       </div>
 
       <div style="text-align:center;">
-        <a href="${process.env.NEXT_PUBLIC_BASE_URL ?? 'https://docoolture.com'}/host/dashboard" style="display:inline-block;background:#1a1a2e;color:#ffffff;padding:14px 32px;border-radius:100px;text-decoration:none;font-size:14px;font-weight:600;">
+        <a href="${process.env.NEXT_PUBLIC_APP_URL ?? 'https://docoolture.com'}/host/dashboard" style="display:inline-block;background:#1a1a2e;color:#ffffff;padding:14px 32px;border-radius:100px;text-decoration:none;font-size:14px;font-weight:600;">
           Ver en mi panel →
         </a>
       </div>
@@ -115,7 +132,7 @@ export async function sendBookingNotificationEmail(data: BookingEmailData) {
   await resend.emails.send({
     from: FROM,
     to: data.hostEmail,
-    subject: `✅ Nueva reserva: ${data.tourName}`,
+    subject: `✅ Nueva reserva: ${data.tourName.replace(/[\r\n]/g, ' ')}`,
     html,
   })
 }

@@ -1,40 +1,31 @@
 'use client'
 
-import { TExperienceListing, TStayListing } from '@/data/listings'
+import { TExperienceListing } from '@/data/listings'
 import useSnapSlider from '@/hooks/useSnapSlider'
 import { ButtonCircle } from '@/shared/Button'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
 import { FC, useRef } from 'react'
 import ExperiencesCard from './ExperiencesCard'
-import StayCard2 from './StayCard2'
 
 interface Props {
   className?: string
   itemClassName?: string
-  listings: TStayListing[] | TExperienceListing[]
-  cardType: 'stay' | 'experience' | 'real-estate'
+  listings: TExperienceListing[]
+  cardType: 'experience'
 }
 
 const SectionSliderCards: FC<Props> = ({
   className,
   itemClassName = 'w-[17rem] lg:w-1/3 xl:w-1/4',
   listings = [],
-  cardType,
 }) => {
   const sliderRef = useRef<HTMLDivElement>(null)
   const { scrollToNextSlide, scrollToPrevSlide, isAtEnd, isAtStart } = useSnapSlider({ sliderRef })
 
-  const renderCard = (item: Props['listings'][number]) => {
-    switch (cardType) {
-      case 'stay':
-        return <StayCard2 data={item as TStayListing} />
-      case 'experience':
-        return <ExperiencesCard data={item as TExperienceListing} />
-      default:
-        return <StayCard2 data={item as TStayListing} />
-    }
-  }
+  const renderCard = (item: TExperienceListing) => (
+    <ExperiencesCard data={item} />
+  )
 
   return (
     <div className={clsx('relative', className)}>
@@ -42,7 +33,7 @@ const SectionSliderCards: FC<Props> = ({
         ref={sliderRef}
         className="hidden-scrollbar relative -mx-2 flex snap-x snap-mandatory overflow-x-auto lg:-mx-3.5"
       >
-        {listings.map((item) => (
+        {listings.map((item: TExperienceListing) => (
           <div className={`mySnapItem px-2 lg:px-3.5 ${itemClassName}`} key={item.id}>
             {renderCard(item)}
           </div>

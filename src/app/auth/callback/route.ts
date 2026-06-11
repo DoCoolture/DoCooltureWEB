@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { supabaseAdmin } from '@/lib/supabase-admin'
 import { cookies } from 'next/headers'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -51,19 +52,32 @@ export async function GET(request: NextRequest) {
     if (user) {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
+        .select('role, created_at')
         .eq('user_id', user.id)
         .single()
 
-      // Si viene con un rol seleccionado (signup con Google) y el perfil es nuevo (explorer por defecto), actualizar
-      if (role && role !== 'explorer' && profile?.role === 'explorer') {
-        await supabase.from('profiles').update({ role }).eq('user_id', user.id)
+      // Only upgrade role during initial signup:
+      // - Profile must be fresh (< 30 min) to survive slow email delivery
+      // - No host record must exist yet, preventing re-use of old signup links
+      let currentRole = profile?.role
+      if (role && role !== 'explorer' && profile?.role === 'explorer' && profile?.created_at) {
+        const profileAgeMs = Date.now() - new Date(profile.created_at).getTime()
+        const isNewAccount = profileAgeMs < 30 * 60 * 1000
+
+        const { count: existingHostCount } = await supabaseAdmin
+          .from('hosts')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+
+        if (isNewAccount && existingHostCount === 0) {
+          await supabaseAdmin.from('profiles').update({ role }).eq('user_id', user.id)
+          currentRole = role
+        }
       }
 
       if (next !== '/experience') return NextResponse.redirect(`${origin}${next}`)
-      const effectiveRole = (role && profile?.role === 'explorer' ? role : profile?.role)
-      if (effectiveRole === 'admin') return NextResponse.redirect(`${origin}/admin`)
-      if (effectiveRole === 'host') return NextResponse.redirect(`${origin}/host/dashboard`)
+      if (currentRole === 'admin') return NextResponse.redirect(`${origin}/admin`)
+      if (currentRole === 'host') return NextResponse.redirect(`${origin}/host/dashboard`)
       return NextResponse.redirect(`${origin}/experience`)
     }
   }

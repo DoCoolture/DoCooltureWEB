@@ -34,7 +34,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       .split('; ')
       .find((row) => row.startsWith('dc_locale='))
     if (cookie) {
-      const value = cookie.split('=')[1] as Locale
+      const value = cookie.slice(cookie.indexOf('=') + 1) as Locale
       if (VALID_LOCALES.includes(value)) {
         setLocaleState(value)
       }

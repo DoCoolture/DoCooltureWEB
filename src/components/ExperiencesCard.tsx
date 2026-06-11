@@ -33,15 +33,14 @@ const ExperiencesCard: FC<Props> = ({
     like,
     saleOff,
     isAds,
-    price,
+    priceUsd,
     reviewStart,
     reviewCount,
   } = data
 
   const { convertPrice } = useCurrency()
   const { t } = useLanguage()
-  const precioNum = Number(price.replace('$', '').replace(',', ''))
-  const precioConvertido = convertPrice(precioNum)
+  const precioConvertido = convertPrice(priceUsd)
 
   const listingHref = `/experience-listings/${listingHandle}`
 

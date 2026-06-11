@@ -4,19 +4,28 @@ import { cookies } from 'next/headers'
 
 /**
  * Resolves the profiles.id for the authenticated user.
- * Retries once after a short delay to handle the OAuth trigger race condition
+ * Retries with exponential backoff to handle the OAuth trigger race condition
  * where the profile row hasn't been created yet immediately after signup.
+ * Strategy: immediate attempt first, then 200 / 400 / 800 ms delays (4 total).
  */
 export async function getProfileId(supabase: SupabaseClient, userId: string): Promise<string | null> {
   const query = () =>
     supabase.from('profiles').select('id').eq('user_id', userId).single()
 
-  const { data } = await query()
-  if (data?.id) return data.id
+  // First attempt is immediate; subsequent waits happen only before a retry.
+  const retryDelays = [200, 400, 800]
 
-  await new Promise(r => setTimeout(r, 800))
-  const { data: retried } = await query()
-  return retried?.id ?? null
+  const { data: first } = await query()
+  if (first?.id) return first.id
+
+  for (const delay of retryDelays) {
+    await new Promise(r => setTimeout(r, delay))
+    const { data } = await query()
+    if (data?.id) return data.id
+  }
+
+  console.warn('[getProfileId] profile not found after retries for user:', userId)
+  return null
 }
 
 export async function createSupabaseServerClient() {

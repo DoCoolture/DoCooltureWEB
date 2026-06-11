@@ -60,22 +60,15 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
 
   const reviews = await getExperienceReviews(listing.id)
 
-  // For the hardcoded experience, use translated description and host bio
-  const isHardcoded = handle === 'taste-of-dominican-culture'
-  const resolvedDescription = isHardcoded ? el.tasteDescription : description
-  const resolvedHost = isHardcoded
-    ? { ...host, description: el.hostBio, responseTime: el.hostResponseTime, joinedDate: el.hostJoinedDate }
-    : { ...host, responseTime: host.responseTime || el.hostResponseTime }
+  const resolvedDescription = description
+  const resolvedHost = { ...host, responseTime: host.responseTime || el.hostResponseTime }
 
   // Translate category using the categoryMap (Spanish DB value → locale label)
   const categoryMap = el.categoryMap as Record<string, string>
   const translatedCategory = categoryMap[listingCategory] ?? listingCategory
 
-  // Translate date for hardcoded listing
   const resolvedDate = date === 'weekendsAvailable' ? el.weekendsAvailable : date
-
-  // Translate duration and languages for hardcoded listing
-  const resolvedDuration = isHardcoded ? el.durationTime : durationTime
+  const resolvedDuration = durationTime
   const languageNames = el.languageNames as Record<string, string>
   const translatedLanguages = languages.map((l) => languageNames[l] ?? l)
 
@@ -83,10 +76,10 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
   const handleSubmitForm = async (formData: FormData) => {
     'use server'
 
-    const startDate = formData.get('startDate') as string
-    const endDate = formData.get('endDate') as string
-    const guestAdults = formData.get('guestAdults') as string
-    const guestChildren = formData.get('guestChildren') as string
+    const startDate = formData.get('startDate')?.toString() ?? ''
+    const endDate = formData.get('endDate')?.toString() ?? ''
+    const guestAdults = formData.get('guestAdults')?.toString() ?? '1'
+    const guestChildren = formData.get('guestChildren')?.toString() ?? '0'
 
     const totalExplorers =
       (Number(guestAdults) || 1) + (Number(guestChildren) || 0)
@@ -105,7 +98,6 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
       rating: String(reviewStart ?? 0),
       reviewCount: String(reviewCount ?? 0),
       experienceId: listing.id,
-      hostId: host.handle,
     })
 
     redirect(`/checkout?${params.toString()}`)
@@ -191,14 +183,14 @@ const Page = async ({ params }: { params: Promise<{ handle: string }> }) => {
       </div>
 
       {/* GALERÍA */}
-      <HeaderGallery gridType="grid4" images={galleryImgs} />
+      <HeaderGallery gridType="grid4" images={galleryImgs} imageAlt={title} />
 
       {/* MAIN */}
       <ExperienceDateBridge
         leftTopContent={<>{renderSectionHeader()}{renderSectionInfo()}{renderSectionIncludes()}</>}
         availableDays={availableDays}
         durationTime={durationTime}
-        price={price}
+        priceUsd={listing.priceUsd ?? 0}
         maxGuests={maxGuests}
         date={resolvedDate}
         reviewStart={reviewStart}

@@ -2,6 +2,7 @@
 
 import { supabase, uploadAvatar } from '@/lib/supabase'
 import type { Host } from '@/lib/supabase'
+import { updateHostProfile } from '@/app/actions/host'
 import { DR_CITIES } from '@/types'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -17,6 +18,7 @@ export default function HostProfilePage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const avatarInputRef = useRef<HTMLInputElement>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const saveGuard = useRef(false)
 
   const [form, setForm] = useState({
     display_name: '',
@@ -84,38 +86,40 @@ export default function HostProfilePage() {
     e.target.value = ''
   }
 
+  const isValidUrl = (url: string) => {
+    if (!url.trim()) return true
+    try { return ['https:', 'http:'].includes(new URL(url).protocol) } catch { return false }
+  }
+
   const handleSave = async () => {
-    if (!host) return
+    if (!host || saveGuard.current) return
     if (!form.display_name.trim()) {
       setError('El nombre es obligatorio.')
       return
     }
+    if (!isValidUrl(form.instagram_url)) { setError('La URL de Instagram no es válida.'); return }
+    if (!isValidUrl(form.facebook_url)) { setError('La URL de Facebook no es válida.'); return }
+    if (!isValidUrl(form.website_url)) { setError('La URL del sitio web no es válida.'); return }
+    saveGuard.current = true
     setSaving(true)
     setError('')
 
-    const [{ error: hostErr }, { error: profileErr }] = await Promise.all([
-      supabase.from('hosts').update({
-        display_name: form.display_name.trim(),
-        bio: form.bio.trim() || null,
-        city: form.city.trim() || null,
-        country: form.country.trim(),
-        whatsapp: form.whatsapp.trim() || null,
-        instagram_url: form.instagram_url.trim() || null,
-        facebook_url: form.facebook_url.trim() || null,
-        website_url: form.website_url.trim() || null,
-      }).eq('id', host.id),
-      supabase.from('profiles').update({
-        display_name: form.display_name.trim(),
-        city: form.city.trim() || null,
-        about_me: form.bio.trim() || null,
-        avatar_url: form.avatar_url || null,
-      }).eq('user_id', host.user_id),
-    ])
+    const result = await updateHostProfile({
+      displayName: form.display_name,
+      bio: form.bio,
+      city: form.city,
+      country: form.country,
+      whatsapp: form.whatsapp,
+      instagramUrl: form.instagram_url,
+      facebookUrl: form.facebook_url,
+      websiteUrl: form.website_url,
+      avatarUrl: form.avatar_url,
+    })
 
     setSaving(false)
-    const err = hostErr ?? profileErr
-    if (err) {
-      setError('Error al guardar: ' + err.message)
+    saveGuard.current = false
+    if (result.error) {
+      setError(result.error)
     } else {
       setSaved(true)
       setTimeout(() => setSaved(false), 3000)

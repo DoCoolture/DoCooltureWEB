@@ -1,95 +1,12 @@
 import { cache } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
+import { extractAvatarUrl, type ProfileJoin } from '@/lib/supabase-joins'
 
-//  STAY LISTING  //
-export interface TStayListing {
-  id: string
-  date: string
-  listingCategory: string
-  title: string
-  handle: string
-  description: string
-  featuredImage: string
-  galleryImgs: string[]
-  like: boolean
-  address: string
-  reviewStart: number
-  reviewCount: number
-  price: string
-  maxGuests: number
-  bedrooms: number
-  bathrooms: number
-  beds?: number
-  saleOff: string | null
-  isAds: string | null
-  map: { lat: number; lng: number }
-  host: {
-    displayName: string
-    avatarUrl: string
-    handle: string
-    description: string
-    listingsCount: number
-    reviewsCount: number
-    rating: number
-    responseRate: number
-    responseTime: string
-    isSuperhost: boolean
-    isVerified: boolean
-    joinedDate: string
-  }
-}
-
-export async function getStayListings(): Promise<TStayListing[]> {
-  return []
-}
-export const getStayListingByHandle = async (_handle: string): Promise<TStayListing | null> => null
-
-//  CAR LISTING  //
-export interface TCarListing {
-  id: string
-  title: string
-  handle: string
-  listingCategory: string
-  description: string
-  featuredImage: string
-  galleryImgs: string[]
-  address: string
-  reviewStart: number
-  reviewCount: number
-  price: string
-  gearshift: string
-  seats: number
-  airbags: number
-  like: boolean
-  saleOff: string | null
-  isAds: string | null
-  map: { lat: number; lng: number }
-  bags?: number
-  pickUpAddress?: string
-  dropOffAddress?: string
-  pickUpTime?: string
-  dropOffTime?: string
-  host: {
-    displayName: string
-    avatarUrl: string
-    handle: string
-    description: string
-    listingsCount: number
-    reviewsCount: number
-    rating: number
-    responseRate: number
-    responseTime: string
-    isSuperhost: boolean
-    isVerified: boolean
-    joinedDate: string
-  }
-}
-
-export async function getCarListings(): Promise<TCarListing[]> {
-  return []
-}
-export const getCarListingByHandle = async (_handle: string): Promise<TCarListing | null> => null
-
+type HostJoin = {
+  display_name: string | null
+  user_id: string
+  profiles: ProfileJoin
+} | null
 
 const CITY_CENTERS: Record<string, { lat: number; lng: number }> = {
   'punta cana':               { lat: 18.5820, lng: -68.4054 },
@@ -136,56 +53,57 @@ function cityCoordsFallback(address: string): { lat: number; lng: number } | nul
   return null
 }
 
-export async function getExperienceListings() {
-  const { data } = await supabase
+// Cached for the duration of a single request tree — prevents duplicate queries
+// when listings page and map page render in the same RSC pass.
+export const getExperienceListings = cache(async () => {
+  const { data } = await supabaseAdmin
     .from('experiences')
-    .select('*, hosts(display_name, user_id, profiles(avatar_url))')
+    .select('id, title, handle, host_id, category, available_days, description, duration_time, languages, featured_image_url, gallery_urls, address, average_rating, total_reviews, price_usd, max_guests, latitude, longitude, hosts(display_name, user_id, profiles(avatar_url))')
     .eq('is_published', true)
     .eq('is_hidden', false)
     .order('created_at', { ascending: false })
 
-  const fromSupabase = (data ?? []).map((exp) => {
-    const host = (exp as any).hosts
-    const avatarUrl = host?.profiles?.avatar_url ?? ''
-    return ({
-    id: exp.id,
-    title: exp.title,
-    handle: exp.handle,
-    host: {
-      displayName: host?.display_name ?? 'Anfitrión DoCoolture',
-      avatarUrl,
-      handle: exp.host_id,
-    },
-    listingCategory: exp.category,
-    date: (exp.available_days as string[] | null)?.join(', ') ?? 'Consultar disponibilidad',
-    description: exp.description,
-    durationTime: exp.duration_time,
-    languages: (exp.languages as string[] | null) ?? [],
-    featuredImage: exp.featured_image_url ?? '',
-    galleryImgs: [
-      ...(exp.featured_image_url ? [exp.featured_image_url] : []),
-      ...((exp.gallery_urls as string[] | null) ?? []),
-    ],
-    like: false,
-    address: exp.address,
-    reviewStart: exp.average_rating ?? 0,
-    reviewCount: exp.total_reviews ?? 0,
-    price: `$${exp.price_usd}`,
-    maxGuests: exp.max_guests,
-    saleOff: null as string | null,
-    isAds: null as string | null,
-    map: exp.latitude && exp.longitude
-      ? { lat: exp.latitude, lng: exp.longitude }
-      : (cityCoordsFallback(exp.address ?? '') ?? { lat: 0, lng: 0 }),
-  })})
-
-  return fromSupabase
-}
+  return (data ?? []).map((exp) => {
+    const host = exp.hosts as unknown as HostJoin
+    const avatarUrl = host ? extractAvatarUrl(host.profiles) : ''
+    return {
+      id: exp.id,
+      title: exp.title,
+      handle: exp.handle,
+      host: {
+        displayName: host?.display_name ?? 'Anfitrión DoCoolture',
+        avatarUrl,
+        handle: exp.host_id,
+      },
+      listingCategory: exp.category,
+      date: (exp.available_days as string[] | null)?.join(', ') ?? null,
+      description: exp.description,
+      durationTime: exp.duration_time,
+      languages: (exp.languages as string[] | null) ?? [],
+      featuredImage: exp.featured_image_url ?? '',
+      galleryImgs: [
+        ...(exp.featured_image_url ? [exp.featured_image_url] : []),
+        ...((exp.gallery_urls as string[] | null) ?? []),
+      ],
+      like: false,
+      address: exp.address,
+      reviewStart: exp.average_rating ?? 0,
+      reviewCount: exp.total_reviews ?? 0,
+      priceUsd: exp.price_usd as number,
+      maxGuests: exp.max_guests,
+      saleOff: null as string | null,
+      isAds: null as string | null,
+      map: exp.latitude != null && exp.longitude != null
+        ? { lat: exp.latitude, lng: exp.longitude }
+        : cityCoordsFallback(exp.address ?? '') ?? null,
+    }
+  })
+})
 
 export const getExperienceListingByHandle = cache(async (handle: string) => {
-  const { data: exp } = await supabase
+  const { data: exp } = await supabaseAdmin
     .from('experiences')
-    .select('*')
+    .select('id, title, handle, host_id, category, available_days, description, duration_time, languages, featured_image_url, gallery_urls, address, average_rating, total_reviews, price_usd, max_guests, latitude, longitude, is_published, is_hidden')
     .eq('handle', handle)
     .eq('is_published', true)
     .eq('is_hidden', false)
@@ -194,20 +112,20 @@ export const getExperienceListingByHandle = cache(async (handle: string) => {
   if (!exp) return null
 
   // Fetch host and their profile avatar in a single query via FK join
-  const { data: hostData } = await supabase
+  const { data: hostData } = await supabaseAdmin
     .from('hosts')
-    .select('*, profiles!profile_id(avatar_url)')
+    .select('id, display_name, bio, total_listings, total_reviews, average_rating, response_rate, response_time, is_superhost, is_verified, created_at, profiles!profile_id(avatar_url)')
     .eq('id', exp.host_id)
     .single()
 
-  const avatarUrl = (hostData as any)?.profiles?.avatar_url ?? ''
+  const avatarUrl = hostData ? extractAvatarUrl((hostData as { profiles: ProfileJoin }).profiles) : ''
 
   return {
     id: exp.id,
     title: exp.title,
     handle: exp.handle,
     listingCategory: exp.category,
-    date: (exp.available_days as string[] | null)?.join(', ') ?? 'Consultar disponibilidad',
+    date: (exp.available_days as string[] | null)?.join(', ') ?? null,
     description: exp.description,
     durationTime: exp.duration_time,
     languages: (exp.languages as string[] | null) ?? [],
@@ -220,6 +138,7 @@ export const getExperienceListingByHandle = cache(async (handle: string) => {
     address: exp.address,
     reviewStart: exp.average_rating ?? 0,
     reviewCount: exp.total_reviews ?? 0,
+    priceUsd: exp.price_usd as number,
     price: `$${exp.price_usd}`,
     maxGuests: exp.max_guests,
     availableDays: (exp.available_days as string[] | null) ?? [],
@@ -245,111 +164,6 @@ export const getExperienceListingByHandle = cache(async (handle: string) => {
   }
 })
 export type TExperienceListing = Awaited<ReturnType<typeof getExperienceListings>>[number]
-
-//  REAL-ESTATE LISTING  //
-export interface TRealEstateListing {
-  id: string
-  date: string
-  listingCategory: string
-  title: string
-  handle: string
-  description: string
-  featuredImage: string
-  galleryImgs: string[]
-  like: boolean
-  address: string
-  reviewStart: number
-  reviewCount: number
-  price: string
-  maxGuests: number
-  bedrooms: number
-  bathrooms: number
-  acreage: number
-  saleOff: string | null
-  isAds: string | null
-  map: { lat: number; lng: number }
-  host: {
-    displayName: string
-    avatarUrl: string
-    handle: string
-    description: string
-    listingsCount: number
-    reviewsCount: number
-    rating: number
-    responseRate: number
-    responseTime: string
-    isSuperhost: boolean
-    isVerified: boolean
-    joinedDate: string
-    email?: string
-    phone?: string
-  }
-}
-
-export async function getRealEstateListings(): Promise<TRealEstateListing[]> {
-  return []
-}
-export const getRealEstateListingByHandle = async (_handle: string): Promise<TRealEstateListing | null> => null
-
-// FLIGHT LISTING //
-export interface TFlightListing {
-  id: string
-  name: string
-  departure: string
-  departureTime: string
-  arrivalTime: string
-  arrival: string
-  duration: string
-  stopNumber: number
-  stopAirport: string
-  layover: string
-  href: string
-  price: string
-  airlines: { logo: string; name: string }
-}
-
-export async function getFlightListings(): Promise<TFlightListing[]> {
-  return []
-}
-
-// ============================================================
-// FILTER OPTIONS
-// ============================================================
-
-export async function getStayListingFilterOptions() {
-  return [
-    {
-      label: 'Property type',
-      name: 'propertyType',
-      tabUIType: 'checkbox',
-      options: [
-        { name: 'Entire place', value: 'entire_place', description: 'Have a place to yourself', defaultChecked: true },
-        { name: 'Private room', value: 'private_room', description: 'Have your own room and share some common spaces', defaultChecked: true },
-        { name: 'Hotel room', value: 'hotel_room', description: 'Have a private or shared room in a boutique hotel, hostel, and more' },
-        { name: 'Shared room', value: 'shared_room', description: 'Stay in a shared space, like a common room' },
-      ],
-    },
-    { label: 'Price range', name: 'priceRange', tabUIType: 'price-range', min: 0, max: 1000 },
-    {
-      label: 'Rooms & Beds',
-      name: 'roomsAndBeds',
-      tabUIType: 'select-number',
-      options: [{ name: 'Beds', max: 10 }, { name: 'Bedrooms', max: 10 }, { name: 'Bathrooms', max: 10 }],
-    },
-    {
-      label: 'Amenities',
-      name: 'amenities',
-      tabUIType: 'checkbox',
-      options: [
-        { name: 'Kitchen', value: 'kitchen', description: 'Have a place to yourself', defaultChecked: true },
-        { name: 'Air conditioning', value: 'air_conditioning', description: 'Have your own room and share some common spaces', defaultChecked: true },
-        { name: 'Heating', value: 'heating', description: 'Have a private or shared room in a boutique hotel, hostel, and more' },
-        { name: 'Dryer', value: 'dryer', description: 'Stay in a shared space, like a common room' },
-        { name: 'Washer', value: 'washer', description: 'Stay in a shared space, like a common room' },
-      ],
-    },
-  ]
-}
 
 export async function getExperienceListingFilterOptions(ef?: {
   experienceType: string; priceRange: string; duration: string; timeOfDay: string
@@ -421,61 +235,5 @@ export async function getExperienceListingFilterOptions(ef?: {
         { name: f.evening, value: 'evening', description: f.evening_desc, defaultChecked: false },
       ],
     },
-  ]
-}
-
-export async function getRealEstateListingFilterOptions() {
-  return [
-    {
-      label: 'Property type',
-      name: 'listingCategory',
-      tabUIType: 'checkbox',
-      options: [
-        { name: 'Entire place', value: 'entire_place', description: 'Have a place to yourself', defaultChecked: true },
-        { name: 'Private room', value: 'private_room', description: 'Have your own room and share some common spaces', defaultChecked: true },
-        { name: 'Hotel room', value: 'hotel_room', description: 'Have a private or shared room in a boutique hotel, hostel, and more' },
-        { name: 'Shared room', value: 'shared_room', description: 'Stay in a shared space, like a common room' },
-      ],
-    },
-    { label: 'Price range', name: 'priceRange', tabUIType: 'price-range', min: 0, max: 1000 },
-    {
-      label: 'Rooms & Beds',
-      name: 'roomsAndBeds',
-      tabUIType: 'select-number',
-      options: [{ name: 'Beds', max: 10 }, { name: 'Bedrooms', max: 10 }, { name: 'Bathrooms', max: 10 }],
-    },
-  ]
-}
-
-export async function getCarListingFilterOptions() {
-  return [
-    {
-      label: 'Car type',
-      name: 'Car-type',
-      tabUIType: 'checkbox',
-      options: [
-        { name: 'Sedan', value: 'sedan', description: 'Comfortable and spacious for city driving.', defaultChecked: true },
-        { name: 'SUV', value: 'suv', description: 'Perfect for off-road adventures and family trips.', defaultChecked: true },
-        { name: 'Truck', value: 'truck', description: 'Ideal for heavy loads and rugged terrain.' },
-        { name: 'Convertible', value: 'convertible', description: 'Enjoy the open air with a stylish ride.' },
-      ],
-    },
-    { label: 'Price range', name: 'Price-range', tabUIType: 'price-range', min: 0, max: 1000 },
-  ]
-}
-
-export async function getFlightFilterOptions() {
-  return [
-    {
-      label: 'Airlines',
-      name: 'airlines',
-      tabUIType: 'checkbox',
-      options: [
-        { name: 'Korean Air', value: 'korean_air', description: 'Flag carrier and largest airline of South Korea.', defaultChecked: true },
-        { name: 'Singapore Airlines', value: 'singapore_airlines', description: 'Flag carrier of Singapore, known for its service.', defaultChecked: true },
-        { name: 'Philippine Airlines', value: 'philippine_airlines', description: 'Flag carrier of the Philippines.' },
-      ],
-    },
-    { label: 'Price range', name: 'priceRange', tabUIType: 'price-range', min: 0, max: 10000 },
   ]
 }

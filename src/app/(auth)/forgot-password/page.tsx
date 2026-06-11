@@ -13,24 +13,19 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [success, setSuccess] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError(null)
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
     })
 
     setIsLoading(false)
 
-    if (error) {
-      setError(fp.errorSending)
-    } else {
-      setSuccess(true)
-    }
+    // Always show success to prevent account enumeration
+    setSuccess(true)
   }
 
   if (success) {
@@ -66,12 +61,6 @@ export default function ForgotPasswordPage() {
                 className="w-full rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
               />
             </div>
-
-            {error && (
-              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">
-                ⚠️ {error}
-              </div>
-            )}
 
             <ButtonPrimary type="submit" disabled={isLoading} className="w-full disabled:opacity-60">
               {isLoading ? fp.sending : fp.submit}

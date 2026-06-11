@@ -35,18 +35,14 @@ const NcInputNumber: FC<NcInputNumberProps> = ({
   }, [defaultValue])
 
   const handleClickDecrement = () => {
-    if (min >= value) return
-    setValue((state) => {
-      return state - 1
-    })
-    onChange && onChange(value - 1)
+    if (min !== undefined && value - 1 < min) return
+    setValue((state) => state - 1)
+    onChange?.(value - 1)
   }
   const handleClickIncrement = () => {
-    if (max && max <= value) return
-    setValue((state) => {
-      return state + 1
-    })
-    onChange && onChange(value + 1)
+    if (max !== undefined && value + 1 > max) return
+    setValue((state) => state + 1)
+    onChange?.(value + 1)
   }
 
   return (
@@ -63,12 +59,12 @@ const NcInputNumber: FC<NcInputNumberProps> = ({
       )}
 
       <div className="flex min-w-28 items-center justify-between gap-2.5">
-        <ButtonCircle outline disabled={min >= value} onClick={handleClickDecrement} className="size-8!">
+        <ButtonCircle outline disabled={min !== undefined && value - 1 < min} onClick={handleClickDecrement} className="size-8!">
           <MinusIcon className="size-4!" />
         </ButtonCircle>
         <span>{value}</span>
-        <input type="hidden" name={inputName} id={inputId} value={value || 0} />
-        <ButtonCircle outline onClick={handleClickIncrement} disabled={max ? max <= value : false} className="size-8!">
+        <input type="hidden" name={inputName} id={inputId} value={value} />
+        <ButtonCircle outline onClick={handleClickIncrement} disabled={max !== undefined && value + 1 > max} className="size-8!">
           <PlusIcon className="size-4!" />
         </ButtonCircle>
       </div>

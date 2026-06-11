@@ -18,7 +18,6 @@ interface PayWithProps {
   customerName: string
   notes: string | null
   experienceId: string | null
-  hostId: string | null
 }
 
 type PaymentTab = 'paypal' | 'cardnet_rest'
@@ -38,7 +37,6 @@ const PayWith: React.FC<PayWithProps> = ({
   customerName,
   notes,
   experienceId,
-  hostId,
 }) => {
   const { t } = useLanguage()
   const b = t.booking
@@ -51,7 +49,7 @@ const PayWith: React.FC<PayWithProps> = ({
     const res = await fetch('/api/paypal/create-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ amount: totalUsd.toFixed(2), description: tourName }),
+      body: JSON.stringify({ experienceId, guests, description: tourName }),
     })
     const data = await res.json()
     if (!res.ok || !data.id) throw new Error(data.error ?? 'Failed to create order')
@@ -70,7 +68,6 @@ const PayWith: React.FC<PayWithProps> = ({
       body: JSON.stringify({
         orderID,
         experienceId,
-        hostId,
         tourName,
         bookingDate,
         guests,
@@ -86,7 +83,7 @@ const PayWith: React.FC<PayWithProps> = ({
       return
     }
 
-    router.push('/pay-done')
+    router.push(`/pay-done?ref=${encodeURIComponent(data.transactionId ?? '')}`)
   }
 
   return (
@@ -139,19 +136,23 @@ const PayWith: React.FC<PayWithProps> = ({
 
       {/* Cardnet — REST */}
       {activeTab === 'cardnet_rest' && (
-        <CardnetDirectForm
-          totalAmount={totalUsd}
-          currency="DOP"
-          tourName={tourName}
-          bookingDate={bookingDate}
-          guests={guests}
-          customerId={customerId}
-          customerEmail={customerEmail}
-          customerName={customerName}
-          notes={notes}
-          experienceId={experienceId}
-          hostId={hostId}
-        />
+        <>
+          <p className="mb-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-2.5 text-xs text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300">
+            ℹ️ {b.cardnetCurrencyNote}
+          </p>
+          <CardnetDirectForm
+            totalAmount={totalUsd}
+            currency="DOP"
+            tourName={tourName}
+            bookingDate={bookingDate}
+            guests={guests}
+            customerId={customerId}
+            customerEmail={customerEmail}
+            customerName={customerName}
+            notes={notes}
+            experienceId={experienceId}
+          />
+        </>
       )}
     </div>
   )

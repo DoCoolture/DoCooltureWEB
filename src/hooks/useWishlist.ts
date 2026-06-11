@@ -6,10 +6,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 export function useWishlist() {
   const [liked, setLiked] = useState<Set<string>>(new Set())
   const profileIdRef = useRef<string | null>(null)
+  const processingRef = useRef<Set<string>>(new Set())
 
   const loadFromDb = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    if (!session?.user) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
       setLiked(new Set())
       return
     }
@@ -17,7 +18,7 @@ export function useWishlist() {
     const { data: profile } = await supabase
       .from('profiles')
       .select('id')
-      .eq('user_id', session.user.id)
+      .eq('user_id', user.id)
       .single()
 
     if (!profile) {
@@ -53,6 +54,9 @@ export function useWishlist() {
   const isLiked = useCallback((id: string) => liked.has(id), [liked])
 
   const toggle = useCallback(async (id: string) => {
+    if (processingRef.current.has(id)) return
+    processingRef.current.add(id)
+
     const isCurrentlyLiked = liked.has(id)
 
     setLiked((prev) => {
@@ -64,6 +68,12 @@ export function useWishlist() {
     const profileId = profileIdRef.current
     if (!profileId) {
       console.warn('[useWishlist] No profileId — usuario no autenticado')
+      setLiked((prev) => {
+        const next = new Set(prev)
+        isCurrentlyLiked ? next.add(id) : next.delete(id)
+        return next
+      })
+      processingRef.current.delete(id)
       return
     }
 
@@ -73,13 +83,21 @@ export function useWishlist() {
         .delete()
         .eq('profile_id', profileId)
         .eq('experience_id', id)
-      if (error) console.error('[useWishlist] delete error:', error)
+      if (error) {
+        console.error('[useWishlist] delete error:', error)
+        setLiked((prev) => { const next = new Set(prev); next.add(id); return next })
+      }
     } else {
       const { error } = await supabase
         .from('wishlists')
         .insert({ profile_id: profileId, experience_id: id })
-      if (error) console.error('[useWishlist] insert error:', error)
+      if (error) {
+        console.error('[useWishlist] insert error:', error)
+        setLiked((prev) => { const next = new Set(prev); next.delete(id); return next })
+      }
     }
+
+    processingRef.current.delete(id)
   }, [liked])
 
   return { isLiked, toggle }

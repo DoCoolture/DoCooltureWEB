@@ -14,7 +14,7 @@ export function formatAmount(amount: number): string {
     .padStart(12, '0')
 }
 
-/** Generates a 6-char alphanumeric transaction ID */
+/** Generates a cryptographically secure 8-char hex transaction ID */
 export function generateTxId(): string {
-  return Math.random().toString(36).substring(2, 8).toUpperCase()
+  return crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
 }

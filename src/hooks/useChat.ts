@@ -79,7 +79,8 @@ export function useChat(): UseChatReturn {
         throw new Error(data.error ?? `Error ${response.status}`)
       }
 
-      const reader = response.body!.getReader()
+      if (!response.body) throw new Error('Empty response body')
+      const reader = response.body.getReader()
       const decoder = new TextDecoder()
 
       while (true) {

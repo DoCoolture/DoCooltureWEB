@@ -1,5 +1,6 @@
 import { createSupabaseServerClient, getProfileId } from '@/lib/supabase-server'
 import { CARDNET_REST_BASE } from '@/lib/cardnet'
+import { calculateTotal, toDopAmount } from '@/lib/pricing'
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 
@@ -24,7 +25,6 @@ export async function POST(request: NextRequest) {
       guests,
       notes,
       experienceId,
-      hostId,
       customerName,
       customerEmail,
     } = await request.json()
@@ -33,14 +33,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing card details' }, { status: 400 })
     }
 
-    if (!experienceId || !hostId) {
+    if (!experienceId) {
       return NextResponse.json({ error: 'Missing booking details' }, { status: 400 })
     }
 
-    // Validate amount against the authoritative DB price — never trust client-supplied amount
+    // Validate amount against the authoritative DB price — never trust client-supplied amount.
+    // Also fetch host_id, title and max_guests from DB so the client cannot redirect notifications,
+    // inject a spoofed tour name, or book more guests than the experience allows.
     const { data: experience } = await supabase
       .from('experiences')
-      .select('price_usd')
+      .select('price_usd, title, host_id, max_guests')
       .eq('id', experienceId)
       .eq('is_published', true)
       .single()
@@ -49,18 +51,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Experience not found' }, { status: 404 })
     }
 
-    const expectedTotal = Number((experience.price_usd * (guests ?? 1) * 1.18).toFixed(2))
+    // Derive hostId and tour name from DB — never from client
+    const hostId = experience.host_id
+    const authoritativeTourName = experience.title ?? tourName
+
+    // Clamp guests: at least 1, at most max_guests from DB
+    const numGuests = Math.max(1, Math.min(Number(guests) || 1, experience.max_guests ?? 20))
+
+    const expectedTotal = calculateTotal(experience.price_usd, numGuests)
     if (Math.abs(Number(amount) - expectedTotal) > 0.02) {
       return NextResponse.json({ error: 'Amount mismatch' }, { status: 422 })
     }
 
+    // Convert to charge currency: price_usd is always USD; Cardnet default is DOP
+    const CURRENCY_CODES: Record<string, string> = { DOP: '214', USD: '840', EUR: '978' }
+    const currencyCode = CURRENCY_CODES[currency?.toUpperCase()] ?? '214'
+    const chargeAmount = currency?.toUpperCase() === 'DOP' ? toDopAmount(expectedTotal) : expectedTotal
+
     const merchantId = process.env.CARDNET_MERCHANT_NUMBER!
     const terminalId = process.env.CARDNET_MERCHANT_TERMINAL!
     const token = process.env.CARDNET_TOKEN ?? ''
-
-    // Map currency text to Cardnet numeric codes
-    const CURRENCY_CODES: Record<string, string> = { DOP: '214', USD: '840', EUR: '978' }
-    const currencyCode = CURRENCY_CODES[currency?.toUpperCase()] ?? '214'
 
     // Step 1: Get idempotency key
     let keyText = ''
@@ -87,6 +97,9 @@ export async function POST(request: NextRequest) {
     // Step 2: Create booking in 'pending_payment' BEFORE charging.
     // If the DB is down right now, we fail here and the card is never charged.
     const invoiceNum = (invoiceNumber ?? `DC${Date.now()}`).slice(-15)
+    const subtotalUsd = Number((experience.price_usd * numGuests).toFixed(2))
+    const processingFeeUsd = Number((expectedTotal - subtotalUsd).toFixed(2))
+
     const { data: newBooking, error: insertError } = await supabase
       .from('bookings')
       .insert({
@@ -95,14 +108,18 @@ export async function POST(request: NextRequest) {
         customer_name: customerName,
         customer_email: customerEmail,
         explorer_id: profileId,
-        customer_phone: '',
-        tour_name: tourName,
+        customer_phone: null,
+        tour_name: authoritativeTourName,
         booking_date: bookingDate,
-        guests,
+        guests: numGuests,
         notes,
         status: 'pending_payment',
         payment_method: 'cardnet_direct',
         payment_status: 'pending',
+        payment_currency: currency?.toUpperCase() ?? 'DOP',
+        price_per_person: experience.price_usd,
+        subtotal_usd: subtotalUsd,
+        processing_fee_usd: processingFeeUsd,
         total_usd: expectedTotal,
       })
       .select('id')
@@ -127,15 +144,22 @@ export async function POST(request: NextRequest) {
       'card-number': cardNumber,
       'expiration-date': expirationDate,
       cvv,
-      amount: Number(Number(amount).toFixed(2)),
-      currency: Number(currencyCode), // Cardnet espera número: 214, 840
+      amount: chargeAmount,
+      currency: Number(currencyCode), // Cardnet espera número: 214=DOP, 840=USD
       'invoice-number': invoiceNum,
       'client-ip': clientIp,
       environment: 'Ecommerce',
     }
     if (token) salePayload.token = token
 
-    let saleData: any = {}
+    type CardnetSaleResponse = {
+      'response-code'?: string
+      'response-code-desc'?: string
+      'approval-code'?: string
+      pnRef?: string
+      message?: string
+    }
+    let saleData: CardnetSaleResponse = {}
     try {
       const saleRes = await fetch(`${CARDNET_REST_BASE}/transactions/sales`, {
         method: 'POST',
@@ -167,20 +191,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Sale request failed: ${err}` }, { status: 500 })
     }
 
-    // Step 4: Payment approved — confirm the booking
-    const { error: confirmError } = await supabase
-      .from('bookings')
-      .update({
-        status: 'confirmed',
-        payment_status: 'paid',
-        payment_reference: saleData['approval-code'] ?? saleData['pnRef'],
-      })
-      .eq('id', bookingId)
+    // Step 4: Payment approved — confirm the booking.
+    // Retry once on failure: the card is already charged, so a confirmed booking
+    // with its payment_reference is worth a second attempt before giving up.
+    const paymentReference = saleData['approval-code'] ?? saleData['pnRef']
+    const confirmUpdate = () =>
+      supabase
+        .from('bookings')
+        .update({
+          status: 'confirmed',
+          payment_status: 'paid',
+          payment_reference: paymentReference,
+        })
+        .eq('id', bookingId)
+
+    let { error: confirmError } = await confirmUpdate()
+    if (confirmError) {
+      await new Promise((r) => setTimeout(r, 500))
+      ;({ error: confirmError } = await confirmUpdate())
+    }
 
     if (confirmError) {
-      // Card was charged but confirmation update failed — log for manual review
+      // Card was charged but confirmation update failed after retry — log for manual review
       console.error('[Cardnet] CRITICAL: payment charged but booking confirm failed', {
         bookingId,
+        experienceId,
+        customerEmail,
+        totalUsd: expectedTotal,
+        currency,
         approvalCode: saleData['approval-code'],
         pnRef: saleData['pnRef'],
         error: confirmError,
@@ -195,8 +233,8 @@ export async function POST(request: NextRequest) {
       fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/notify-booking`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-internal-secret': internalSecret },
-        body: JSON.stringify({ hostId, tourName, bookingDate, guests, customerName, customerEmail, totalAmount: amount, currency }),
-      }).catch(() => {})
+        body: JSON.stringify({ hostId, tourName: authoritativeTourName, bookingDate, guests: numGuests, customerName, customerEmail, totalAmount: expectedTotal, currency }),
+      }).catch((err) => console.error('[cardnet] notify-booking failed:', err))
     }
 
     return NextResponse.json({

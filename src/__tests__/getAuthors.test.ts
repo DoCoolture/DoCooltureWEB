@@ -4,16 +4,12 @@ vi.mock('next/cache', () => ({
   unstable_cache: (fn: unknown) => fn,
 }))
 
-vi.mock('@/lib/supabase-admin', () => ({
-  supabaseAdmin: { from: vi.fn() },
-}))
-
 const mockEq = vi.fn()
 const mockSelect = vi.fn(() => ({ eq: mockEq }))
 const mockFrom = vi.fn(() => ({ select: mockSelect }))
 
-vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(() => ({ from: mockFrom })),
+vi.mock('@/lib/supabase-admin', () => ({
+  supabaseAdmin: { from: mockFrom },
 }))
 
 const HOST_FIXTURE = {

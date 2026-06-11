@@ -24,7 +24,7 @@ const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings
     setCurrentHoverID(selectedID)
   }, [selectedID])
 
-  const validListings = listings.filter((l) => l.map.lat !== 0 && l.map.lng !== 0)
+  const validListings = listings.filter((l) => l.map != null)
   const firstValid = validListings[0]
   const mapCenter = firstValid?.map ?? DEFAULT_CENTER
   const zoom = isAllView ? 8 : 11
@@ -35,7 +35,7 @@ const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings
         <Map center={mapCenter} zoom={zoom}>
           <MapControls position="bottom-right" showZoom showFullscreen />
           {validListings.map((listing) => (
-            <MapMarker key={listing.id} longitude={listing.map.lng} latitude={listing.map.lat}>
+            <MapMarker key={listing.id} longitude={listing.map!.lng} latitude={listing.map!.lat}>
               <MarkerContent>
                 <p
                   className={`flex min-w-max items-center justify-center rounded-lg px-3.5 py-1.5 text-sm font-medium shadow-lg transition-all ${
@@ -44,7 +44,7 @@ const MapFixedSection = ({ closeButtonHref, currentHoverID: selectedID, listings
                       : 'bg-white text-neutral-900 hover:scale-110 dark:bg-neutral-600 dark:text-white'
                   }`}
                 >
-                  {listing.price}
+                  ${listing.priceUsd}
                 </p>
               </MarkerContent>
               <MarkerPopup className="rounded-2xl! p-0!">

@@ -131,7 +131,7 @@ const CurrLangDropdown: FC<Props> = ({
   currencies,
   panelClassName = 'w-sm',
 }) => {
-  const { locale, setLocale } = useLanguage()
+  const { locale, setLocale, t } = useLanguage()
 
   return (
     <Popover className={clsx('group', className)}>
@@ -152,7 +152,7 @@ const CurrLangDropdown: FC<Props> = ({
       >
         <TabGroup>
           <TabList className="flex space-x-1 rounded-full bg-neutral-100 p-1 dark:bg-neutral-700">
-            {['Idioma', 'Moneda'].map((category) => (
+            {[t.Header.langTab, t.Header.currTab].map((category) => (
               <Tab
                 key={category}
                 className={({ selected }) =>

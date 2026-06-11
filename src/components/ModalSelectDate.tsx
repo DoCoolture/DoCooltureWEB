@@ -1,6 +1,6 @@
 'use client'
 
-import { excludeDateIntervals } from '@/contains/contants'
+import { excludeDateIntervals } from '@/constants/constants'
 import { Button } from '@/shared/Button'
 import ButtonClose from '@/shared/ButtonClose'
 import ButtonPrimary from '@/shared/ButtonPrimary'

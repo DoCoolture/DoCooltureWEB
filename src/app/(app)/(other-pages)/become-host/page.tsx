@@ -1,6 +1,7 @@
 'use client'
 
 import ButtonPrimary from '@/shared/ButtonPrimary'
+import { registerHost } from '@/app/actions/host'
 import { useLanguage } from '@/context/LanguageContext'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -92,7 +93,7 @@ export default function BecomeHostPage() {
   const handleNext = () => {
     const errs = validateStep(step)
     setFieldErrors(errs)
-    if (Object.keys(errs).length === 0) setStep((s) => (s + 1) as any)
+    if (Object.keys(errs).length === 0) setStep((s) => Math.min(s + 1, TOTAL_STEPS) as typeof s)
   }
 
   const handleSubmit = async () => {
@@ -103,76 +104,54 @@ export default function BecomeHostPage() {
     setIsLoading(true)
     setError(null)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error(bh.notAuthenticated)
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id, role')
-        .eq('user_id', user.id)
-        .single()
-      if (!profile) throw new Error(bh.profileNotFound)
-
-      const { data: host, error: hostError } = await supabase
-        .from('hosts')
-        .insert({
-          profile_id: profile.id,
-          user_id: user.id,
-          display_name: displayName,
-          bio,
-          city,
-          whatsapp,
-          specialties,
-          languages,
-          years_experience: yearsExperience,
-          instagram_url: instagramUrl || null,
-          facebook_url: facebookUrl || null,
-          website_url: websiteUrl || null,
-        })
-        .select()
-        .single()
-      if (hostError) throw hostError
-
-      await supabase
-        .from('profiles')
-        .update({ role: profile.role === 'admin' ? 'admin' : 'host', phone })
-        .eq('user_id', user.id)
+      // Upload identity documents client-side to Storage first (Storage RLS enforces ownership)
+      let frontUrl: string | null = null
+      let backUrl: string | null = null
+      let selfieUrl: string | null = null
 
       if (documentFront || documentBack || selfie) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) throw new Error(bh.notAuthenticated)
+
+        // Store the object path, not a signed URL. Signed URLs expire;
+        // the admin generates fresh ones on-demand via adminGetDocumentSignedUrls().
         const uploadFile = async (file: File, type: string) => {
           const ext = file.name.split('.').pop()
           const path = `${user.id}/${type}.${ext}`
           const { error } = await supabase.storage.from('identity-documents').upload(path, file, { upsert: true })
-          if (error) return null
-          const { data } = await supabase.storage.from('identity-documents').createSignedUrl(path, 3600 * 24 * 365)
-          return data?.signedUrl || null
+          return error ? null : path
         }
-        const frontUrl = documentFront ? await uploadFile(documentFront, 'front') : null
-        const backUrl  = documentBack  ? await uploadFile(documentBack,  'back')  : null
-        const selfieUrl = selfie       ? await uploadFile(selfie,         'selfie') : null
 
-        await supabase.from('identity_verifications').insert({
-          host_id: host.id,
-          document_type: documentType,
-          document_number: documentNumber,
-          document_front_url: frontUrl,
-          document_back_url: backUrl,
-          selfie_url: selfieUrl,
-          status: 'pending',
-        })
+        frontUrl  = documentFront ? await uploadFile(documentFront, 'front')  : null
+        backUrl   = documentBack  ? await uploadFile(documentBack,  'back')   : null
+        selfieUrl = selfie        ? await uploadFile(selfie,        'selfie') : null
       }
 
-      await supabase.from('notifications').insert({
-        user_id: user.id,
-        type: 'new_host_registration',
-        title: '¡Bienvenido como anfitrión!',
-        message: 'Tu perfil de anfitrión ha sido creado. Estamos revisando tu verificación de identidad.',
-        action_url: '/host/dashboard',
+      // All DB operations go through the server action — supabaseAdmin, validated, atomic
+      const result = await registerHost({
+        displayName,
+        bio,
+        city,
+        phone,
+        whatsapp,
+        specialties,
+        languages,
+        yearsExperience,
+        instagramUrl,
+        facebookUrl,
+        websiteUrl,
+        documentType,
+        documentNumber,
+        documentFrontUrl: frontUrl,
+        documentBackUrl: backUrl,
+        selfieUrl,
       })
 
+      if (result.error) throw new Error(result.error)
+
       router.push('/host/dashboard')
-    } catch (err: any) {
-      setError(err.message || bh.errorCreating)
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : bh.errorCreating)
     } finally {
       setIsLoading(false)
     }
@@ -466,7 +445,7 @@ export default function BecomeHostPage() {
 
         <div className="mt-8 flex items-center justify-between border-t border-neutral-200 pt-6 dark:border-neutral-700">
           {step > 1 ? (
-            <button onClick={() => { setStep((s) => (s - 1) as any); setFieldErrors({}) }} className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
+            <button onClick={() => { setStep((s) => Math.max(s - 1, 1) as typeof s); setFieldErrors({}) }} className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100">
               {bh.back}
             </button>
           ) : <div />}

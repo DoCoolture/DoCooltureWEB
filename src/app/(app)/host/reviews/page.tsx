@@ -22,6 +22,7 @@ export default function HostReviewsPage() {
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState<string | null>(null)
   const [hostId, setHostId] = useState<string | null>(null)
+  const [replyError, setReplyError] = useState<string | null>(null)
 
   useEffect(() => {
     loadReviews()
@@ -68,9 +69,18 @@ export default function HostReviewsPage() {
     setIsLoading(false)
   }
 
+  const MAX_REPLY_LENGTH = 2000
+
   const handleReply = async (reviewId: string) => {
     const reply = replyTexts[reviewId]?.trim()
-    if (!reply) return
+    if (!reply || submitting === reviewId) return
+
+    if (reply.length > MAX_REPLY_LENGTH) {
+      setReplyError(`La respuesta no puede superar ${MAX_REPLY_LENGTH} caracteres.`)
+      return
+    }
+
+    setReplyError(null)
     setSubmitting(reviewId)
 
     const { error } = await supabase
@@ -80,6 +90,7 @@ export default function HostReviewsPage() {
 
     if (error) {
       console.error('[handleReply] update failed:', error)
+      setReplyError('No se pudo guardar la respuesta. Intenta de nuevo.')
       setSubmitting(null)
       return
     }
@@ -210,7 +221,11 @@ export default function HostReviewsPage() {
 
               {/* Reply form */}
               {(!review.host_reply || replyTexts[review.id] !== undefined) && (
-                <div className="mt-4 flex gap-x-2">
+                <div className="mt-4 flex flex-col gap-y-1.5">
+                {replyError && (
+                  <p className="text-xs text-red-500">{replyError}</p>
+                )}
+                <div className="flex gap-x-2">
                   <textarea
                     rows={2}
                     placeholder={hr.replyPlaceholder}
@@ -227,6 +242,7 @@ export default function HostReviewsPage() {
                   >
                     {submitting === review.id ? hr.sending : review.host_reply ? hr.update : hr.reply}
                   </button>
+                </div>
                 </div>
               )}
             </div>

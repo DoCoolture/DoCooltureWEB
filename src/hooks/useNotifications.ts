@@ -25,7 +25,7 @@ export function useNotifications() {
     const fetchNotifications = async () => {
       const { data } = await supabase
         .from('notifications')
-        .select('*')
+        .select('id, type, title, message, action_url, is_read, read_at, created_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(20)
@@ -49,25 +49,32 @@ export function useNotifications() {
   }, [userId])
 
   const markAsRead = useCallback(async (id: string) => {
-    await supabase
+    // Capture snapshot via functional setter so we don't need `notifications` as a dep
+    let snapshot: Notification[] = []
+    setNotifications((ns) => {
+      snapshot = ns
+      return ns.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+    })
+    const { error } = await supabase
       .from('notifications')
       .update({ is_read: true, read_at: new Date().toISOString() })
       .eq('id', id)
-
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
-    )
+    if (error) setNotifications(snapshot)
   }, [])
 
   const markAllAsRead = useCallback(async () => {
     if (!userId) return
-    await supabase
+    let snapshot: Notification[] = []
+    setNotifications((ns) => {
+      snapshot = ns
+      return ns.map((n) => ({ ...n, is_read: true }))
+    })
+    const { error } = await supabase
       .from('notifications')
       .update({ is_read: true, read_at: new Date().toISOString() })
       .eq('user_id', userId)
       .eq('is_read', false)
-
-    setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
+    if (error) setNotifications(snapshot)
   }, [userId])
 
   const unreadCount = notifications.filter((n) => !n.is_read).length

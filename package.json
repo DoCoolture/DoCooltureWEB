@@ -1,6 +1,6 @@
 {
-  "name": "docoolture-template",
-  "description": "A template for creating a Next.js application with Tailwind CSS and TypeScript.",
+  "name": "docoolture",
+  "description": "DoCoolture — marketplace de experiencias auténticas en República Dominicana.",
   "version": "2.2.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "db:link": "supabase link --project-ref gfcmpqdtpueelgleelhy",
+    "db:link": "supabase link --project-ref $SUPABASE_PROJECT_REF",
     "db:push": "supabase db push",
     "db:diff": "supabase db diff",
     "db:reset": "supabase db reset"

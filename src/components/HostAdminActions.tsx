@@ -1,5 +1,6 @@
 'use client'
 
+import { adminSuspendHost } from '@/app/actions/admin'
 import { supabase } from '@/lib/supabase'
 import { ShieldCheckIcon } from '@heroicons/react/24/outline'
 import { useEffect, useState } from 'react'
@@ -32,22 +33,10 @@ export default function HostAdminActions({ hostId, hostName }: Props) {
   const handleToggle = async () => {
     if (!status) return
     setLoading(true)
-    const newStatus = status === 'active' ? 'suspended' : 'active'
-    await supabase.from('hosts').update({ status: newStatus }).eq('id', hostId)
-    const { data: host } = await supabase
-      .from('hosts').select('user_id').eq('id', hostId).single()
-    if (host) {
-      await supabase.from('notifications').insert({
-        user_id: host.user_id,
-        type: newStatus === 'suspended' ? 'host_suspended' : 'host_reactivated',
-        title: newStatus === 'suspended' ? '⚠️ Cuenta suspendida' : '✅ Cuenta reactivada',
-        message: newStatus === 'suspended'
-          ? 'Tu cuenta de anfitrión ha sido suspendida por DoCoolture.'
-          : 'Tu cuenta de anfitrión ha sido reactivada por DoCoolture.',
-        action_url: '/host/dashboard',
-      })
+    const result = await adminSuspendHost(hostId, status)
+    if (!result.error) {
+      setStatus(status === 'active' ? 'suspended' : 'active')
     }
-    setStatus(newStatus)
     setLoading(false)
   }
 

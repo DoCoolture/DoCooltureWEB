@@ -2,7 +2,7 @@
 
 import DatePickerCustomDay from '@/components/DatePickerCustomDay'
 import DatePickerCustomHeaderTwoMonth from '@/components/DatePickerCustomHeaderTwoMonth'
-import { excludeDateIntervals } from '@/contains/contants'
+import { excludeDateIntervals } from '@/constants/constants'
 import { useLanguage } from '@/context/LanguageContext'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { CalendarIcon, XMarkIcon } from '@heroicons/react/24/outline'

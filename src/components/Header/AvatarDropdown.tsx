@@ -1,7 +1,7 @@
 'use client'
 
 import { useLanguage } from '@/context/LanguageContext'
-import { supabase } from '@/lib/supabase'
+import { supabase, type Profile } from '@/lib/supabase'
 import Avatar from '@/shared/Avatar'
 import { CloseButton, Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import {
@@ -19,8 +19,8 @@ import { useEffect, useState } from 'react'
 export default function AvatarDropdown() {
   const router = useRouter()
   const { t } = useLanguage()
-  const [user, setUser] = useState<any>(null)
-  const [profile, setProfile] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string; email?: string; user_metadata?: Record<string, string> } | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

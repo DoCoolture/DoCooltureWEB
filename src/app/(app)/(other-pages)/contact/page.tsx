@@ -1,11 +1,8 @@
 import { getServerT } from '@/lib/locale-server'
-import ButtonPrimary from '@/shared/ButtonPrimary'
 import { Divider } from '@/shared/divider'
-import { Field, Label } from '@/shared/fieldset'
-import Input from '@/shared/Input'
 import SocialsList from '@/shared/SocialsList'
-import Textarea from '@/shared/Textarea'
 import { Metadata } from 'next'
+import ContactForm from './ContactForm'
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getServerT()
@@ -17,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const PageContact = async () => {
   const t = await getServerT()
-  const { heading, address, email, phone, socials, form } = t.contact
+  const { heading, address, email, phone, socials } = t.contact
 
   const info = [
     { title: address.label, description: address.value },
@@ -44,23 +41,7 @@ const PageContact = async () => {
               </div>
             </div>
           </div>
-          <form className="grid grid-cols-1 gap-6" action="#" method="post">
-            <Field className="block">
-              <Label>{form.name}</Label>
-              <Input placeholder={form.namePlaceholder} type="text" className="mt-1" />
-            </Field>
-            <Field className="block">
-              <Label>{form.email}</Label>
-              <Input type="email" placeholder={form.emailPlaceholder} className="mt-1" />
-            </Field>
-            <Field className="block">
-              <Label>{form.message}</Label>
-              <Textarea className="mt-1" rows={6} />
-            </Field>
-            <div>
-              <ButtonPrimary type="submit">{form.submit}</ButtonPrimary>
-            </div>
-          </form>
+          <ContactForm />
         </div>
       </div>
 

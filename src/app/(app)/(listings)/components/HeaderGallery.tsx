@@ -98,8 +98,9 @@ const EmblaCarousel = ({ images, option }: { images: string[]; option: EmblaOpti
 interface Props {
   images: string[]
   gridType?: 'grid1' | 'grid2' | 'grid3' | 'grid4'
+  imageAlt?: string
 }
-const HeaderGallery = ({ images, gridType = 'grid1' }: Props) => {
+const HeaderGallery = ({ images, gridType = 'grid1', imageAlt = 'Foto de la experiencia' }: Props) => {
   const { t } = useLanguage()
   let [isOpen, setIsOpen] = useState(false)
   let [startIndex, setStartIndex] = useState(0)
@@ -113,10 +114,10 @@ const HeaderGallery = ({ images, gridType = 'grid1' }: Props) => {
 
   return (
     <>
-      {gridType === 'grid1' && <HeaderGalleryGrid1 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} />}
-      {gridType === 'grid2' && <HeaderGalleryGrid2 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} />}
-      {gridType === 'grid3' && <HeaderGalleryGrid3 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} />}
-      {gridType === 'grid4' && <HeaderGalleryGrid4 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} />}
+      {gridType === 'grid1' && <HeaderGalleryGrid1 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} imageAlt={imageAlt} />}
+      {gridType === 'grid2' && <HeaderGalleryGrid2 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} imageAlt={imageAlt} />}
+      {gridType === 'grid3' && <HeaderGalleryGrid3 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} imageAlt={imageAlt} />}
+      {gridType === 'grid4' && <HeaderGalleryGrid4 images={images} handleOpenDialog={handleOpenDialog} showAllPhotosLabel={showAllPhotosLabel} imageAlt={imageAlt} />}
 
       {/* Dialog for full-screen image gallery */}
       <Dialog open={isOpen} onClose={() => setIsOpen(false)} className="relative z-50">
@@ -141,10 +142,12 @@ const HeaderGalleryGrid1 = ({
   images,
   handleOpenDialog,
   showAllPhotosLabel,
+  imageAlt,
 }: {
   images: string[]
   handleOpenDialog: (index?: number) => void
   showAllPhotosLabel: string
+  imageAlt: string
 }) => {
   return (
     <header className="relative md:grid md:grid-cols-4 md:gap-2">
@@ -154,7 +157,7 @@ const HeaderGalleryGrid1 = ({
             fill
             className="rounded-xl object-cover transition-[filter] hover:brightness-75"
             src={images[0]}
-            alt="bigger"
+            alt={imageAlt}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 80vw"
             priority
           />
@@ -167,7 +170,7 @@ const HeaderGalleryGrid1 = ({
               fill
               className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
               src={item || ''}
-              alt="others"
+              alt={imageAlt}
               sizes="(max-width: 768px) 33vw, 33vw"
               priority
             />
@@ -188,17 +191,19 @@ const HeaderGalleryGrid2 = ({
   images,
   handleOpenDialog,
   showAllPhotosLabel,
+  imageAlt,
 }: {
   images: string[]
   handleOpenDialog: (index?: number) => void
   showAllPhotosLabel: string
+  imageAlt: string
 }) => {
   return (
     <header className="relative md:grid md:grid-cols-4">
       <div className="relative aspect-4/5 size-full md:col-span-3 md:aspect-5/4" onClick={() => handleOpenDialog(0)}>
         {images[0] && (
           <Image
-            alt=""
+            alt={imageAlt}
             src={images[0]}
             fill
             className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -212,7 +217,7 @@ const HeaderGalleryGrid2 = ({
         {images.slice(1, 4).map((item, index) => (
           <div className="relative aspect-3/2 size-full" key={index} onClick={() => handleOpenDialog(index + 1)}>
             <Image
-              alt=""
+              alt={imageAlt}
               src={item}
               fill
               className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -236,17 +241,19 @@ const HeaderGalleryGrid3 = ({
   images,
   handleOpenDialog,
   showAllPhotosLabel,
+  imageAlt,
 }: {
   images: string[]
   handleOpenDialog: (index?: number) => void
   showAllPhotosLabel: string
+  imageAlt: string
 }) => {
   return (
     <header className="relative md:grid md:grid-cols-3 md:gap-x-2">
       <div className="relative aspect-4/5 size-full md:aspect-3/4" onClick={() => handleOpenDialog(0)}>
         {images[0] && (
           <Image
-            alt=""
+            alt={imageAlt}
             src={images[0]}
             fill
             className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -260,7 +267,7 @@ const HeaderGalleryGrid3 = ({
         <div className="relative aspect-3/2 size-full" onClick={() => handleOpenDialog(1)}>
           {images[1] && (
             <Image
-              alt=""
+              alt={imageAlt}
               src={images[1]}
               fill
               className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -272,7 +279,7 @@ const HeaderGalleryGrid3 = ({
         <div className="relative aspect-3/2 size-full" onClick={() => handleOpenDialog(2)}>
           {images[2] && (
             <Image
-              alt=""
+              alt={imageAlt}
               src={images[2]}
               fill
               className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -286,7 +293,7 @@ const HeaderGalleryGrid3 = ({
       <div className="relative hidden size-full md:block md:aspect-3/4" onClick={() => handleOpenDialog(3)}>
         {images[3] && (
           <Image
-            alt=""
+            alt={imageAlt}
             src={images[3]}
             fill
             className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -309,17 +316,19 @@ const HeaderGalleryGrid4 = ({
   images,
   handleOpenDialog,
   showAllPhotosLabel,
+  imageAlt,
 }: {
   images: string[]
   handleOpenDialog: (index?: number) => void
   showAllPhotosLabel: string
+  imageAlt: string
 }) => {
   return (
     <header className="relative md:grid md:grid-cols-3 md:gap-x-2">
       <div className="relative aspect-4/5 size-full md:aspect-3/4" onClick={() => handleOpenDialog(0)}>
         {images[0] && (
           <Image
-            alt=""
+            alt={imageAlt}
             src={images[0]}
             fill
             className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -332,7 +341,7 @@ const HeaderGalleryGrid4 = ({
       <div className="relative hidden aspect-4/5 size-full md:block md:aspect-3/4" onClick={() => handleOpenDialog(3)}>
         {images[3] && (
           <Image
-            alt=""
+            alt={imageAlt}
             src={images[3]}
             fill
             className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -346,7 +355,7 @@ const HeaderGalleryGrid4 = ({
         <div className="relative aspect-3/2 size-full" onClick={() => handleOpenDialog(1)}>
           {images[1] && (
             <Image
-              alt=""
+              alt={imageAlt}
               src={images[1]}
               fill
               className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"
@@ -358,7 +367,7 @@ const HeaderGalleryGrid4 = ({
         <div className="relative aspect-3/2 size-full" onClick={() => handleOpenDialog(2)}>
           {images[2] && (
             <Image
-              alt=""
+              alt={imageAlt}
               src={images[2]}
               fill
               className="rounded-xl object-cover brightness-100 transition-[filter] hover:brightness-75"

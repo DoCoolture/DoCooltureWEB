@@ -1,5 +1,6 @@
 'use client'
 
+import { updateExperience } from '@/app/actions/experiences'
 import { supabase, uploadExperienceImage } from '@/lib/supabase'
 import {
   CITY_ADDRESSES, DR_CITIES, DURATION_OPTIONS,
@@ -9,6 +10,7 @@ import LocationPickerMap from '@/components/LocationPickerMap'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
 import { useLanguage } from '@/context/LanguageContext'
+import Image from 'next/image'
 
 const CUSTOM = '__custom__'
 
@@ -68,6 +70,7 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
   const [error, setError] = useState('')
   const isDirty = useRef(false)
   const submitGuard = useRef(false)
+  const onCloseRef = useRef(onClose)
   const overlayRef = useRef<HTMLDivElement>(null)
   const featuredInputRef = useRef<HTMLInputElement>(null)
   const galleryInputRef = useRef<HTMLInputElement>(null)
@@ -125,14 +128,22 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
     isDirty.current = false
   }, [experience.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Keep ref in sync so the keyboard listener always sees the latest onClose
+  useEffect(() => { onCloseRef.current = onClose }, [onClose])
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user) setUserId(user.id)
     })
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (isDirty.current && !window.confirm(te.unsavedChanges)) return
+        onCloseRef.current()
+      }
+    }
     document.addEventListener('keydown', handleKey)
     return () => document.removeEventListener('keydown', handleKey)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [te.unsavedChanges])
 
   const markDirty = () => { isDirty.current = true }
 
@@ -258,35 +269,34 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
     setError('')
 
     try {
-      const { error: err } = await supabase
-        .from('experiences')
-        .update({
-          title: form.title.trim(),
-          short_description: form.short_description?.trim() ?? null,
-          description: form.description.trim(),
-          category: form.category,
-          tags,
-          price_usd: Number(form.price_usd),
-          duration_time: form.duration_time.trim(),
-          max_guests: Number(form.max_guests),
-          min_guests: Number(form.min_guests ?? 1),
-          meeting_point: form.meeting_point?.trim() ?? null,
-          address: form.address.trim(),
-          city: form.city.trim(),
-          is_published: form.is_published,
-          featured_image_url: featuredUrl,
-          gallery_urls: galleryUrls,
-          price_includes: priceIncludes,
-          price_excludes: priceExcludes,
-          available_days: availableDays,
-          available_times: availableTimes,
-          latitude: latitude ?? null,
-          longitude: longitude ?? null,
-        })
-        .eq('id', form.id)
+      const result = await updateExperience({
+        id: form.id,
+        title: form.title,
+        shortDescription: form.short_description ?? null,
+        description: form.description,
+        category: form.category,
+        tags,
+        priceUsd: Number(form.price_usd),
+        durationTime: form.duration_time,
+        maxGuests: Number(form.max_guests),
+        minGuests: Number(form.min_guests ?? 1),
+        meetingPoint: form.meeting_point ?? null,
+        address: form.address,
+        city: form.city,
+        isPublished: form.is_published,
+        featuredImageUrl: featuredUrl,
+        galleryUrls,
+        languages: form.languages ?? [],
+        priceIncludes,
+        priceExcludes,
+        availableDays,
+        availableTimes,
+        latitude: latitude ?? null,
+        longitude: longitude ?? null,
+      })
 
-      if (err) {
-        setError(te.errorSave + err.message)
+      if (result.error) {
+        setError(te.errorSave + result.error)
       } else {
         isDirty.current = false
         onSaved()
@@ -624,8 +634,7 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
               <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">{te.fieldFeaturedPhoto}</label>
               {featuredUrl ? (
                 <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={featuredUrl} alt={te.fieldFeaturedPhoto} className="w-full h-full object-cover" />
+                  <Image src={featuredUrl} alt={te.fieldFeaturedPhoto} fill sizes="(max-width: 640px) 100vw, 600px" className="object-cover" />
                   <button type="button" onClick={() => { setFeaturedUrl(null); markDirty() }}
                     className="absolute top-2 right-2 rounded-full bg-black/60 p-1 text-white hover:bg-black/80">
                     <XMarkIcon className="size-4" />
@@ -648,9 +657,8 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
               {galleryUrls.length > 0 && (
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   {galleryUrls.map((url, i) => (
-                    <div key={i} className="relative aspect-square rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={url} alt={`Foto ${i + 1}`} className="w-full h-full object-cover" />
+                    <div key={url} className="relative aspect-square rounded-xl overflow-hidden bg-neutral-100 dark:bg-neutral-800">
+                      <Image src={url} alt={`${te.fieldGallery} ${i + 1}`} fill sizes="(max-width: 640px) 33vw, 200px" className="object-cover" />
                       <button type="button" onClick={() => removeGalleryImage(i)}
                         className="absolute top-1 right-1 rounded-full bg-black/60 p-0.5 text-white hover:bg-black/80">
                         <XMarkIcon className="size-3.5" />
@@ -683,7 +691,7 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
 
         {/* Footer */}
         <div className="sticky bottom-0 flex justify-end gap-x-3 border-t border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-6 py-4">
-          <button onClick={onClose}
+          <button onClick={handleClose}
             className="rounded-xl border border-neutral-200 dark:border-neutral-700 px-4 py-2 text-sm font-medium hover:bg-neutral-50 dark:hover:bg-neutral-800">
             {te.cancelBtn}
           </button>

@@ -2,6 +2,8 @@
 
 import ExperiencesCard from '@/components/ExperiencesCard'
 import { useLanguage } from '@/context/LanguageContext'
+import { extractAvatarUrl, type ProfileJoin } from '@/lib/supabase-joins'
+import { toHandle } from '@/lib/handle'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/shared/Button'
 import { Divider } from '@/shared/divider'
@@ -22,11 +24,12 @@ type SavedExperience = {
   address: string
   reviewStart: number
   reviewCount: number
+  priceUsd: number
   price: string
   maxGuests: number
   saleOff: string | null
   isAds: string | null
-  map: { lat: number; lng: number }
+  map: { lat: number; lng: number } | null
   host: { displayName: string; avatarUrl: string; handle: string }
 }
 
@@ -38,40 +41,42 @@ export default function SavedListingsPage() {
 
   useEffect(() => {
     const fetchSaved = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.user) {
-        setLoading(false)
-        return
-      }
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setLoading(false); return }
 
       const { data: profileData } = await supabase
         .from('profiles')
         .select('id')
-        .eq('user_id', session.user.id)
+        .eq('user_id', user.id)
         .single()
 
-      if (!profileData) {
-        setLoading(false)
-        return
-      }
+      if (!profileData) { setLoading(false); return }
 
       const { data: wishlists } = await supabase
         .from('wishlists')
         .select('experience_id')
         .eq('profile_id', profileData.id)
 
-      if (wishlists && wishlists.length > 0) {
-        const ids = wishlists.map((w) => w.experience_id)
+      if (!wishlists || wishlists.length === 0) {
+        setLoading(false)
+        return
+      }
 
-        const { data: exps } = await supabase
-          .from('experiences')
-          .select('*')
-          .in('id', ids)
-          .eq('is_published', true)
+      const ids = wishlists.map((w) => w.experience_id)
 
-        if (exps) {
-          setExperiences(
-            exps.map((exp) => ({
+      // Join hosts and profiles so host name, avatar and handle are real data
+      const { data: exps } = await supabase
+        .from('experiences')
+        .select('*, hosts(display_name, profiles(avatar_url))')
+        .in('id', ids)
+        .eq('is_published', true)
+
+      if (exps) {
+        setExperiences(
+          exps.map((exp) => {
+            const host = exp.hosts as { display_name: string | null; profiles: ProfileJoin } | null
+            const displayName = host?.display_name ?? 'Anfitrión DoCoolture'
+            return {
               id: exp.id,
               title: exp.title,
               handle: exp.handle,
@@ -89,15 +94,22 @@ export default function SavedListingsPage() {
               address: exp.address,
               reviewStart: exp.average_rating ?? 0,
               reviewCount: exp.total_reviews ?? 0,
+              priceUsd: exp.price_usd as number,
               price: `$${exp.price_usd}`,
               maxGuests: exp.max_guests,
               saleOff: null,
               isAds: null,
-              map: { lat: exp.latitude ?? 0, lng: exp.longitude ?? 0 },
-              host: { displayName: '', avatarUrl: '', handle: exp.host_id },
-            }))
-          )
-        }
+              map: exp.latitude != null && exp.longitude != null
+                ? { lat: exp.latitude, lng: exp.longitude }
+                : null,
+              host: {
+                displayName,
+                avatarUrl: host ? extractAvatarUrl(host.profiles) : '',
+                handle: toHandle(displayName),
+              },
+            }
+          })
+        )
       }
 
       setLoading(false)

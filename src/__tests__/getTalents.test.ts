@@ -8,13 +8,13 @@ vi.mock('react', async (importOriginal) => {
 const mockHostsQuery = vi.fn()
 const mockExpsQuery = vi.fn()
 
-vi.mock('@/lib/supabase-server', () => ({
-  createSupabaseServerClient: vi.fn(async () => ({
+vi.mock('@/lib/supabase-admin', () => ({
+  supabaseAdmin: {
     from: vi.fn((table: string) => {
       if (table === 'hosts') return mockHostsQuery()
       if (table === 'experiences') return mockExpsQuery()
     }),
-  })),
+  },
 }))
 
 const HOST_FIXTURE = {

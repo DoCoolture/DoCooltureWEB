@@ -4,6 +4,7 @@ import { Dialog, DialogBody, DialogTitle } from '@/components/dialog'
 import ListingReview from '@/components/ListingReview'
 import { useLanguage } from '@/context/LanguageContext'
 import { ExperienceReview } from '@/data/reviews'
+import { deleteReview } from '@/app/actions/experiences'
 import { supabase } from '@/lib/supabase'
 import ButtonCircle from '@/shared/ButtonCircle'
 import ButtonSecondary from '@/shared/ButtonSecondary'
@@ -137,7 +138,8 @@ const SectionListingReviews = ({ reviews: initialReviews, reviewStart: initialRe
 
   const handleDelete = async () => {
     if (!existingReviewId || !confirm('¿Seguro que quieres eliminar tu reseña?')) return
-    await supabase.from('experience_reviews').delete().eq('id', existingReviewId)
+    const result = await deleteReview(existingReviewId)
+    if (result.error) return
     setReviews((prev) => {
       const updated = prev.filter((r) => r.id !== existingReviewId)
       const avg = updated.length > 0 ? updated.reduce((sum, r) => sum + r.rating, 0) / updated.length : 0

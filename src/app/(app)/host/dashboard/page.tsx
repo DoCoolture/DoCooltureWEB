@@ -1,8 +1,8 @@
 'use client'
 
 import EditExperienceModal from '@/components/EditExperienceModal'
+import { fetchHostDashboard, hostTogglePublish, hostDeleteExperience } from '@/app/actions/host'
 import { useLanguage } from '@/context/LanguageContext'
-import { supabase } from '@/lib/supabase'
 import type { Host, Booking, Experience } from '@/lib/supabase'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { useRouter } from 'next/navigation'
@@ -19,78 +19,55 @@ export default function HostDashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [editingExp, setEditingExp] = useState<Experience | null>(null)
+  const [galleryNotice, setGalleryNotice] = useState<number | null>(null)
 
   useEffect(() => {
     loadDashboard()
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('notice') === 'gallery_partial') {
+      const failed = Number(params.get('failed')) || 0
+      if (failed > 0) setGalleryNotice(failed)
+      // Clean the URL so the notice doesn't persist on refresh
+      window.history.replaceState(null, '', window.location.pathname)
+    }
   }, [])
 
   const loadDashboard = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      router.push('/login')
+    const result = await fetchHostDashboard()
+
+    if ('redirect' in result) {
+      router.push(result.redirect)
       return
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role, display_name')
-      .eq('user_id', user.id)
-      .single()
-
-    setDisplayName(profile?.display_name || '')
-
-    // Obtener perfil de anfitrión
-    const { data: hostData } = await supabase
-      .from('hosts')
-      .select('id, display_name, verification_status, total_listings, total_bookings, total_reviews, average_rating')
-      .eq('user_id', user.id)
-      .single()
-
-    if (!hostData) {
-      if (profile?.role === 'admin') {
-        // Admin sin perfil de anfitrión — puede crear uno
-        setIsLoading(false)
-        return
-      }
-      router.push('/become-host')
+    if ('adminNoHost' in result) {
+      setIsLoading(false)
       return
     }
 
+    if ('error' in result) {
+      setIsLoading(false)
+      return
+    }
+
+    const { displayName: dn, host: hostData, experiences: experiencesData, bookings: bookingsData } = result.data
+    setDisplayName(dn)
     setHost(hostData as Host)
-
-    // Obtener experiencias
-    const { data: experiencesData } = await supabase
-      .from('experiences')
-      .select('id, host_id, title, description, category, price_usd, duration_time, max_guests, address, city, is_published, is_hidden, featured_image_url, gallery_urls, average_rating, total_reviews')
-      .eq('host_id', hostData.id)
-      .order('created_at', { ascending: false })
-
-    setExperiences((experiencesData || []) as Experience[])
-
-    // Obtener reservas recientes
-    const { data: bookingsData } = await supabase
-      .from('bookings')
-      .select('id, booking_code, customer_name, customer_email, booking_date, guests, status')
-      .eq('host_id', hostData.id)
-      .order('created_at', { ascending: false })
-      .limit(5)
-
-    setBookings((bookingsData || []) as Booking[])
+    setExperiences(experiencesData)
+    setBookings(bookingsData as Booking[])
     setIsLoading(false)
   }
 
   const handleTogglePublish = async (exp: Experience) => {
-    await supabase
-      .from('experiences')
-      .update({ is_published: !exp.is_published })
-      .eq('id', exp.id)
-    loadDashboard()
+    await hostTogglePublish(exp.id, exp.is_published ?? false)
+    loadDashboard().catch(console.error)
   }
 
   const handleDeleteExperience = async (id: string) => {
     if (!confirm(d.deleteConfirm)) return
-    await supabase.from('experiences').delete().eq('id', id)
-    loadDashboard()
+    const result = await hostDeleteExperience(id)
+    if (result.error) { alert(result.error); return }
+    loadDashboard().catch(console.error)
   }
 
   if (!isLoading && !host) {
@@ -145,6 +122,16 @@ export default function HostDashboardPage() {
 
   return (
     <main className="container max-w-5xl mx-auto py-12 px-4 mb-24">
+
+      {galleryNotice !== null && (
+        <div className="mb-6 flex items-start justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+          <span>
+            ⚠️ Tu experiencia se publicó, pero {galleryNotice} foto(s) de galería no se pudieron subir.
+            Puedes agregarlas editando la experiencia.
+          </span>
+          <button onClick={() => setGalleryNotice(null)} className="shrink-0 font-medium hover:opacity-70">×</button>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-10">
@@ -333,13 +320,13 @@ export default function HostDashboardPage() {
       {/* Reservas recientes */}
       <div>
         <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-5">
-          Reservas recientes
+          {d.recentBookings}
         </h2>
 
         {bookings.length === 0 ? (
           <div className="rounded-2xl border border-neutral-200 dark:border-neutral-700 p-8 text-center">
             <p className="text-3xl mb-3">📅</p>
-            <p className="text-neutral-500">Aún no tienes reservas.</p>
+            <p className="text-neutral-500">{d.noBookings}</p>
           </div>
         ) : (
           <div className="rounded-2xl border border-neutral-200 dark:border-neutral-700 overflow-hidden">
@@ -374,7 +361,7 @@ export default function HostDashboardPage() {
                     </td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-neutral-900 dark:text-neutral-100">
-                        {booking.customer_name || 'Sin nombre'}
+                        {booking.customer_name || d.noName}
                       </p>
                       <p className="text-xs text-neutral-500">
                         {booking.customer_email}

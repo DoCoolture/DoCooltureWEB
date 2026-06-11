@@ -1,5 +1,6 @@
 'use client'
 
+import { useLanguage } from '@/context/LanguageContext'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import Input from '@/shared/Input'
 import { useRouter } from 'next/navigation'
@@ -16,8 +17,9 @@ interface CardnetDirectFormProps {
   customerName: string
   notes: string | null
   experienceId: string | null
-  hostId: string | null
 }
+
+const USD_TO_DOP = Number(process.env.NEXT_PUBLIC_USD_TO_DOP_RATE ?? 59)
 
 const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
   totalAmount,
@@ -30,9 +32,13 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
   customerName,
   notes,
   experienceId,
-  hostId,
 }) => {
   const router = useRouter()
+  const { t } = useLanguage()
+  const b = t.booking
+
+  // totalAmount is always in USD. Convert to the charge currency for display.
+  const displayAmount = currency === 'DOP' ? totalAmount * USD_TO_DOP : totalAmount
   const [cardNumber, setCardNumber] = React.useState('')
   const [expirationDate, setExpirationDate] = React.useState('')
   const [cvv, setCvv] = React.useState('')
@@ -76,7 +82,6 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
           guests,
           notes,
           experienceId,
-          hostId,
           customerName,
           customerEmail,
           customerId,
@@ -86,14 +91,15 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
       const data = await res.json()
 
       if (!res.ok || !data.approved) {
-        setError(data.error ?? 'El pago fue rechazado. Verifica los datos de tu tarjeta.')
+        setError(data.error ?? b.cardDeclined)
         setLoading(false)
         return
       }
 
-      router.push('/pay-done')
+      router.push(`/pay-done?ref=${encodeURIComponent(data.approvalCode ?? '')}`)
+
     } catch {
-      setError('Error de conexión. Por favor intenta de nuevo.')
+      setError(b.cardConnError)
       setLoading(false)
     }
   }
@@ -103,7 +109,7 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
       <div className="space-y-3">
         <div>
           <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Número de tarjeta
+            {b.cardNumber}
           </label>
           <Input
             type="text"
@@ -119,7 +125,7 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
         <div className="flex gap-x-3">
           <div className="flex-1">
             <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              Expiración
+              {b.cardExpiry}
             </label>
             <Input
               type="text"
@@ -133,7 +139,7 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
           </div>
           <div className="w-28">
             <label className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              CVV
+              {b.cardCvv}
             </label>
             <Input
               type="text"
@@ -155,11 +161,16 @@ const CardnetDirectForm: React.FC<CardnetDirectFormProps> = ({
       )}
 
       <ButtonPrimary type="submit" disabled={loading} className="w-full">
-        {loading ? 'Procesando pago...' : `Pagar ${currency} ${totalAmount.toFixed(2)} con tarjeta`}
+        {loading
+          ? b.cardProcessing
+          : b.cardPayWith.replace(
+              '{amount}',
+              new Intl.NumberFormat('es-DO', { style: 'currency', currency }).format(displayAmount)
+            )}
       </ButtonPrimary>
 
       <p className="text-center text-xs text-neutral-400">
-        Pago directo procesado por Cardnet REST · TLS 1.2
+        {b.cardNote}
       </p>
     </form>
   )

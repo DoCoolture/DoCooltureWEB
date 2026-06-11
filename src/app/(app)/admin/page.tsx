@@ -2,11 +2,26 @@
 
 import EditExperienceModal from '@/components/EditExperienceModal'
 import { supabase } from '@/lib/supabase'
-import type { Experience, Host, Booking } from '@/lib/supabase'
 import ButtonPrimary from '@/shared/ButtonPrimary'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
+import {
+  adminHideExperience,
+  adminDeleteExperience,
+  adminSuspendHost,
+  adminVerifyHost,
+  adminUpdateVerification,
+  adminFetchStats,
+  adminFetchExperiences,
+  adminFetchHosts,
+  adminFetchBookings,
+  adminFetchVerifications,
+  type AdminExperience,
+  type AdminHost,
+  type AdminBooking,
+  type AdminVerification,
+} from '@/app/actions/admin'
 
 type Tab = 'experiences' | 'hosts' | 'bookings' | 'verifications'
 
@@ -16,10 +31,10 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
 
-  const [experiences, setExperiences] = useState<Experience[]>([])
-  const [hosts, setHosts] = useState<Host[]>([])
-  const [bookings, setBookings] = useState<Booking[]>([])
-  const [verifications, setVerifications] = useState<any[]>([])
+  const [experiences, setExperiences] = useState<AdminExperience[]>([])
+  const [hosts, setHosts] = useState<AdminHost[]>([])
+  const [bookings, setBookings] = useState<AdminBooking[]>([])
+  const [verifications, setVerifications] = useState<AdminVerification[]>([])
 
   const [stats, setStats] = useState({
     totalExperiences: 0,
@@ -30,17 +45,18 @@ export default function AdminPage() {
     totalRevenue: 0,
   })
 
-  const [editingExp, setEditingExp] = useState<Experience | null>(null)
+  const [editingExp, setEditingExp] = useState<AdminExperience | null>(null)
   const [deletingExpId, setDeletingExpId] = useState<string | null>(null)
-  const [hidingExpId, setHidingExpId] = useState<string | null>(null)
-  const [hideReason, setHideReason] = useState('')
-  const [rejectingVerificationId, setRejectingVerificationId] = useState<string | null>(null)
-  const [rejectReason, setRejectReason] = useState('')
+  // Model inline forms as { id, reason } so each row carries its own reason text
+  const [hidingExp, setHidingExp] = useState<{ id: string; reason: string } | null>(null)
+  const [rejectingVerification, setRejectingVerification] = useState<{ id: string; reason: string } | null>(null)
   const [mutationError, setMutationError] = useState<string | null>(null)
 
   useEffect(() => {
     checkAdmin()
   }, [])
+
+  const loadRequestRef = useRef(0)
 
   useEffect(() => {
     if (isAdmin) loadData()
@@ -64,121 +80,53 @@ export default function AdminPage() {
       return
     }
 
+    // Set isAdmin before isLoading=false to avoid the frame where (!isAdmin && !isLoading) renders null
     setIsAdmin(true)
     setIsLoading(false)
-    loadStats()
+    loadStats().catch(console.error)
   }
 
   const loadStats = async () => {
-    const [
-      { count: expCount },
-      { count: hostCount },
-      { count: bookingCount },
-      { count: verCount },
-      { count: hiddenCount },
-      { data: revenueData },
-    ] = await Promise.all([
-      supabase.from('experiences').select('*', { count: 'exact', head: true }),
-      supabase.from('hosts').select('*', { count: 'exact', head: true }),
-      supabase.from('bookings').select('*', { count: 'exact', head: true }),
-      supabase.from('identity_verifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending'),
-      supabase.from('experiences')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_hidden', true),
-      supabase.from('bookings')
-        .select('total_usd')
-        .eq('payment_status', 'paid'),
-    ])
-
-    const revenue = revenueData?.reduce(
-      (sum, b) => sum + (b.total_usd || 0), 0
-    ) || 0
-
-    setStats({
-      totalExperiences: expCount || 0,
-      totalHosts: hostCount || 0,
-      totalBookings: bookingCount || 0,
-      pendingVerifications: verCount || 0,
-      hiddenExperiences: hiddenCount || 0,
-      totalRevenue: revenue,
-    })
+    const result = await adminFetchStats()
+    if (result.data) setStats(result.data)
   }
 
   const loadData = async () => {
+    const requestId = ++loadRequestRef.current
     setIsLoading(true)
 
     if (activeTab === 'experiences') {
-      const { data } = await supabase
-        .from('experiences')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(100)
+      const { data } = await adminFetchExperiences()
+      if (requestId !== loadRequestRef.current) return
       setExperiences(data || [])
     }
 
     if (activeTab === 'hosts') {
-      const { data } = await supabase
-        .from('hosts')
-        .select('*, identity_verifications(id, status, document_type, document_number, document_front_url, document_back_url, selfie_url, created_at)')
-        .order('created_at', { ascending: false })
-        .limit(100)
-      setHosts((data || []) as any[])
+      const { data } = await adminFetchHosts()
+      if (requestId !== loadRequestRef.current) return
+      setHosts(data || [])
     }
 
     if (activeTab === 'bookings') {
-      const { data } = await supabase
-        .from('bookings')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50)
+      const { data } = await adminFetchBookings()
+      if (requestId !== loadRequestRef.current) return
       setBookings(data || [])
     }
 
     if (activeTab === 'verifications') {
-      const { data } = await supabase
-        .from('identity_verifications')
-        .select('*, hosts(display_name, user_id)')
-        .order('created_at', { ascending: false })
-        .limit(100)
+      const { data } = await adminFetchVerifications()
+      if (requestId !== loadRequestRef.current) return
       setVerifications(data || [])
     }
 
+    if (requestId !== loadRequestRef.current) return
     setIsLoading(false)
   }
 
-  const handleHideExperience = async (exp: Experience, reason: string) => {
+  const handleHideExperience = async (exp: AdminExperience, reason: string) => {
     setMutationError(null)
-    const { error } = await supabase
-      .from('experiences')
-      .update({
-        is_hidden: !exp.is_hidden,
-        hidden_reason: exp.is_hidden ? null : reason,
-        hidden_at: exp.is_hidden ? null : new Date().toISOString(),
-      })
-      .eq('id', exp.id)
-
-    if (error) { setMutationError(`Error al ${exp.is_hidden ? 'mostrar' : 'pausar'} la experiencia: ${error.message}`); return }
-
-    if (!exp.is_hidden) {
-      const { data: host } = await supabase
-        .from('hosts')
-        .select('user_id')
-        .eq('id', exp.host_id)
-        .single()
-
-      if (host) {
-        await supabase.from('notifications').insert({
-          user_id: host.user_id,
-          type: 'experience_hidden',
-          title: 'Tu experiencia fue pausada',
-          message: `Tu experiencia "${exp.title}" fue pausada por DoCoolture. Razón: ${reason}`,
-          action_url: '/host/dashboard',
-        })
-      }
-    }
-
+    const result = await adminHideExperience(exp.id, exp.title, exp.host_id, exp.is_hidden, reason)
+    if (result.error) { setMutationError(`Error al ${exp.is_hidden ? 'mostrar' : 'pausar'} la experiencia: ${result.error}`); return }
     loadData()
     loadStats()
   }
@@ -190,75 +138,33 @@ export default function AdminPage() {
     reason?: string
   ) => {
     setMutationError(null)
-
-    // Single atomic DB call — both tables update in the same transaction
-    const { error: rpcError } = await supabase.rpc('approve_or_reject_verification', {
-      p_verification_id: id,
-      p_host_id: hostId,
-      p_status: status,
-      p_reason: reason ?? null,
-    })
-
-    if (rpcError) { setMutationError(`Error al procesar verificación: ${rpcError.message}`); return }
-
-    // Notify the host (best-effort, non-blocking)
-    const { data: host } = await supabase
-      .from('hosts')
-      .select('user_id')
-      .eq('id', hostId)
-      .single()
-
-    if (host) {
-      await supabase.from('notifications').insert({
-        user_id: host.user_id,
-        type: status === 'approved' ? 'verification_approved' : 'verification_rejected',
-        title: status === 'approved' ? '✅ Identidad verificada' : '❌ Verificación rechazada',
-        message: status === 'approved'
-          ? '¡Tu identidad ha sido verificada! Los explorers verán tu insignia de verificación.'
-          : `Tu verificación fue rechazada. Razón: ${reason}`,
-        action_url: '/host/profile',
-      })
-    }
-
+    const result = await adminUpdateVerification(id, hostId, status, reason)
+    if (result.error) { setMutationError(`Error al procesar verificación: ${result.error}`); return }
     loadData()
     loadStats()
   }
 
-  const handleDeleteExperience = async (exp: Experience) => {
+  const handleDeleteExperience = async (exp: AdminExperience) => {
     setMutationError(null)
-    const { error } = await supabase.from('experiences').delete().eq('id', exp.id)
-    if (error) {
-      setMutationError(`Error al eliminar la experiencia: ${error.message}`)
-    } else {
-      setDeletingExpId(null)
-      loadData()
-      loadStats()
-    }
-  }
-
-  const handleSuspendHost = async (host: Host) => {
-    setMutationError(null)
-    const newStatus = host.status === 'active' ? 'suspended' : 'active'
-    const { error } = await supabase
-      .from('hosts')
-      .update({ status: newStatus })
-      .eq('id', host.id)
-    if (error) { setMutationError(`Error al ${newStatus === 'suspended' ? 'suspender' : 'activar'} el anfitrión: ${error.message}`); return }
+    const result = await adminDeleteExperience(exp.id)
+    if (result.error) { setMutationError(result.error); return }
+    setDeletingExpId(null)
     loadData()
     loadStats()
   }
 
-  const handleVerifyHost = async (host: Host) => {
+  const handleSuspendHost = async (host: AdminHost) => {
     setMutationError(null)
-    const { error } = await supabase
-      .from('hosts')
-      .update({
-        is_verified: true,
-        verification_status: 'approved',
-        verified_at: new Date().toISOString(),
-      })
-      .eq('id', host.id)
-    if (error) { setMutationError(`Error al verificar el anfitrión: ${error.message}`); return }
+    const result = await adminSuspendHost(host.id, host.status ?? 'active')
+    if (result.error) { setMutationError(result.error); return }
+    loadData()
+    loadStats()
+  }
+
+  const handleVerifyHost = async (host: AdminHost) => {
+    setMutationError(null)
+    const result = await adminVerifyHost(host.id)
+    if (result.error) { setMutationError(result.error); return }
     loadData()
     loadStats()
   }
@@ -277,19 +183,23 @@ export default function AdminPage() {
   ]
 
   const bookingStatusColors: Record<string, string> = {
-    pending: 'bg-yellow-100 text-yellow-800',
-    confirmed: 'bg-green-100 text-green-800',
-    completed: 'bg-blue-100 text-blue-800',
-    cancelled: 'bg-red-100 text-red-800',
-    no_show: 'bg-neutral-100 text-neutral-800',
+    pending_payment: 'bg-orange-100 text-orange-800',
+    payment_failed:  'bg-red-100 text-red-800',
+    pending:         'bg-yellow-100 text-yellow-800',
+    confirmed:       'bg-green-100 text-green-800',
+    completed:       'bg-blue-100 text-blue-800',
+    cancelled:       'bg-red-100 text-red-800',
+    no_show:         'bg-neutral-100 text-neutral-800',
   }
 
   const bookingStatusLabels: Record<string, string> = {
-    pending: 'Pendiente',
-    confirmed: 'Confirmada',
-    completed: 'Completada',
-    cancelled: 'Cancelada',
-    no_show: 'No se presentó',
+    pending_payment: 'Pago pendiente',
+    payment_failed:  'Pago fallido',
+    pending:         'Pendiente',
+    confirmed:       'Confirmada',
+    completed:       'Completada',
+    cancelled:       'Cancelada',
+    no_show:         'No se presentó',
   }
 
   return (
@@ -414,7 +324,7 @@ export default function AdminPage() {
                   {/* Actions */}
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => { setEditingExp(exp); setHidingExpId(null) }}
+                      onClick={() => { setEditingExp(exp); setHidingExp(null) }}
                       className="rounded-lg border border-blue-200 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-50 dark:border-blue-700 dark:text-blue-400"
                     >
                       ✏️ Editar
@@ -428,7 +338,7 @@ export default function AdminPage() {
                       </button>
                     ) : (
                       <button
-                        onClick={() => { setHidingExpId(exp.id); setHideReason('') }}
+                        onClick={() => setHidingExp({ id: exp.id, reason: '' })}
                         className="rounded-lg px-3 py-1.5 text-xs font-medium border border-amber-200 text-amber-700 hover:bg-amber-50"
                       >
                         🚫 Ocultar
@@ -460,26 +370,26 @@ export default function AdminPage() {
                     )}
                   </div>
 
-                  {/* Inline hide reason */}
-                  {hidingExpId === exp.id && (
+                  {/* Inline hide reason — each row carries its own reason in hidingExp.reason */}
+                  {hidingExp?.id === exp.id && (
                     <div className="flex items-center gap-2 mt-1">
                       <input
                         type="text"
-                        value={hideReason}
-                        onChange={(e) => setHideReason(e.target.value)}
+                        value={hidingExp.reason}
+                        onChange={(e) => setHidingExp({ id: exp.id, reason: e.target.value })}
                         placeholder="Razón para ocultar..."
                         autoFocus
                         className="flex-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-400"
                       />
                       <button
-                        onClick={() => { if (hideReason.trim()) { handleHideExperience(exp, hideReason); setHidingExpId(null); setHideReason('') } }}
-                        disabled={!hideReason.trim()}
+                        onClick={() => { if (hidingExp.reason.trim()) { handleHideExperience(exp, hidingExp.reason); setHidingExp(null) } }}
+                        disabled={!hidingExp.reason.trim()}
                         className="rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-amber-700 disabled:opacity-40"
                       >
                         Confirmar
                       </button>
                       <button
-                        onClick={() => { setHidingExpId(null); setHideReason('') }}
+                        onClick={() => setHidingExp(null)}
                         className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs"
                       >
                         Cancelar
@@ -497,8 +407,8 @@ export default function AdminPage() {
           {/* ANFITRIONES */}
           {activeTab === 'hosts' && (
             <div className="space-y-4">
-              {(hosts as any[]).map((host) => {
-                const verDocs: any[] = host.identity_verifications ?? []
+              {hosts.map((host) => {
+                const verDocs = host.identity_verifications ?? []
                 const latestDoc = verDocs[verDocs.length - 1] ?? null
                 return (
                   <div
@@ -574,7 +484,7 @@ export default function AdminPage() {
                         <div className="flex flex-wrap gap-2">
                           {latestDoc.document_front_url && (
                             <button
-                              onClick={() => window.open(latestDoc.document_front_url, '_blank')}
+                              onClick={() => window.open(latestDoc.document_front_url ?? undefined, '_blank')}
                               className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-700"
                             >
                               📄 Frente
@@ -582,7 +492,7 @@ export default function AdminPage() {
                           )}
                           {latestDoc.document_back_url && (
                             <button
-                              onClick={() => window.open(latestDoc.document_back_url, '_blank')}
+                              onClick={() => window.open(latestDoc.document_back_url ?? undefined, '_blank')}
                               className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-700"
                             >
                               📄 Dorso
@@ -590,7 +500,7 @@ export default function AdminPage() {
                           )}
                           {latestDoc.selfie_url && (
                             <button
-                              onClick={() => window.open(latestDoc.selfie_url, '_blank')}
+                              onClick={() => window.open(latestDoc.selfie_url ?? undefined, '_blank')}
                               className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs hover:bg-neutral-100 dark:hover:bg-neutral-700"
                             >
                               🤳 Selfie
@@ -687,7 +597,7 @@ export default function AdminPage() {
                     <div>
                       <div className="flex items-center gap-x-2 mb-1">
                         <p className="font-semibold text-neutral-900 dark:text-neutral-100">
-                          {ver.hosts?.display_name || 'Anfitrión'}
+                          {ver.hosts?.[0]?.display_name || 'Anfitrión'}
                         </p>
                         <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
                           ver.status === 'pending'
@@ -721,7 +631,7 @@ export default function AdminPage() {
                     <div className="flex gap-x-2">
                       {ver.document_front_url && (
                         <button
-                          onClick={() => window.open(ver.document_front_url, '_blank')}
+                          onClick={() => window.open(ver.document_front_url ?? undefined, '_blank')}
                           className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs hover:bg-neutral-50 dark:hover:bg-neutral-700"
                         >
                           📄 Frente
@@ -729,7 +639,7 @@ export default function AdminPage() {
                       )}
                       {ver.document_back_url && (
                         <button
-                          onClick={() => window.open(ver.document_back_url, '_blank')}
+                          onClick={() => window.open(ver.document_back_url ?? undefined, '_blank')}
                           className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs hover:bg-neutral-50 dark:hover:bg-neutral-700"
                         >
                           📄 Dorso
@@ -737,7 +647,7 @@ export default function AdminPage() {
                       )}
                       {ver.selfie_url && (
                         <button
-                          onClick={() => window.open(ver.selfie_url, '_blank')}
+                          onClick={() => window.open(ver.selfie_url ?? undefined, '_blank')}
                           className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-xs hover:bg-neutral-50 dark:hover:bg-neutral-700"
                         >
                           🤳 Selfie
@@ -757,31 +667,31 @@ export default function AdminPage() {
                           ✅ Aprobar
                         </button>
                         <button
-                          onClick={() => { setRejectingVerificationId(ver.id); setRejectReason('') }}
+                          onClick={() => setRejectingVerification({ id: ver.id, reason: '' })}
                           className="rounded-xl border border-red-200 text-red-600 px-4 py-2 text-sm font-medium hover:bg-red-50 transition-colors"
                         >
                           ❌ Rechazar
                         </button>
                       </div>
-                      {rejectingVerificationId === ver.id && (
+                      {rejectingVerification?.id === ver.id && (
                         <div className="flex items-center gap-2">
                           <input
                             type="text"
-                            value={rejectReason}
-                            onChange={(e) => setRejectReason(e.target.value)}
+                            value={rejectingVerification.reason}
+                            onChange={(e) => setRejectingVerification({ id: ver.id, reason: e.target.value })}
                             placeholder="Razón del rechazo..."
                             autoFocus
                             className="flex-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                           />
                           <button
-                            onClick={() => { if (rejectReason.trim()) { handleUpdateVerification(ver.id, ver.host_id, 'rejected', rejectReason); setRejectingVerificationId(null); setRejectReason('') } }}
-                            disabled={!rejectReason.trim()}
+                            onClick={() => { if (rejectingVerification.reason.trim()) { handleUpdateVerification(ver.id, ver.host_id, 'rejected', rejectingVerification.reason); setRejectingVerification(null) } }}
+                            disabled={!rejectingVerification.reason.trim()}
                             className="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-40"
                           >
                             Confirmar
                           </button>
                           <button
-                            onClick={() => { setRejectingVerificationId(null); setRejectReason('') }}
+                            onClick={() => setRejectingVerification(null)}
                             className="rounded-lg border border-neutral-200 dark:border-neutral-700 px-3 py-1.5 text-sm"
                           >
                             Cancelar

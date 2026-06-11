@@ -1,15 +1,16 @@
-import { supabase, ExperienceReview } from '@/lib/supabase'
+import { supabaseAdmin } from '@/lib/supabase-admin'
+import type { ExperienceReview } from '@/lib/supabase'
 
 export type { ExperienceReview }
 
 export async function getExperienceReviews(experienceId: string): Promise<ExperienceReview[]> {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from('experience_reviews')
-    .select('*')
+    .select('id, experience_id, booking_id, explorer_id, reviewer_name, reviewer_avatar_url, rating, comment, host_reply, host_replied_at, hidden_reason, created_at, is_visible')
     .eq('experience_id', experienceId)
     .eq('is_visible', true)
     .order('created_at', { ascending: false })
-  return data ?? []
+  return (data ?? []) as unknown as ExperienceReview[]
 }
 
 export type PublicTestimonial = {
@@ -19,7 +20,7 @@ export type PublicTestimonial = {
 }
 
 export async function getPublicTestimonials(limit = 6): Promise<PublicTestimonial[]> {
-  const { data } = await supabase
+  const { data } = await supabaseAdmin
     .from('experience_reviews')
     .select('id, comment, reviewer_name, rating')
     .eq('is_visible', true)
@@ -32,6 +33,6 @@ export async function getPublicTestimonials(limit = 6): Promise<PublicTestimonia
   return data.map((r) => ({
     id: r.id,
     content: r.comment as string,
-    clientName: r.reviewer_name,
+    clientName: r.reviewer_name as string,
   }))
 }

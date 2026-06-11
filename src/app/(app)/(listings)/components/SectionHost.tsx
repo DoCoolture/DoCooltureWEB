@@ -12,6 +12,7 @@ import { Award04Icon, Medal01Icon, Navigation03Icon } from '@hugeicons/core-free
 import { HugeiconsIcon } from '@hugeicons/react'
 import HostAvatar from './HostAvatar'
 import { SectionHeading } from './SectionHeading'
+import { useEffect, useRef, useState } from 'react'
 
 interface Props {
   className?: string
@@ -42,6 +43,10 @@ const SectionHost = ({
 }: Props) => {
   const { t } = useLanguage()
   const sh = t.sectionHost
+  const [copied, setCopied] = useState(false)
+  const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+
+  useEffect(() => () => clearTimeout(copiedTimerRef.current), [])
 
   const handleShare = async () => {
     const url = window.location.href
@@ -51,7 +56,9 @@ const SectionHost = ({
       } catch {}
     } else {
       await navigator.clipboard.writeText(url)
-      alert('¡Enlace copiado al portapapeles!')
+      setCopied(true)
+      clearTimeout(copiedTimerRef.current)
+      copiedTimerRef.current = setTimeout(() => setCopied(false), 2500)
     }
   }
 
@@ -118,6 +125,11 @@ const SectionHost = ({
           {sh.share}
           <HugeiconsIcon icon={Navigation03Icon} size={20} color="currentColor" strokeWidth={1.5} className="mb-px" />
         </button>
+        {copied && (
+          <span role="status" className="inline-flex items-center text-sm text-green-600 dark:text-green-400">
+            {sh.linkCopied}
+          </span>
+        )}
       </div>
       <Divider />
       <HostAdminActions hostId={handle} hostName={displayName} />

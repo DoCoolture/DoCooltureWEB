@@ -39,7 +39,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       .split('; ')
       .find((row) => row.startsWith('dc_currency='))
     if (cookie) {
-      const value = cookie.split('=')[1] as Currency
+      const value = cookie.slice(cookie.indexOf('=') + 1) as Currency
       if (['USD', 'DOP', 'EUR', 'COP', 'ARS'].includes(value)) {
         setCurrencyState(value)
       }
@@ -67,8 +67,8 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
           USD: 1,
           DOP: 59.0,
           EUR: 0.92,
-          COP: 4000,
-          ARS: 900,
+          COP: 4200,
+          ARS: 1200,
         })
       } finally {
         setIsLoading(false)

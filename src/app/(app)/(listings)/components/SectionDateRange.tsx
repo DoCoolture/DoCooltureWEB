@@ -2,7 +2,7 @@
 
 import DatePickerCustomDay from '@/components/DatePickerCustomDay'
 import DatePickerCustomHeaderTwoMonth from '@/components/DatePickerCustomHeaderTwoMonth'
-import { excludeDateIntervals } from '@/contains/contants'
+import { excludeDateIntervals } from '@/constants/constants'
 import { useLanguage } from '@/context/LanguageContext'
 import { Divider } from '@/shared/divider'
 import { addDays, format } from 'date-fns'

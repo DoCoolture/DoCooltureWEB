@@ -106,16 +106,11 @@ const Page = async ({
   )
 
   // Augment filterOptions so checkboxes reflect current URL state
-  const augmentedFilterOptions: any[] = filterOptions.map((fo) => {
-    if (!fo || fo.tabUIType !== 'checkbox' || fo.name !== 'experienceType') return fo
-    return {
-      ...fo,
-      options: (fo as any).options?.map((opt: any) => ({
-        ...opt,
-        defaultChecked: activeTypes.includes(opt.value ?? opt.name),
-      })) ?? [],
-    }
-  })
+  const augmentedFilterOptions = filterOptions.map((fo) => {
+    if (!fo || fo.tabUIType !== 'checkbox' || fo.name !== 'experienceType' || !('options' in fo)) return fo
+    const options = fo.options as { name: string; value?: string; description?: string; defaultChecked?: boolean }[]
+    return { ...fo, options: options.map((opt) => ({ ...opt, defaultChecked: activeTypes.includes(opt.value ?? opt.name) })) }
+  }) as Awaited<ReturnType<typeof getExperienceListingFilterOptions>>
 
   const translatedName = category.handle === 'all' ? t.experienceFilters.allExperiences : category.name
   const translatedRegion = t.experienceFilters.inDominicanRepublic

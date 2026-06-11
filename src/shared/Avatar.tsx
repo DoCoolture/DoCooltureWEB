@@ -45,7 +45,8 @@ export default function Avatar({
           </text>
         </svg>
       )}
-      {src && <img className="size-full" src={src} alt={alt} />}
+      {/* eslint-disable-next-line @next/next/no-img-element -- overlay grid layout; next/image fill would conflict with the initials stacking */}
+      {src && <img className="size-full" src={src} alt={alt} loading="lazy" decoding="async" />}
     </span>
   )
 }

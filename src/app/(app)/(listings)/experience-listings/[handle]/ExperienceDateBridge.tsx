@@ -8,7 +8,7 @@ interface Props {
   leftTopContent: React.ReactNode
   availableDays: string[]
   durationTime: string
-  price: string
+  priceUsd: number
   maxGuests: number
   date?: string | null
   reviewStart: number
@@ -20,7 +20,7 @@ export function ExperienceDateBridge({
   leftTopContent,
   availableDays,
   durationTime,
-  price,
+  priceUsd,
   maxGuests,
   date,
   reviewStart,
@@ -44,7 +44,7 @@ export function ExperienceDateBridge({
       <div className="grow">
         <div className="sticky top-5">
           <ExperienceBookingSidebar
-            price={price}
+            priceUsd={priceUsd}
             maxGuests={maxGuests}
             date={date}
             reviewStart={reviewStart}

@@ -2,7 +2,7 @@
 
 import { Dialog, DialogBody, DialogTitle } from '@/components/dialog'
 import { useLanguage } from '@/context/LanguageContext'
-import { supabase } from '@/lib/supabase'
+import { reportHost } from '@/app/actions/notifications'
 import { Flag03Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useState } from 'react'
@@ -26,24 +26,8 @@ export default function ReportHostDialog({ hostId, hostName, label }: Props) {
   const handleSubmit = async () => {
     setSubmitting(true)
     setError(null)
-    const { data: { user } } = await supabase.auth.getUser()
-    const { data: admins } = await supabase
-      .from('profiles').select('user_id').eq('role', 'admin')
-    if (!admins || admins.length === 0) {
-      setError(rh.errorSending)
-      setSubmitting(false)
-      return
-    }
-    const notifications = admins.map((admin) => ({
-      user_id: admin.user_id,
-      type: 'host_report',
-      title: `🚨 Reporte de anfitrión: ${hostName}`,
-      message: `Razón: ${reason}${details ? ` — ${details}` : ''}. Reportado por: ${user?.email ?? 'usuario anónimo'}`,
-      action_url: '/admin',
-      data: { host_id: hostId, reporter_id: user?.id ?? null },
-    }))
-    const { error: insertError } = await supabase.from('notifications').insert(notifications)
-    if (insertError) setError(rh.errorSending)
+    const result = await reportHost({ hostId, hostName, reason, details })
+    if (result.error) setError(result.error)
     else setDone(true)
     setSubmitting(false)
   }
