@@ -29,6 +29,19 @@ function ClickHandler({ onClick }: { onClick: (e: MapLibreGL.MapMouseEvent) => v
   return null
 }
 
+// Flies the map to new coords imperatively — needed because the Map component
+// only reads `center`/`zoom` at initialization; prop changes are ignored after mount.
+function CenterController({ lat, lng, zoom }: { lat: number; lng: number; zoom: number }) {
+  const { map, isLoaded } = useMap()
+
+  useEffect(() => {
+    if (!map || !isLoaded) return
+    map.flyTo({ center: [lng, lat], zoom, duration: 600 })
+  }, [map, isLoaded, lat, lng, zoom])
+
+  return null
+}
+
 export default function LocationPickerMap({ lat, lng, onChange }: Props) {
   const { t } = useLanguage()
   const hasMarker = lat !== null && lng !== null && (lat !== 0 || lng !== 0)
@@ -47,10 +60,15 @@ export default function LocationPickerMap({ lat, lng, onChange }: Props) {
     <div className="space-y-2">
       <div className="relative h-64 w-full overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
         <Map
-          center={hasMarker ? { lat: lat!, lng: lng! } : DR_CENTER}
-          zoom={hasMarker ? 14 : 7}
+          center={DR_CENTER}
+          zoom={7}
           className="h-full w-full"
         >
+          <CenterController
+            lat={hasMarker ? lat! : DR_CENTER.lat}
+            lng={hasMarker ? lng! : DR_CENTER.lng}
+            zoom={hasMarker ? 14 : 7}
+          />
           <ClickHandler onClick={handleClick} />
           {hasMarker && (
             <MapMarker longitude={lng!} latitude={lat!}>
