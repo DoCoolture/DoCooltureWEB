@@ -15,6 +15,7 @@ import {
   DR_CITIES,
   CITY_ADDRESSES,
   DURATION_OPTIONS,
+  PRESET_ADDRESS_COORDS,
 } from '@/types'
 
 const TOTAL_STEPS = 5
@@ -513,8 +514,14 @@ export default function NewExperiencePage() {
               if (val !== 'custom') {
                 setAddress(val)
                 setFieldErrors((p) => ({ ...p, address: '' }))
-                // Auto-pin the preset address on the map
-                handleGeocode(val)
+                // Use hardcoded coords for preset — instant, no network needed
+                const preset = PRESET_ADDRESS_COORDS[val]
+                if (preset) {
+                  setLatitude(preset.lat)
+                  setLongitude(preset.lng)
+                } else {
+                  handleGeocode(val)
+                }
               } else {
                 setAddress('')
               }

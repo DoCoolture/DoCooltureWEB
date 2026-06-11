@@ -302,6 +302,78 @@ export const CITY_ADDRESSES: Record<string, string[]> = {
   ],
 }
 
+// Coordenadas precisas para cada dirección predeterminada.
+// Se usan directamente al seleccionar un preset — sin depender de geocoding externo.
+export const PRESET_ADDRESS_COORDS: Record<string, { lat: number; lng: number }> = {
+  // Santo Domingo
+  'Zona Colonial, Santo Domingo':             { lat: 18.4741, lng: -69.8845 },
+  'Parque Colón, Zona Colonial':              { lat: 18.4735, lng: -69.8830 },
+  'Malecón de Santo Domingo':                 { lat: 18.4651, lng: -69.9009 },
+  'Mercado Modelo, Santo Domingo':            { lat: 18.4772, lng: -69.8944 },
+  'Plaza de la Cultura, Santo Domingo':       { lat: 18.4662, lng: -69.9319 },
+  'Jardín Botánico Nacional, Santo Domingo':  { lat: 18.4927, lng: -69.9597 },
+  'Acuario Nacional, Santo Domingo':          { lat: 18.4526, lng: -69.9447 },
+  'Parque Mirador Sur, Santo Domingo':        { lat: 18.4577, lng: -69.9664 },
+  // Santiago
+  'Monumento a los Héroes, Santiago':         { lat: 19.4517, lng: -70.7072 },
+  'Calle del Sol, Santiago':                  { lat: 19.4517, lng: -70.6985 },
+  'Mercado Modelo de Santiago':               { lat: 19.4479, lng: -70.6930 },
+  'Centro León, Santiago':                    { lat: 19.4682, lng: -70.6967 },
+  'Parque Duarte, Santiago':                  { lat: 19.4498, lng: -70.7003 },
+  // Punta Cana
+  'Bávaro, Punta Cana':                       { lat: 18.6879, lng: -68.4428 },
+  'Cap Cana, Punta Cana':                     { lat: 18.5066, lng: -68.3767 },
+  'Playa Bávaro, Punta Cana':                 { lat: 18.7116, lng: -68.4403 },
+  'Palma Real Shopping Village, Punta Cana':  { lat: 18.6826, lng: -68.4313 },
+  'Aeropuerto Internacional de Punta Cana':   { lat: 18.5674, lng: -68.3639 },
+  // Puerto Plata
+  'Malecón de Puerto Plata':                  { lat: 19.7970, lng: -70.6915 },
+  'Fortaleza San Felipe, Puerto Plata':       { lat: 19.7998, lng: -70.6938 },
+  'Telefèrico de Puerto Plata':               { lat: 19.7861, lng: -70.6862 },
+  'Ocean World Adventure Park, Puerto Plata': { lat: 19.7760, lng: -70.5945 },
+  'Playa Dorada, Puerto Plata':               { lat: 19.7903, lng: -70.6297 },
+  // La Romana
+  'Casa de Campo, La Romana':                 { lat: 18.4059, lng: -68.9212 },
+  'Altos de Chavón, La Romana':               { lat: 18.4065, lng: -68.9016 },
+  'Parque Central de La Romana':              { lat: 18.4267, lng: -68.9734 },
+  // Samaná
+  'Malecón de Samaná':                        { lat: 19.2057, lng: -69.3369 },
+  'Los Haitises, Samaná':                     { lat: 19.0934, lng: -69.5397 },
+  'Salto El Limón, Samaná':                   { lat: 19.2819, lng: -69.4456 },
+  'Playa Rincón, Samaná':                     { lat: 19.3097, lng: -69.5194 },
+  // Jarabacoa
+  'Parque Central de Jarabacoa':              { lat: 19.1184, lng: -70.6389 },
+  'Salto Baiguate, Jarabacoa':                { lat: 19.0843, lng: -70.6268 },
+  'Salto Jimenoa, Jarabacoa':                 { lat: 19.1007, lng: -70.6568 },
+  'La Confluencia, Jarabacoa':                { lat: 19.1173, lng: -70.6268 },
+  // Constanza
+  'Parque Central de Constanza':              { lat: 18.9059, lng: -70.7439 },
+  'Valle Nuevo, Constanza':                   { lat: 18.7500, lng: -70.6500 },
+  'Lago Aguas Blancas, Constanza':            { lat: 18.8600, lng: -70.7100 },
+  // Barahona
+  'Malecón de Barahona':                      { lat: 18.2092, lng: -71.1011 },
+  'Parque Nacional Jaragua, Barahona':        { lat: 17.9000, lng: -71.5000 },
+  'Playa San Rafael, Barahona':               { lat: 18.0928, lng: -71.0699 },
+  // San Pedro de Macorís
+  'Parque Central de San Pedro de Macorís':   { lat: 18.4565, lng: -69.3059 },
+  'Malecón de San Pedro de Macorís':          { lat: 18.4497, lng: -69.3086 },
+  // San Francisco de Macorís
+  'Parque Duarte, San Francisco de Macorís':  { lat: 19.2990, lng: -70.2527 },
+  'Centro de San Francisco de Macorís':       { lat: 19.3000, lng: -70.2527 },
+  // Higüey
+  'Basílica de la Altagracia, Higüey':        { lat: 18.6153, lng: -68.7079 },
+  'Parque Central de Higüey':                 { lat: 18.6149, lng: -68.7070 },
+  // Bonao
+  'Parque Central de Bonao':                  { lat: 18.9389, lng: -70.4082 },
+  'Centro de Bonao':                          { lat: 18.9389, lng: -70.4082 },
+  // Moca
+  'Parque Central de Moca':                   { lat: 19.3930, lng: -70.5234 },
+  'Iglesia de Moca':                          { lat: 19.3932, lng: -70.5230 },
+  // Azua
+  'Parque Central de Azua':                   { lat: 18.4513, lng: -70.7290 },
+  'Malecón de Azua':                          { lat: 18.4334, lng: -70.7339 },
+}
+
 // ----------------------------------------------------------------
 // ESTADOS DE RESERVA
 // ----------------------------------------------------------------

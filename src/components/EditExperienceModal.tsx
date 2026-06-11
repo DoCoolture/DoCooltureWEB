@@ -5,6 +5,7 @@ import { supabase, uploadExperienceImage } from '@/lib/supabase'
 import {
   CITY_ADDRESSES, DR_CITIES, DURATION_OPTIONS,
   AVAILABLE_LANGUAGES, DAYS_OF_WEEK, EXPERIENCE_CATEGORIES,
+  PRESET_ADDRESS_COORDS,
 } from '@/types'
 import LocationPickerMap from '@/components/LocationPickerMap'
 import { geocodeAddress } from '@/lib/geocode'
@@ -132,8 +133,10 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
     setForm({ ...experience })
     setFeaturedUrl(experience.featured_image_url ?? null)
     setGalleryUrls(experience.gallery_urls ?? [])
-    setLatitude(experience.latitude ?? null)
-    setLongitude(experience.longitude ?? null)
+    const newLat = experience.latitude ?? null
+    const newLng = experience.longitude ?? null
+    setLatitude(newLat)
+    setLongitude(newLng)
     setTags(experience.tags ?? [])
     setLanguages(experience.languages ?? [])
     setPriceIncludes(experience.price_includes ?? [])
@@ -145,6 +148,19 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
     const addrs = CITY_ADDRESSES[experience.city] ?? []
     setAddressPreset(addrs.includes(experience.address) ? experience.address : CUSTOM)
     isDirty.current = false
+
+    // Auto-pin on open if address exists but coordinates are missing
+    if (experience.address && !newLat && !newLng) {
+      const preset = PRESET_ADDRESS_COORDS[experience.address]
+      if (preset) {
+        setLatitude(preset.lat)
+        setLongitude(preset.lng)
+      } else {
+        geocodeAddress(experience.address).then((result) => {
+          if (result) { setLatitude(result.lat); setLongitude(result.lng) }
+        })
+      }
+    }
   }, [experience.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Keep ref in sync so the keyboard listener always sees the latest onClose
@@ -194,10 +210,17 @@ export default function EditExperienceModal({ experience, onClose, onSaved }: Pr
     setAddressPreset(val)
     if (val !== CUSTOM) {
       setForm((prev) => ({ ...prev, address: val }))
-      // Auto-pin when a preset address is chosen
-      geocodeAddress(val).then((result) => {
-        if (result) { setLatitude(result.lat); setLongitude(result.lng) }
-      })
+      // Use hardcoded coords for preset addresses — instant, no network needed
+      const preset = PRESET_ADDRESS_COORDS[val]
+      if (preset) {
+        setLatitude(preset.lat)
+        setLongitude(preset.lng)
+      } else {
+        // Fallback to geocoding for any preset not in the coords table
+        geocodeAddress(val).then((result) => {
+          if (result) { setLatitude(result.lat); setLongitude(result.lng) }
+        })
+      }
     } else {
       setForm((prev) => ({ ...prev, address: '' }))
     }
